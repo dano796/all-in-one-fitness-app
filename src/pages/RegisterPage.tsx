@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { CheckCircle, XCircle } from 'lucide-react';
 
@@ -60,8 +60,7 @@ const RegisterPage: React.FC = () => {
         Correo: correo,
         Contraseña: contraseña, 
       });
-      
-      
+
       setMensaje(`Registro exitoso. Verifica el correo enviado a ${correo}`);
       setTipoMensaje('success');
       setContador(60);
@@ -163,6 +162,13 @@ const RegisterPage: React.FC = () => {
               Crear Cuenta
             </button>
           </form>
+
+          <p className="mt-4 text-center text-gray-600">
+            ¿Ya tienes una cuenta?{' '}
+            <Link to="/login" className="text-black hover:underline">
+              Inicia sesión aquí
+            </Link>
+          </p>
         </div>
       </div>
     </div>
