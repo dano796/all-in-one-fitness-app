@@ -57,7 +57,7 @@ const LoginPage = () => {
         setMensaje("Inicio de sesión exitoso");
         setTipoMensaje("success");
         setModalAbierto(true);
-        setTimeout(() => navigate("/dashboard"), 2000);
+        setTimeout(() => navigate("/"), 2000);
       }
     } catch (err) {
       console.error("Error inesperado:", err);

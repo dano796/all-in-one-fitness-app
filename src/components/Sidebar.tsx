@@ -1,60 +1,49 @@
-import React from 'react';
-import {
-  Box,
-  VStack,
-  Icon,
-  Tooltip,
-  useColorModeValue,
-} from '@chakra-ui/react';
-import {
-  Activity,
-  Dumbbell,
-  Footprints,
-  Droplets,
-  Gauge,
-  Scale,
-} from 'lucide-react';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Dumbbell, Home, User, Calendar, Droplets, Activity, Settings, LogOut } from "lucide-react";
+import { useAuthStore } from "../store/authStore";
+import { supabase } from "../supabaseClient";
+import DashboardNavItem from "./DashboardNavItem";
 
-const SidebarIcon = ({ icon, label }: { icon: React.ReactElement; label: string }) => (
-  <Tooltip label={label} placement="right" hasArrow>
-    <Box
-      p={3}
-      cursor="pointer"
-      borderRadius="lg"
-      _hover={{
-        bg: useColorModeValue('gray.100', 'gray.700'),
-        transform: 'translateY(-2px)',
-      }}
-      transition="all 0.2s"
-    >
-      <Icon as={() => icon} boxSize={6} color="brand.500" />
-    </Box>
-  </Tooltip>
-);
+const Sidebar: React.FC = () => {
+  const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
 
-const Sidebar = () => {
-  const bg = useColorModeValue('white', 'gray.800');
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error al cerrar sesión:", error.message);
+      return;
+    }
+
+    logout(); // Actualiza el estado de autenticación
+    navigate("/"); // Redirige al login
+  };
 
   return (
-    <Box
-      position="fixed"
-      left={0}
-      h="100vh"
-      w="16"
-      bg={bg}
-      borderRight="1px"
-      borderColor={useColorModeValue('gray.200', 'gray.700')}
-      py={8}
-    >
-      <VStack spacing={6}>
-        <SidebarIcon icon={<Activity size={24} />} label="Calorie Tracking" />
-        <SidebarIcon icon={<Dumbbell size={24} />} label="Workout Logging" />
-        <SidebarIcon icon={<Footprints size={24} />} label="Step Monitoring" />
-        <SidebarIcon icon={<Droplets size={24} />} label="Hydration Tracking" />
-        <SidebarIcon icon={<Gauge size={24} />} label="1RM Calculator" />
-        <SidebarIcon icon={<Scale size={24} />} label="Fitness Tools" />
-      </VStack>
-    </Box>
+    <aside className="w-20 bg-black flex flex-col items-center py-8">
+      <Link to="/" className="mb-8">
+        <Dumbbell className="h-8 w-8 text-white" />
+      </Link>
+
+      <nav className="flex-1 space-y-8">
+        <DashboardNavItem to="/dashboard" icon={<Home className="h-6 w-6" />} />
+        <DashboardNavItem to="/profile" icon={<User className="h-6 w-6" />} />
+        <DashboardNavItem to="/workouts" icon={<Calendar className="h-6 w-6" />} />
+        <DashboardNavItem to="/water" icon={<Droplets className="h-6 w-6" />} />
+        <DashboardNavItem to="/activity" icon={<Activity className="h-6 w-6" />} />
+      </nav>
+
+      <div className="mt-auto space-y-8">
+        <DashboardNavItem to="/settings" icon={<Settings className="h-6 w-6" />} />
+        <button
+          onClick={handleLogout}
+          className="flex flex-col items-center text-gray-400 hover:text-white"
+        >
+          <LogOut className="h-6 w-6" />
+        </button>
+      </div>
+    </aside>
   );
 };
 

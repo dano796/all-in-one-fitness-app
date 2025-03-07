@@ -1,104 +1,75 @@
-import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
-import {
-  Box,
-  Flex,
-  Button,
-  useColorMode,
-  useColorModeValue,
-  Stack,
-  Link,
-  IconButton,
-  useDisclosure,
-  HStack,
-  VStack,
-  CloseButton,
-} from '@chakra-ui/react';
-import { Menu, Moon, Sun, X } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Dumbbell, UserCircle } from "lucide-react";
+import { supabase } from "../supabaseClient";
 
-const Navbar = () => {
-  const { colorMode, toggleColorMode } = useColorMode();
-  const { isOpen, onToggle } = useDisclosure();
+const Navbar: React.FC = () => {
+  const [user, setUser] = useState<any>(null);
 
-  const menuItems = [
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Login', path: '/login' },
-    { name: 'Register', path: '/register' },
-  ];
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user) {
+        setUser(data.user);
+      }
+    };
+
+    fetchUser();
+
+    // Escuchar cambios en la autenticación
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   return (
-    <Box
-      bg={useColorModeValue('white', 'gray.900')}
-      px={4}
-      borderBottom={1}
-      borderStyle="solid"
-      borderColor={useColorModeValue('gray.200', 'gray.700')}
-    >
-      <Flex h={16} alignItems="center" justifyContent="space-between">
-        <IconButton
-          size="md"
-          icon={isOpen ? <X /> : <Menu />}
-          aria-label="Open Menu"
-          display={{ md: 'none' }}
-          onClick={onToggle}
-        />
-        
-        <HStack spacing={8} alignItems="center">
-          <Link as={RouterLink} to="/" fontSize="2xl" fontWeight="bold" color="brand.500">
-            Fitness App
+    <header className="bg-white border-b border-gray-200">
+      <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Dumbbell className="w-6 h-6" />
+          <Link to="/" className="text-xl font-semibold">
+            All In One Fitness App
           </Link>
-          <HStack as="nav" spacing={4} display={{ base: 'none', md: 'flex' }}>
-            {menuItems.map((item) => (
-              <Link
-                key={item.name}
-                as={RouterLink}
-                to={item.path}
-                px={2}
-                py={1}
-                rounded="md"
-                _hover={{
-                  textDecoration: 'none',
-                  bg: useColorModeValue('gray.200', 'gray.700'),
-                }}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </HStack>
-        </HStack>
+        </div>
 
-        <Flex alignItems="center">
-          <Stack direction="row" spacing={7}>
-            <Button onClick={toggleColorMode}>
-              {colorMode === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-            </Button>
-          </Stack>
-        </Flex>
-      </Flex>
+        <div className="flex items-center space-x-4">
+          <Link to="/" className="nav-link">Inicio</Link>
+          <Link to="/nosotros" className="nav-link">Nosotros</Link>
+          <Link to="/modulos" className="nav-link">Módulos</Link>
+          <Link to="/contacto" className="nav-link">Contacto</Link>
 
-      {isOpen && (
-        <Box pb={4} display={{ md: 'none' }}>
-          <Stack as="nav" spacing={4}>
-            {menuItems.map((item) => (
-              <Link
-                key={item.name}
-                as={RouterLink}
-                to={item.path}
-                px={2}
-                py={1}
-                rounded="md"
-                _hover={{
-                  textDecoration: 'none',
-                  bg: useColorModeValue('gray.200', 'gray.700'),
-                }}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </Stack>
-        </Box>
-      )}
-    </Box>
+          {user ? (
+            <>
+              <Link to="/dashboard" className="nav-link">Dashboard</Link>
+              <button className="relative group">
+                <UserCircle className="w-8 h-8 text-gray-700" />
+                <div className="hidden absolute right-0 mt-2 w-48 bg-white border rounded shadow-md p-2 group-hover:block">
+                  <p className="text-sm font-medium text-gray-700">{user.email}</p>
+                  <button 
+                    onClick={async () => {
+                      await supabase.auth.signOut();
+                      setUser(null);
+                    }} 
+                    className="w-full mt-2 text-left text-sm text-red-500 hover:bg-gray-100 p-2 rounded"
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="btn btn-outline">Iniciar Sesión</Link>
+              <Link to="/registro" className="btn btn-primary">Registrarse</Link>
+            </>
+          )}
+        </div>
+      </nav>
+    </header>
   );
 };
 
