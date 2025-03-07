@@ -10,23 +10,23 @@ interface ModuleCardProps {
 
 const ModuleCard: React.FC<ModuleCardProps> = ({ icon, title, description, features }) => {
   return (
-    <div className="bg-[#141414] rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
-      <div className="bg-[#FF3B30] rounded-lg w-16 h-16 flex items-center justify-center mb-4">
+    <div className="bg-[#0B101A] rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
+      <div className="bg-[#0B101A] rounded-lg w-16 h-16 flex items-center justify-center mb-4">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold mb-2 text-[#FF3B30]">{title}</h3>
+      <h3 className="text-xl font-semibold mb-2 text-[#FFFFFF]">{title}</h3>
       <p className="text-gray-400 mb-4">{description}</p>
       <ul className="space-y-2 flex-grow mb-6">
         {features.map((feature, index) => (
           <li key={index} className="flex items-center text-sm text-gray-400">
-            <span className="w-2 h-2 bg-[#FFCC00] rounded-full mr-2" />
+            <span className="w-2 h-2 bg-[#FF9500] rounded-full mr-2" />
             {feature}
           </li>
         ))}
       </ul>
       <Link
         to="/registro"
-        className="mt-auto block text-center bg-[#FFCC00] text-[#1C1C1E] font-semibold py-2 px-4 rounded-lg hover:bg-[#FF9500] transition"
+        className="mt-auto block text-center bg-[#FFFFFF] text-[#1C1C1E] font-semibold py-2 px-4 rounded-lg hover:bg-[#FF9500] transition"
       >
         Comenzar
       </Link>

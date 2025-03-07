@@ -13,7 +13,7 @@ import { Dumbbell, Moon, Sun } from 'lucide-react';
 
 const Header = () => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const bg = useColorModeValue('#FFFFFF', '#1C1C1E');
+  const bg = useColorModeValue('#FFFFFF', '#111827'); // Cambio de #1C1C1E a #111827
   const textColor = useColorModeValue('#1C1C1E', '#FFFFFF');
 
   return (
@@ -37,8 +37,8 @@ const Header = () => {
         <Flex alignItems="center">
           <Link as={RouterLink} to="/" _hover={{ textDecoration: 'none' }}>
             <Flex alignItems="center" gap={2}>
-              <Dumbbell size={24} color="#FF3B30" />
-              <Box fontSize="xl" fontWeight="bold" color="#FF3B30">
+              <Dumbbell size={24} color="#FF9500" />
+              <Box fontSize="xl" fontWeight="bold" color="#FF9500">
                 All In One Fitness
               </Box>
             </Flex>

@@ -81,7 +81,7 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 relative bg-[#1C1C1E] text-white">
+    <div className="container mx-auto px-4 py-16 relative bg-[#111827] text-white">
       {mensaje && modalAbierto && (
         <div 
           className="fixed inset-0 flex items-center justify-center bg-[#1C1C1E] bg-opacity-80" 
@@ -116,7 +116,7 @@ const RegisterPage: React.FC = () => {
       <div className="max-w-md mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">Crear Cuenta</h1>
 
-        <div className="bg-[#2C2C2E] rounded-xl p-8 shadow-sm">
+        <div className="bg-[#0B101A] rounded-xl p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleRegister}>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Nombre de Usuario</label>
@@ -166,14 +166,14 @@ const RegisterPage: React.FC = () => {
               />
             </div>
 
-            <button type="submit" className="w-full py-2 px-4 bg-[#FF3B30] text-white font-semibold rounded-lg hover:bg-[#FF9500]">
+            <button type="submit" className="w-full py-2 px-4 bg-[#FF9500] text-white font-semibold rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition">
               Crear Cuenta
             </button>
           </form>
 
           <p className="mt-4 text-center text-gray-400">
             ¿Ya tienes una cuenta?{' '}
-            <Link to="/login" className="text-[#FFCC00] hover:underline">
+            <Link to="/login" className="text-[#FF9500] hover:underline">
               Inicia sesión aquí
             </Link>
           </p>

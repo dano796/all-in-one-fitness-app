@@ -27,7 +27,7 @@ const HeroSection: React.FC = () => {
     <section className="container mx-auto px-4 py-16 md:py-24">
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <div>
-          <h1 className="text-5xl font-bold mb-6 text-[#FF3B30]">
+          <h1 className="text-5xl font-bold mb-6 text-[#ffffff]">
             All In One<br />Fitness App
           </h1>
           <p className="text-xl text-gray-300 mb-8">
@@ -41,8 +41,8 @@ const HeroSection: React.FC = () => {
             {user ? "Ir al Dashboard" : "Comienza Ahora"}
           </Link>
         </div>
-        <div className="bg-[#141414] rounded-xl aspect-square flex items-center justify-center">
-          <Activity className="w-32 h-32 text-[#FF3B30]" />
+        <div className="bg-[#111827] rounded-xl aspect-square flex items-center justify-center">
+          <Activity className="w-32 h-32 text-[#FF9500]" />
         </div>
       </div>
     </section>

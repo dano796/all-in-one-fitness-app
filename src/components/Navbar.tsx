@@ -53,11 +53,11 @@ const Navbar: React.FC = () => {
   }, []);
 
   return (
-    <header className="bg-[#1C1C1E] border-b border-gray-700">
+    <header className="bg-[#111827] border-b border-gray-700">
       <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <Dumbbell className="w-6 h-6 text-[#FF3B30]" />
+          <Dumbbell className="w-6 h-6 text-[#FF9500]" />
           <Link to="/" className="text-xl font-semibold text-white">
             All In One Fitness
           </Link>
@@ -65,10 +65,10 @@ const Navbar: React.FC = () => {
 
         {/* Menú para pantallas grandes */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/" className="text-gray-300 hover:text-[#FF3B30] transition">Inicio</Link>
+          <Link to="/" className="text-gray-300 hover:text-[#FF9500] transition">Inicio</Link>
           <Link to="/nosotros" className="text-gray-300 hover:text-[#FF9500] transition">Nosotros</Link>
-          <Link to="/modulos" className="text-gray-300 hover:text-[#FFCC00] transition">Módulos</Link>
-          <Link to="/contacto" className="text-gray-300 hover:text-[#FF3B30] transition">Contacto</Link>
+          <Link to="/modulos" className="text-gray-300 hover:text-[#FF9500] transition">Módulos</Link>
+          <Link to="/contacto" className="text-gray-300 hover:text-[#FF9500] transition">Contacto</Link>
 
           {user && <Link to="/dashboard" className="text-gray-300 hover:text-[#FF9500] transition">Dashboard</Link>}
 
@@ -102,8 +102,8 @@ const Navbar: React.FC = () => {
             </div>
           ) : (
             <>
-              <Link to="/login" className="border border-[#FFCC00] text-[#FFCC00] py-2 px-4 rounded-lg hover:bg-[#FF9500] transition">Iniciar Sesión</Link>
-              <Link to="/registro" className="bg-[#FF3B30] text-white py-2 px-4 rounded-lg hover:bg-[#FF9500] transition">Registrarse</Link>
+              <Link to="/login" className="border border-[#FF9500] text-[#FF9500] py-2 px-4 rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition">Iniciar Sesión</Link>
+              <Link to="/registro" className="bg-[#FF9500] text-white py-2 px-4 rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition">Registrarse</Link>
             </>
           )}
         </div>
@@ -116,7 +116,7 @@ const Navbar: React.FC = () => {
 
       {/* Menú para móviles */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#1C1C1E] border-t border-gray-700 p-4">
+        <div className="md:hidden bg-[#111827] border-t border-gray-700 p-4">
           <Link to="/" className="block py-2 text-gray-300 hover:text-[#FF3B30] transition">Inicio</Link>
           <Link to="/nosotros" className="block py-2 text-gray-300 hover:text-[#FF9500] transition">Nosotros</Link>
           <Link to="/modulos" className="block py-2 text-gray-300 hover:text-[#FFCC00] transition">Módulos</Link>
