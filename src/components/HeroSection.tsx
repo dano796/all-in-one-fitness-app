@@ -27,19 +27,22 @@ const HeroSection: React.FC = () => {
     <section className="container mx-auto px-4 py-16 md:py-24">
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <div>
-          <h1 className="text-5xl font-bold mb-6">
+          <h1 className="text-5xl font-bold mb-6 text-[#FF3B30]">
             All In One<br />Fitness App
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-300 mb-8">
             Tu compañero integral para un estilo de vida saludable. Monitorea calorías,
             entrenamientos, hidratación y más, todo en un solo lugar.
           </p>
-          <Link to={user ? "/dashboard" : "/registro"} className="btn btn-primary text-lg px-8 py-3">
+          <Link
+            to={user ? "/dashboard" : "/registro"}
+            className="text-lg px-8 py-3 rounded-lg bg-[#FF9500] text-[#1C1C1E] font-semibold hover:bg-[#FF9500] transition"
+          >
             {user ? "Ir al Dashboard" : "Comienza Ahora"}
           </Link>
         </div>
-        <div className="bg-gray-100 rounded-xl aspect-square flex items-center justify-center">
-          <Activity className="w-32 h-32 text-gray-400" />
+        <div className="bg-[#141414] rounded-xl aspect-square flex items-center justify-center">
+          <Activity className="w-32 h-32 text-[#FF3B30]" />
         </div>
       </div>
     </section>

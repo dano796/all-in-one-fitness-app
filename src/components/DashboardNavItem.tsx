@@ -8,7 +8,7 @@ interface DashboardNavItemProps {
 
 const DashboardNavItem: React.FC<DashboardNavItemProps> = ({ to, icon }) => {
   return (
-    <Link to={to} className="flex flex-col items-center text-gray-400 hover:text-white">
+    <Link to={to} className="flex flex-col items-center text-[#1C1C1E] hover:text-[#FF3B30]">
       {icon}
     </Link>
   );

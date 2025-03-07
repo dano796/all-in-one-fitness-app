@@ -13,7 +13,8 @@ import { Dumbbell, Moon, Sun } from 'lucide-react';
 
 const Header = () => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const bg = useColorModeValue('white', 'gray.900');
+  const bg = useColorModeValue('#FFFFFF', '#1C1C1E');
+  const textColor = useColorModeValue('#1C1C1E', '#FFFFFF');
 
   return (
     <Box
@@ -36,8 +37,8 @@ const Header = () => {
         <Flex alignItems="center">
           <Link as={RouterLink} to="/" _hover={{ textDecoration: 'none' }}>
             <Flex alignItems="center" gap={2}>
-              <Dumbbell size={24} className="text-brand-500" />
-              <Box fontSize="xl" fontWeight="bold" color="brand.500">
+              <Dumbbell size={24} color="#FF3B30" />
+              <Box fontSize="xl" fontWeight="bold" color="#FF3B30">
                 All In One Fitness
               </Box>
             </Flex>
@@ -45,21 +46,21 @@ const Header = () => {
         </Flex>
 
         <Flex alignItems="center" gap={6}>
-          <Link as={RouterLink} to="/about" fontWeight="medium">
+          <Link as={RouterLink} to="/about" fontWeight="medium" color="#FF9500">
             About
           </Link>
-          <Link as={RouterLink} to="/contact" fontWeight="medium">
+          <Link as={RouterLink} to="/contact" fontWeight="medium" color="#FF9500">
             Contact
           </Link>
-          <Button as={RouterLink} to="/login" variant="ghost">
+          <Button as={RouterLink} to="/login" variant="ghost" color={textColor}>
             Login
           </Button>
-          <Button as={RouterLink} to="/register" colorScheme="brand">
+          <Button as={RouterLink} to="/register" bg="#FFCC00" color="#1C1C1E" _hover={{ bg: "#FF9500" }}>
             Register
           </Button>
           <IconButton
             aria-label="Toggle color mode"
-            icon={colorMode === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+            icon={colorMode === 'light' ? <Moon size={20} color="#FF9500" /> : <Sun size={20} color="#FFCC00" />}
             onClick={toggleColorMode}
             variant="ghost"
           />
