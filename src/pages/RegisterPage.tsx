@@ -52,7 +52,6 @@ const RegisterPage: React.FC = () => {
       } else {
         setMensaje("Error al registrar: " + error.message);
       }      
-
       setModalAbierto(true);
     } else {
       await supabase.from('Inicio Sesion').insert({
@@ -82,21 +81,30 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 relative">
+    <div className="container mx-auto px-4 py-16 relative bg-[#111827] text-white">
       {mensaje && modalAbierto && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60" onClick={() => setModalAbierto(false)}>
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md text-black" onClick={(e) => e.stopPropagation()}>
+        <div 
+          className="fixed inset-0 flex items-center justify-center bg-[#1C1C1E] bg-opacity-80" 
+          onClick={() => setModalAbierto(false)}
+        >
+          <div 
+            className="bg-[#2C2C2E] p-6 rounded-lg shadow-lg text-center max-w-md text-white" 
+            onClick={(e) => e.stopPropagation()}
+          >
             {tipoMensaje === 'success' ? (
-              <CheckCircle className="text-green-500 w-16 h-16 mx-auto animate-bounce" />
+              <CheckCircle className="w-16 h-16 mx-auto animate-bounce" style={{ color: "#FFCC00" }} />
             ) : (
-              <XCircle className="text-red-500 w-16 h-16 mx-auto animate-bounce" />
+              <XCircle className="w-16 h-16 mx-auto animate-bounce" style={{ color: "#FF3B30" }} />
             )}
             <p className="mt-4 font-semibold">{mensaje}</p>
             {tipoMensaje === 'success' && verificandoCorreo && (
               !puedeReenviar ? (
-                <p className="mt-2 text-sm text-gray-600">Puedes reenviar en {contador}s</p>
+                <p className="mt-2 text-sm text-gray-400">Puedes reenviar en {contador}s</p>
               ) : (
-                <button onClick={reenviarCorreo} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600">
+                <button 
+                  onClick={reenviarCorreo} 
+                  className="mt-4 px-4 py-2 bg-[#FF9500] text-white rounded-lg shadow-md hover:bg-[#FF3B30]"
+                >
                   Reenviar correo de verificación
                 </button>
               )
@@ -108,64 +116,64 @@ const RegisterPage: React.FC = () => {
       <div className="max-w-md mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">Crear Cuenta</h1>
 
-        <div className="bg-white rounded-xl p-8 shadow-sm">
+        <div className="bg-[#0B101A] rounded-xl p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleRegister}>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de Usuario</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Nombre de Usuario</label>
               <input
                 type="text"
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#1C1C1E] text-white placeholder-gray-400"
                 placeholder="NombreUsuario"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Correo</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Correo</label>
               <input
                 type="email"
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#1C1C1E] text-white placeholder-gray-400"
                 placeholder="example@email.com"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Contraseña</label>
               <input
                 type="password"
                 value={contraseña}
                 onChange={(e) => setContraseña(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#1C1C1E] text-white placeholder-gray-400"
                 placeholder="••••••••"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Confirmar Contraseña</label>
               <input
                 type="password"
                 value={confirmarContraseña} 
                 onChange={(e) => setConfirmarContraseña(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#1C1C1E] text-white placeholder-gray-400"
                 placeholder="••••••••"
                 required
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-full">
+            <button type="submit" className="w-full py-2 px-4 bg-[#FF9500] text-white font-semibold rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition">
               Crear Cuenta
             </button>
           </form>
 
-          <p className="mt-4 text-center text-gray-600">
+          <p className="mt-4 text-center text-gray-400">
             ¿Ya tienes una cuenta?{' '}
-            <Link to="/login" className="text-black hover:underline">
+            <Link to="/login" className="text-[#FF9500] hover:underline">
               Inicia sesión aquí
             </Link>
           </p>
