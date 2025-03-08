@@ -9,21 +9,5 @@
 }
 
 body {
-  @apply bg-[#111827] text-white;
-}
-
-.btn {
-  @apply px-4 py-2 rounded-lg font-medium transition-colors;
-}
-
-.btn-primary {
-  @apply bg-black text-white hover:bg-gray-800;
-}
-
-.btn-outline {
-  @apply border border-gray-300 hover:bg-gray-100;
-}
-
-.nav-link {
-  @apply px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors;
+  @apply bg-[#282c3c] text-white;
 }

@@ -3,7 +3,7 @@ import { Users, Target, Award } from 'lucide-react';
 
 const AboutPage: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-16 bg-[#111827] text-white">
+    <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center text-white">¿Quiénes somos?</h1>
         
@@ -14,30 +14,30 @@ const AboutPage: React.FC = () => {
 
         <div className="grid md:grid-cols-3 gap-8">
           <div className="text-center">
-            <div className="w-16 h-16 bg-[#FF9500] rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-[#ff9404] rounded-full flex items-center justify-center mx-auto mb-4">
               <Target className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-[#FF9500]">Nuestra Misión</h3>
+            <h3 className="text-xl font-bold mb-2">Nuestra Misión</h3>
             <p className="text-gray-300">
               Facilitar el seguimiento de hábitos saludables con tecnología intuitiva.
             </p>
           </div>
 
           <div className="text-center">
-            <div className="w-16 h-16 bg-[#FF9500] rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-[#ff9404] rounded-full flex items-center justify-center mx-auto mb-4">
               <Award className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-[#FF9500]">Nuestros Valores</h3>
+            <h3 className="text-xl font-bold mb-2">Nuestros Valores</h3>
             <p className="text-gray-300">
               Compromiso con la calidad, innovación y bienestar de nuestros usuarios.
             </p>
           </div>
 
           <div className="text-center">
-            <div className="w-16 h-16 bg-[#FF9500] rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-[#ff9404] rounded-full flex items-center justify-center mx-auto mb-4">
               <Users className="w-8 h-8 text-[#ffffff]" />
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-[#FF9500]">Nuestro Equipo</h3>
+            <h3 className="text-xl font-bold mb-2">Nuestro Equipo</h3>
             <p className="text-gray-300">
               Expertos en fitness, nutrición y desarrollo de software.
             </p>
