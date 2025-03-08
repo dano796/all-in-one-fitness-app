@@ -31,7 +31,7 @@ const Dashboard: React.FC = () => {
     datasets: [
       {
         data: [85, 92, 96],
-        backgroundColor: ['#FF3B30', '#FF9500', '#FACC15'],
+        backgroundColor: ['#3B82F6', '#8B5CF6', '#F59E0B'],
         borderWidth: 0,
         circumference: 270,
         rotation: 225,
@@ -44,7 +44,7 @@ const Dashboard: React.FC = () => {
     datasets: [
       {
         data: [2100, 1950, 1800, 2000, 1750, 1900, 2000],
-        backgroundColor: '#FF9500',
+        backgroundColor: '#ff9404',
         borderRadius: 4,
         barThickness: 20,
       },
@@ -56,8 +56,8 @@ const Dashboard: React.FC = () => {
     datasets: [
       {
         data: Array.from({ length: 30 }, () => 75 + Math.random() * 2),
-        borderColor: '#FF3B30',
-        backgroundColor: 'rgba(255, 59, 48, 0.3)',
+        borderColor: '#ff9404',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
         tension: 0.4,
         fill: true,
         pointRadius: 2,
@@ -73,18 +73,18 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 space-y-6 bg-[#111827] min-h-screen text-white">
+    <div className="p-6 space-y-6 bg-[#282c3c] min-h-screen">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-[#1E293B] rounded-lg p-6 shadow-md">
+        <div className="bg-[#3B4252] rounded-lg p-6 shadow-md">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-[#FF3B30]">
+            <h2 className="text-sm font-semibold">
               Ingesta Calórica dd/mm/aaaa
             </h2>
             <div className="flex space-x-2">
-              <button className="text-[#FF9500] hover:text-[#FACC15]">
+              <button className="hover:text-[#FF9500]">
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <button className="text-[#FF9500] hover:text-[#FACC15]">
+              <button className="hover:text-[#FF9500]">
                 <ChevronRight className="h-5 w-5" />
               </button>
             </div>
@@ -100,7 +100,7 @@ const Dashboard: React.FC = () => {
               }}
             />
           </div>
-          <div className="grid grid-cols-3 gap-4 text-center text-[#FACC15]">
+          <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-sm font-medium">Proteína</div>
               <div className="text-xs">0/174g</div>
@@ -116,8 +116,8 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-[#1E293B] rounded-lg p-6 shadow-md">
-          <h2 className="text-sm font-semibold text-[#FF3B30] mb-4">
+        <div className="bg-[#3B4252] rounded-lg p-6 shadow-md">
+          <h2 className="text-sm font-semibold mb-4">
             Ingesta Calórica - Semana
           </h2>
           <Bar
@@ -128,12 +128,12 @@ const Dashboard: React.FC = () => {
               scales: {
                 y: {
                   beginAtZero: true,
-                  grid: { color: '#333' },
-                  ticks: { color: '#FACC15' },
+                  grid: { color: '#282c3c' },
+                  ticks: { color: '#fff' },
                 },
                 x: {
                   grid: { display: false },
-                  ticks: { color: '#FACC15' },
+                  ticks: { color: '#fff' },
                 },
               },
             }}
@@ -146,26 +146,26 @@ const Dashboard: React.FC = () => {
           {meals.map((meal) => (
             <div
               key={meal.id}
-              className="flex items-center justify-between p-3 bg-[#374151] rounded-lg"
+              className="flex items-center justify-between p-3 bg-[#3B4252] rounded-lg"
             >
               <div className="flex items-center space-x-3">
                 <span className="text-xl">{meal.icon}</span>
                 <div>
-                  <h3 className="text-sm font-semibold text-[#FACC15]">
+                  <h3 className="text-sm font-semibold">
                     {meal.type}
                   </h3>
                   <p className="text-xs text-gray-400">0/{meal.calories} kcal</p>
                 </div>
               </div>
-              <button className="text-[#FF9500] hover:text-[#FACC15]">
+              <button className="hover:text-[#FF9500]">
                 <Plus className="h-5 w-5" />
               </button>
             </div>
           ))}
         </div>
 
-        <div className="bg-[#1E293B] rounded-lg p-6 shadow-md">
-          <h2 className="text-sm font-semibold text-[#FF3B30] mb-4">Peso - Mes</h2>
+        <div className="bg-[#3B4252] rounded-lg p-6 shadow-md">
+          <h2 className="text-sm font-semibold mb-4">Peso - Mes</h2>
           <Line
             data={weightData}
             options={{
@@ -173,12 +173,12 @@ const Dashboard: React.FC = () => {
               plugins: { legend: { display: false } },
               scales: {
                 y: {
-                  grid: { color: '#333' },
-                  ticks: { color: '#FACC15' },
+                  grid: { color: '#282c3c' },
+                  ticks: { color: '#fff' },
                 },
                 x: {
                   grid: { display: false },
-                  ticks: { color: '#FACC15' },
+                  ticks: { color: '#fff' },
                 },
               },
             }}

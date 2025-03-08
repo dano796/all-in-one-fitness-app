@@ -53,11 +53,11 @@ const Navbar: React.FC = () => {
   }, []);
 
   return (
-    <header className="bg-[#111827] border-b border-gray-700">
+    <header className="bg-[#282c3c] border-b border-[#3B4252]">
       <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <Dumbbell className="w-6 h-6 text-[#FF9500]" />
+          <Dumbbell className="w-6 h-6 text-[#ff9404]" />
           <Link to="/" className="text-xl font-semibold text-white">
             All In One Fitness
           </Link>
@@ -65,12 +65,12 @@ const Navbar: React.FC = () => {
 
         {/* Menú para pantallas grandes */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/" className="text-gray-300 hover:text-[#FF9500] transition">Inicio</Link>
-          <Link to="/nosotros" className="text-gray-300 hover:text-[#FF9500] transition">Nosotros</Link>
-          <Link to="/modulos" className="text-gray-300 hover:text-[#FF9500] transition">Módulos</Link>
-          <Link to="/contacto" className="text-gray-300 hover:text-[#FF9500] transition">Contacto</Link>
+          <Link to="/" className="hover:text-[#FF9500] transition">Inicio</Link>
+          <Link to="/nosotros" className="hover:text-[#FF9500] transition">Nosotros</Link>
+          <Link to="/modulos" className="hover:text-[#FF9500] transition">Módulos</Link>
+          <Link to="/contacto" className="hover:text-[#FF9500] transition">Contacto</Link>
 
-          {user && <Link to="/dashboard" className="text-gray-300 hover:text-[#FF9500] transition">Dashboard</Link>}
+          {user && <Link to="/dashboard" className="hover:text-[#FF9500] transition">Dashboard</Link>}
 
           {user ? (
             <div className="relative" ref={menuRef}>
@@ -102,8 +102,8 @@ const Navbar: React.FC = () => {
             </div>
           ) : (
             <>
-              <Link to="/login" className="border border-[#FF9500] text-[#FF9500] py-2 px-4 rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition">Iniciar Sesión</Link>
-              <Link to="/registro" className="bg-[#FF9500] text-white py-2 px-4 rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition">Registrarse</Link>
+              <Link to="/login" className="border border-[#FF9500] font-semibold text-[#FF9500] py-2 px-4 rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition">Iniciar Sesión</Link>
+              <Link to="/registro" className="bg-[#FF9500] font-semibold text-white py-2 px-4 rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition">Registrarse</Link>
             </>
           )}
         </div>
@@ -116,11 +116,11 @@ const Navbar: React.FC = () => {
 
       {/* Menú para móviles */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#111827] border-t border-gray-700 p-4">
-          <Link to="/" className="block py-2 text-gray-300 hover:text-[#FF3B30] transition">Inicio</Link>
-          <Link to="/nosotros" className="block py-2 text-gray-300 hover:text-[#FF9500] transition">Nosotros</Link>
-          <Link to="/modulos" className="block py-2 text-gray-300 hover:text-[#FFCC00] transition">Módulos</Link>
-          <Link to="/contacto" className="block py-2 text-gray-300 hover:text-[#FF3B30] transition">Contacto</Link>
+        <div className="md:hidden bg-[secondary] border-t border-gray-700 p-4">
+          <Link to="/" className="block py-2 hover:text-[#FF9500] transition">Inicio</Link>
+          <Link to="/nosotros" className="block py-2 hover:text-[#FF9500] transition">Nosotros</Link>
+          <Link to="/modulos" className="block py-2 hover:text-[#FF9500] transition">Módulos</Link>
+          <Link to="/contacto" className="block py-2 hover:text-[#FF9500] transition">Contacto</Link>
 
           {user && <Link to="/dashboard" className="block py-2 text-gray-300 hover:text-[#FF9500] transition">Dashboard</Link>}
 
@@ -133,15 +133,15 @@ const Navbar: React.FC = () => {
                   setUserData(null);
                   setMobileMenuOpen(false);
                 }}
-                className="w-full text-left text-red-500 py-2 hover:bg-gray-800 p-2 rounded transition"
+                className="w-full text-left py-2 hover:bg-gray-800 p-2 rounded transition"
               >
                 <LogOut className="w-5 h-5 inline-block mr-2" />Cerrar sesión
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="block py-2 text-gray-300 underline hover:text-[#FF9500] transition">Iniciar Sesión</Link>
-              <Link to="/registro" className="block py-2 text-[#FF3B30] underline hover:text-[#FF9500] transition">Registrarse</Link>
+              <Link to="/login" className="block py-2 hover:text-[#FF9500] transition">Iniciar Sesión</Link>
+              <Link to="/registro" className="block py-2 hover:text-[#FF9500] transition">Registrarse</Link>
             </>
           )}
         </div>

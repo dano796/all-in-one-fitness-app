@@ -10,16 +10,16 @@ interface ModuleCardProps {
 
 const ModuleCard: React.FC<ModuleCardProps> = ({ icon, title, description, features }) => {
   return (
-    <div className="bg-[#0B101A] rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
-      <div className="bg-[#0B101A] rounded-lg w-16 h-16 flex items-center justify-center mb-4">
+    <div className="bg-[#3B4252] rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
+      <div className="border rounded-lg w-16 h-16 flex items-center justify-center mb-4">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold mb-2 text-[#FFFFFF]">{title}</h3>
+      <h3 className="text-xl font-semibold mb-2 text-white">{title}</h3>
       <p className="text-gray-400 mb-4">{description}</p>
       <ul className="space-y-2 flex-grow mb-6">
         {features.map((feature, index) => (
           <li key={index} className="flex items-center text-sm text-gray-400">
-            <span className="w-2 h-2 bg-[#FF9500] rounded-full mr-2" />
+            <span className="w-2 h-2 bg-[#ff9404] rounded-full mr-2" />
             {feature}
           </li>
         ))}

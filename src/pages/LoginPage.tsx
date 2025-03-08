@@ -68,10 +68,10 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 relative bg-[#111827] text-white">
+    <div className="container mx-auto px-4 py-16 relative bg-[#282c3c] text-white">
       {mensaje && modalAbierto && (
         <div 
-          className="fixed inset-0 flex items-center justify-center bg-[#111827] bg-opacity-80" 
+          className="fixed inset-0 flex items-center justify-center bg-[#282c3c] bg-opacity-80" 
           onClick={() => setModalAbierto(false)}
         >
           <div 
@@ -91,7 +91,7 @@ const LoginPage = () => {
       <div className="max-w-md mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">Iniciar Sesión</h1>
         
-        <div className="bg-[#0B101A] rounded-xl p-8 shadow-sm">
+        <div className="bg-[#3B4252] rounded-xl p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label htmlFor="input" className="block text-sm font-medium text-gray-300 mb-1">
@@ -103,7 +103,7 @@ const LoginPage = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#111827] text-white placeholder-gray-400 focus:ring-2 focus:ring-[#FF3B30] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400"
                 placeholder="Usuario o tu@email.com"
               />
             </div>
@@ -118,19 +118,19 @@ const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#111827] text-white placeholder-gray-400 focus:ring-2 focus:ring-[#FF3B30] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400"
                 placeholder="••••••••"
               />
             </div>
 
-            <button type="submit" className="w-full py-2 px-4 bg-[#FF9500] text-white font-semibold rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition">
+            <button type="submit" className="w-full py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg hover:bg-[#ff9404] hover:text-[#282c3c] transition">
               Iniciar Sesión
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-400">
             ¿No tienes una cuenta?{' '}
-            <Link to="/registro" className="text-[#FF9500] font-medium hover:underline">
+            <Link to="/registro" className="text-[#ff9404] font-medium hover:underline">
               Regístrate aquí
             </Link>
           </div>

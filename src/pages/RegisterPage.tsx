@@ -81,10 +81,10 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 relative bg-[#111827] text-white">
+    <div className="container mx-auto px-4 py-16 relative bg-[#282c3c] text-white">
       {mensaje && modalAbierto && (
         <div 
-          className="fixed inset-0 flex items-center justify-center bg-[#1C1C1E] bg-opacity-80" 
+          className="fixed inset-0 flex items-center justify-center bg-[#282c3c] bg-opacity-80" 
           onClick={() => setModalAbierto(false)}
         >
           <div 
@@ -103,7 +103,7 @@ const RegisterPage: React.FC = () => {
               ) : (
                 <button 
                   onClick={reenviarCorreo} 
-                  className="mt-4 px-4 py-2 bg-[#FF9500] text-white rounded-lg shadow-md hover:bg-[#FF3B30]"
+                  className="mt-4 px-4 py-2 bg-[#ff9404] text-white rounded-lg shadow-md hover:bg-[#ff9404]"
                 >
                   Reenviar correo de verificación
                 </button>
@@ -116,7 +116,7 @@ const RegisterPage: React.FC = () => {
       <div className="max-w-md mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">Crear Cuenta</h1>
 
-        <div className="bg-[#0B101A] rounded-xl p-8 shadow-sm">
+        <div className="bg-[#3B4252] rounded-xl p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleRegister}>
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Nombre de Usuario</label>
@@ -124,7 +124,7 @@ const RegisterPage: React.FC = () => {
                 type="text"
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#1C1C1E] text-white placeholder-gray-400"
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400"
                 placeholder="NombreUsuario"
                 required
               />
@@ -136,7 +136,7 @@ const RegisterPage: React.FC = () => {
                 type="email"
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#1C1C1E] text-white placeholder-gray-400"
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400"
                 placeholder="example@email.com"
                 required
               />
@@ -148,7 +148,7 @@ const RegisterPage: React.FC = () => {
                 type="password"
                 value={contraseña}
                 onChange={(e) => setContraseña(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#1C1C1E] text-white placeholder-gray-400"
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400"
                 placeholder="••••••••"
                 required
               />
@@ -160,20 +160,20 @@ const RegisterPage: React.FC = () => {
                 type="password"
                 value={confirmarContraseña} 
                 onChange={(e) => setConfirmarContraseña(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#1C1C1E] text-white placeholder-gray-400"
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400"
                 placeholder="••••••••"
                 required
               />
             </div>
 
-            <button type="submit" className="w-full py-2 px-4 bg-[#FF9500] text-white font-semibold rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition">
+            <button type="submit" className="w-full py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg hover:bg-[#ff9404] hover:text-[#282c3c] transition">
               Crear Cuenta
             </button>
           </form>
 
           <p className="mt-4 text-center text-gray-400">
             ¿Ya tienes una cuenta?{' '}
-            <Link to="/login" className="text-[#FF9500] hover:underline">
+            <Link to="/login" className="text-[#ff9404] hover:underline">
               Inicia sesión aquí
             </Link>
           </p>

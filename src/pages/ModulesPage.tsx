@@ -1,14 +1,23 @@
 import React from "react";
-import { Utensils, Dumbbell, Activity, Droplets, Calculator, Camera } from "lucide-react";
+import {
+  Utensils,
+  Dumbbell,
+  Activity,
+  Droplets,
+  Calculator,
+  Camera,
+} from "lucide-react";
 import ModuleCard from "../components/ModuleCard";
 
 const ModulesPage: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-16 bg-[#111827] text-white">
-      <h1 className="text-4xl font-bold mb-8 text-center text#FFFFFF">Nuestros Módulos</h1>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+    <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
+      <h1 className="text-4xl font-bold mb-8 text-center text-#ff9404">
+        Nuestros Módulos
+      </h1>
+      <div className="text-[#ff9404] grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
         <ModuleCard
-          icon={<Utensils className="w-8 h-8 text-[#FF9500]" />}
+          icon={<Utensils className="w-8 h-8" />}
           title="Conteo de Calorías"
           description="Registra tu ingesta diaria de alimentos y monitorea tus macronutrientes de forma precisa."
           features={[
@@ -19,7 +28,7 @@ const ModulesPage: React.FC = () => {
           ]}
         />
         <ModuleCard
-          icon={<Dumbbell className="w-8 h-8 text-[#FF9500]" />}
+          icon={<Dumbbell className="w-8 h-8" />}
           title="Registro de Entrenamientos"
           description="Mantén un registro detallado de tus rutinas de ejercicio y progreso en el gimnasio."
           features={[
@@ -30,7 +39,7 @@ const ModulesPage: React.FC = () => {
           ]}
         />
         <ModuleCard
-          icon={<Activity className="w-8 h-8 text-[#FF9500]" />}
+          icon={<Activity className="w-8 h-8" />}
           title="Monitoreo de Pasos"
           description="Realiza un seguimiento de tu actividad diaria y calorías quemadas."
           features={[
@@ -41,7 +50,7 @@ const ModulesPage: React.FC = () => {
           ]}
         />
         <ModuleCard
-          icon={<Droplets className="w-8 h-8 text-[#FF9500]" />}
+          icon={<Droplets className="w-8 h-8" />}
           title="Control de Hidratación"
           description="Mantén un registro de tu consumo de agua diario y alcanza tus metas de hidratación."
           features={[
@@ -52,7 +61,7 @@ const ModulesPage: React.FC = () => {
           ]}
         />
         <ModuleCard
-          icon={<Calculator className="w-8 h-8 text-[#FF9500]" />}
+          icon={<Calculator className="w-8 h-8" />}
           title="Calculadora 1RM"
           description="Calcula tu repetición máxima (1RM) para diferentes ejercicios."
           features={[
@@ -63,7 +72,7 @@ const ModulesPage: React.FC = () => {
           ]}
         />
         <ModuleCard
-          icon={<Camera className="w-8 h-8 text-[#FF9500]" />}
+          icon={<Camera className="w-8 h-8" />}
           title="Análisis de Comidas"
           description="Obtén información nutricional a partir de fotos de tus comidas."
           features={[
