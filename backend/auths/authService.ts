@@ -33,3 +33,18 @@ export const loginUser = async (input: string, password: string) => {
     return { error: "Ocurrió un error inesperado. Inténtalo de nuevo." };
   }
 };
+export const resetPasswordForEmail = async (email: string) => {
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'http://localhost:5174/reset-password' 
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { success: "Se ha enviado un correo para restablecer tu contraseña" };
+  } catch (err) {
+    return { error: "Ocurrió un error inesperado. Inténtalo de nuevo." };
+  }
+};

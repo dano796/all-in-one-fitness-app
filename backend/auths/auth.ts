@@ -3,54 +3,56 @@ import { supabase } from "../lib/supabaseClient";
 export const registrarUsuario = async (usuario: string, correo: string, contraseña: string) => {
   const usuarioLower = usuario.toLowerCase();
 
-  // Verificar si el usuario ya existe en la base de datos
-  const { data: usuarioExistente } = await supabase
+
+  if (contraseña.length < 8) {
+    return { error: "La contraseña debe tener al menos 8 caracteres." };
+  }
+
+
+  const { data: usuarioExistente, error: usuarioError } = await supabase
     .from("Inicio Sesion")
     .select("Usuario")
     .eq("Usuario", usuarioLower)
     .single();
 
+  if (usuarioError && usuarioError.code !== "PGRST116") {
+    return { error: "Error al verificar el usuario. Intenta de nuevo." };
+  }
   if (usuarioExistente) {
     return { error: "El nombre de usuario ya está en uso." };
   }
 
-  // Verificar si el correo ya existe en la base de datos
-  const { data: correoExistente } = await supabase
+  const { data: correoExistente, error: correoError } = await supabase
     .from("Inicio Sesion")
     .select("Correo")
     .eq("Correo", correo)
     .single();
 
+  if (correoError && correoError.code !== "PGRST116") {
+    return { error: "Error al verificar el correo. Intenta de nuevo." };
+  }
   if (correoExistente) {
     return { error: "El correo ya está registrado." };
   }
 
-  // Intentar iniciar sesión con el correo (para verificar si ya está en Supabase Auth)
-  const { error: authError } = await supabase.auth.signInWithPassword({
-    email: correo,
-    password: contraseña,
-  });
 
-  // Si el error es diferente de "Invalid login credentials", significa que el correo ya existe en Auth
-  if (authError && authError.message !== "Invalid login credentials") {
-    return { error: "El correo ya está registrado en el sistema." };
-  }
-
-  // Registrar al usuario en Supabase Auth
   const { error: signUpError } = await supabase.auth.signUp({
     email: correo,
     password: contraseña,
     options: {
       data: { usuario: usuarioLower },
-      emailRedirectTo: "http://localhost:5173/login",
+      emailRedirectTo: "http://localhost:5174/login",
     },
   });
 
   if (signUpError) {
-    return { error: "El correo ya esta registrado pero no autenticado"};
+    if (signUpError.message.includes("User already registered")) {
+      return { error: "El correo ya está registrado pero no autenticado." };
+    }
+    return { error: `Error al registrar: ${signUpError.message}` };
   }
 
-  // Insertar usuario en la base de datos
+
   await supabase.from("Inicio Sesion").insert({
     Usuario: usuarioLower,
     Correo: correo,

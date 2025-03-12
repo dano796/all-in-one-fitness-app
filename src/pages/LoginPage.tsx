@@ -1,56 +1,101 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; 
 import { Link, useNavigate } from "react-router-dom";
-import { CheckCircle, XCircle } from "lucide-react";
+import Swal from "sweetalert2"; 
+import { Eye, EyeOff } from "lucide-react"; 
 import { loginUser } from "../../backend/auths/authService";
+import PasswordRecovery from "../components/PasswordRecovery";
+import { supabase } from "../../backend/lib/supabaseClient"; 
 
 const LoginPage = () => {
-  const [input, setInput] = useState("");
-  const [password, setPassword] = useState("");
-  const [mensaje, setMensaje] = useState("");
-  const [tipoMensaje, setTipoMensaje] = useState<"error" | "success" | "">("");
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const navigate = useNavigate();
+  const [input, setInput] = useState(""); 
+  const [password, setPassword] = useState(""); 
+  const [showPassword, setShowPassword] = useState(false);
+  const [recoveryModalOpen, setRecoveryModalOpen] = useState(false);
+  const navigate = useNavigate(); 
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+
+        if (error) {
+          console.error("Error al verificar la sesión:", error.message);
+          return;
+        }
+
+        if (user) {
+          navigate("/Dashboard", { replace: true });
+        }
+      } catch (err) {
+        console.error("Excepción al verificar la sesión:", err);
+      }
+    };
+
+    checkSession();
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await loginUser(input, password);
-  
+
     if (result.error) {
-      setMensaje(result.error);
-      setTipoMensaje("error");
-    } else if (result.success) { 
-      setMensaje(result.success);
-      setTipoMensaje("success");
-      setTimeout(() => navigate("/Dashboard"), 2000);
+      await Swal.fire({
+        title: "¡Error!",
+        text: result.error,
+        icon: "error",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#ff9400",
+        customClass: {
+          popup: "custom-swal-background",
+          title: "custom-swal-title",
+          htmlContainer: "custom-swal-text",
+        },
+      });
+    } else if (result.success) {
+      await Swal.fire({
+        title: "¡Éxito!",
+        text: "Inicio de sesión exitoso.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#ff9404",
+        customClass: {
+          popup: "custom-swal-background",
+          icon: "custom-swal-icon",
+          title: "custom-swal-title",
+          htmlContainer: "custom-swal-text",
+        },
+      });
+      navigate("/Dashboard", { replace: true }); 
     }
-  
-    setModalAbierto(true);
   };
-  
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="container mx-auto px-4 py-16 relative bg-[#282c3c] text-white">
-      {mensaje && modalAbierto && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center bg-[#282c3c] bg-opacity-80" 
-          onClick={() => setModalAbierto(false)}
+
+      {recoveryModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={(e) => {
+            e.stopPropagation(); 
+            setRecoveryModalOpen(false); 
+          }}
         >
-          <div 
-            className="bg-[#1F2937] p-6 rounded-lg shadow-lg text-center max-w-md text-white" 
+          <div
+            className="bg-[#3B4252] rounded-xl p-6 shadow-lg w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            {tipoMensaje === "success" ? (
-              <CheckCircle className="w-16 h-16 mx-auto animate-bounce" style={{ color: "#FF9500" }} />
-            ) : (
-              <XCircle className="w-16 h-16 mx-auto animate-bounce" style={{ color: "#FF3B30" }} />
-            )}
-            <p className="mt-4 font-semibold">{mensaje}</p>
+            <PasswordRecovery onClose={() => setRecoveryModalOpen(false)} />
           </div>
         </div>
       )}
 
       <div className="max-w-md mx-auto">
         <h1 className="text-4xl font-bold mb-8 pb-3 text-center">Iniciar Sesión</h1>
-        
+
         <div className="bg-[#3B4252] rounded-xl p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
@@ -72,27 +117,50 @@ const LoginPage = () => {
               <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
                 Contraseña
               </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400"
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"} 
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button" 
+                  onClick={togglePasswordVisibility}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-[#ff9404]"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
-            <button type="submit" className="w-full py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg hover:bg-[#ff9404] hover:text-[#282c3c] transition">
+            <button
+              type="submit"
+              className="w-full py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg hover:bg-[#ff9404] hover:text-[#282c3c] transition"
+            >
               Iniciar Sesión
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-400">
-            ¿No tienes una cuenta?{" "}
-            <Link to="/registro" className="text-[#ff9404] font-medium hover:underline">
-              Regístrate aquí
-            </Link>
+          <div className="mt-6 text-center text-sm text-gray-400 space-y-2">
+            <div>
+              ¿No tienes una cuenta?{" "}
+              <Link to="/registro" className="text-[#ff9404] font-medium hover:underline">
+                Regístrate aquí
+              </Link>
+            </div>
+            <div className="text-gray-400">o</div>
+            <div>
+              <button
+                onClick={() => setRecoveryModalOpen(true)}
+                className="text-[#ff9404] font-medium hover:underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
           </div>
         </div>
       </div>

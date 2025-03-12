@@ -9,6 +9,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import ResetPassword from "./pages/ResetPassword"; 
 import { supabase } from "../backend/lib/supabaseClient";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -41,6 +42,7 @@ function App() {
           <Route path="/contacto" element={<ContactPage />} />
           <Route path="/login" element={<LoginPage/>} />
           <Route path="/registro" element={<RegisterPage />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
 
         {/* Protected routes */}

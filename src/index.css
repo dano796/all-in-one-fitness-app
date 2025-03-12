@@ -11,3 +11,22 @@
 body {
   @apply bg-[#282c3c] text-white;
 }
+
+.custom-swal-background {
+  background-color: #282c3c !important; 
+}
+
+.custom-swal-icon .swal2-success-ring {
+  border-color: #ff9400 !important; 
+}
+.custom-swal-icon .swal2-success-line-tip,
+.custom-swal-icon .swal2-success-line-long {
+  background-color: #ff9400 !important; 
+}
+.custom-swal-title {
+  color: #ff9400 !important; 
+}
+
+.custom-swal-text {
+  color: #ffffff !important; 
+}
