@@ -5,7 +5,7 @@ const ContactPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center text-white">Contacto</h1>
+        <h1 className="text-5xl font-bold mb-8 pb-5 text-center text-white">Contacto</h1>
         
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           <div className="text-center">
@@ -29,7 +29,7 @@ const ContactPage: React.FC = () => {
               <MapPin className="w-6 h-6 text-white" />
             </div>
             <h3 className="font-semibold mb-1 text-[#ffffff]">Ubicación</h3>
-            <p className="text-gray-300">Ciudad de México, México</p>
+            <p className="text-gray-300">Medellín, Colombia</p>
           </div>
         </div>
 

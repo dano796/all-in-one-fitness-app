@@ -26,9 +26,9 @@ const features = [
 
 const FeaturesSection: React.FC = () => {
   return (
-    <section className="bg-[#282c3c] py-16">
+    <section className="bg-[#282c3c] py-16 px-16">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl pt-10 pb-5 font-bold text-center mb-12 text-[#FFFFFF]">
+        <h2 className="text-5xl pt-10 pb-5 font-bold text-center mb-12 text-[#FFFFFF]">
           ¿Por qué usar All In One Fitness App?
         </h2>
 
