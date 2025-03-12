@@ -49,7 +49,7 @@ const LoginPage = () => {
       )}
 
       <div className="max-w-md mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">Iniciar Sesión</h1>
+        <h1 className="text-4xl font-bold mb-8 pb-3 text-center">Iniciar Sesión</h1>
         
         <div className="bg-[#3B4252] rounded-xl p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleLogin}>

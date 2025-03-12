@@ -5,9 +5,9 @@ const AboutPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-center text-white">¿Quiénes somos?</h1>
+        <h1 className="text-5xl font-bold mb-8 pb-5 text-center text-white">¿Quiénes somos?</h1>
         
-        <p className="text-xl text-gray-400 mb-12 text-center">
+        <p className="text-xl text-gray-300 mb-12 text-center">
           Somos un equipo apasionado por la salud y el bienestar, dedicados a crear
           la mejor herramienta para ayudarte a alcanzar tus objetivos fitness.
         </p>
@@ -18,7 +18,7 @@ const AboutPage: React.FC = () => {
               <Target className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-bold mb-2">Nuestra Misión</h3>
-            <p className="text-gray-300">
+            <p className="text-gray-400">
               Facilitar el seguimiento de hábitos saludables con tecnología intuitiva.
             </p>
           </div>
@@ -28,7 +28,7 @@ const AboutPage: React.FC = () => {
               <Award className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-bold mb-2">Nuestros Valores</h3>
-            <p className="text-gray-300">
+            <p className="text-gray-400">
               Compromiso con la calidad, innovación y bienestar de nuestros usuarios.
             </p>
           </div>
@@ -38,7 +38,7 @@ const AboutPage: React.FC = () => {
               <Users className="w-8 h-8 text-[#ffffff]" />
             </div>
             <h3 className="text-xl font-bold mb-2">Nuestro Equipo</h3>
-            <p className="text-gray-300">
+            <p className="text-gray-400">
               Expertos en fitness, nutrición y desarrollo de software.
             </p>
           </div>

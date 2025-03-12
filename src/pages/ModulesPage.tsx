@@ -12,7 +12,7 @@ import ModuleCard from "../components/ModuleCard";
 const ModulesPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
-      <h1 className="text-4xl font-bold mb-8 text-center text-#ff9404">
+      <h1 className="text-5xl font-bold mb-8 pb-5 text-center text-#ff9404">
         Nuestros Módulos
       </h1>
       <div className="text-[#ff9404] grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">

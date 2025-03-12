@@ -3,14 +3,20 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "../../backend/lib/supabaseClient";
 
-// Datos para el carrusel (imágenes de ejemplo)
-const carouselItems = [
+const carouselItemsLeft = [
   "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=300&h=400&fit=crop",
-  "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=300&fit=crop",
-  "https://static.mujerhoy.com/www/multimedia/202406/26/media/cortadas/cardio-portada-kBvG-U220552748840lPF-1248x1248@MujerHoy.jpg?w=300&h=400&fit=crop",
   "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300&h=300&fit=crop",
+  "https://e00-elmundo.uecdn.es/assets/multimedia/imagenes/2024/03/13/17103128329071.jpg?w=300&h=400&fit=crop",
+  "https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=300&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1577221084712-45b0445d2b00?q=80&w=1996&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?w=300&h=400&fit=crop",
+];
+
+const carouselItemsRight = [
+  "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=400&fit=crop",
+  "https://static.mujerhoy.com/www/multimedia/202406/26/media/cortadas/cardio-portada-kBvG-U220552748840lPF-1248x1248@MujerHoy.jpg?w=300&h=300&fit=crop",
   "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=400&fit=crop",
-  "https://e00-elmundo.uecdn.es/assets/multimedia/imagenes/2024/03/13/17103128329071.jpg?w=300&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=300&h=300&fit=crop",
+  "https://images.unsplash.com/photo-1535914254981-b5012eebbd15?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?w=300&h=400&fit=crop",
 ];
 
 // Variantes para el carrusel izquierdo (arriba -> abajo -> arriba)
@@ -18,7 +24,7 @@ const leftCarouselVariants = {
   animate: {
     y: ["0%", "-50%"],
     transition: {
-      duration: 55,
+      duration: 10,
       ease: "linear",
       repeat: Infinity,
       repeatType: "reverse" as const,
@@ -31,7 +37,7 @@ const rightCarouselVariants = {
   animate: {
     y: ["-50%", "0%"],
     transition: {
-      duration: 55,
+      duration: 10,
       ease: "linear",
       repeat: Infinity,
       repeatType: "reverse" as const,
@@ -90,7 +96,7 @@ const HeroSection: React.FC = () => {
               animate="animate"
               className="flex flex-col gap-4"
             >
-              {carouselItems.map((image, index) => (
+              {carouselItemsLeft.map((image, index) => (
                 <motion.img
                   key={`left-${index}`}
                   src={image}
@@ -106,7 +112,7 @@ const HeroSection: React.FC = () => {
               animate="animate"
               className="flex flex-col gap-4"
             >
-              {carouselItems.map((image, index) => (
+              {carouselItemsRight.map((image, index) => (
                 <motion.img
                   key={`right-${index}`}
                   src={image}
