@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Dumbbell, UserCircle, LogOut, Menu, X } from "lucide-react";
-import { supabase } from "../../backend/lib/supabaseClient";
+import { supabase } from "../lib/supabaseClient";
 
 const Navbar: React.FC = () => {
   const [user, setUser] = useState<any>(null);

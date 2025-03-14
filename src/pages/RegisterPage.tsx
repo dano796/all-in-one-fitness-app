@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react"; 
-import { Link, useNavigate } from "react-router-dom"; 
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import Swal from "sweetalert2"; 
-import { registrarUsuario } from "../../backend/auths/auth";
-import { supabase } from "../../backend/lib/supabaseClient"; 
+import Swal from "sweetalert2";
+import { supabase } from "../lib/supabaseClient";
 
-const RegisterPage: React.FC = () => {
+const RegisterPage = () => {
   const [usuario, setUsuario] = useState("");
   const [correo, setCorreo] = useState("");
   const [contraseña, setContraseña] = useState("");
@@ -14,16 +13,20 @@ const RegisterPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [contador, setContador] = useState(60);
   const [puedeReenviar, setPuedeReenviar] = useState(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: NodeJS.Timeout | null = null;
     if (!puedeReenviar && contador > 0) {
       timer = setTimeout(() => setContador(contador - 1), 1000);
     } else {
       setPuedeReenviar(true);
     }
-    return () => clearTimeout(timer);
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
   }, [contador, puedeReenviar]);
 
   useEffect(() => {
@@ -32,12 +35,11 @@ const RegisterPage: React.FC = () => {
         const { data: { user }, error } = await supabase.auth.getUser();
 
         if (error) {
-          console.error("Error al verificar la sesión:", error.message);
+          console.log("Error al verificar la sesión (esperado si no hay sesión):", error.message);
           return;
         }
 
         if (user) {
-         
           navigate("/Dashboard", { replace: true });
         }
       } catch (err) {
@@ -51,7 +53,6 @@ const RegisterPage: React.FC = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
- 
     if (contraseña !== confirmarContraseña) {
       await Swal.fire({
         title: "¡Error!",
@@ -68,42 +69,62 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
- 
-    const response = await registrarUsuario(usuario, correo, contraseña);
+    try {
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario, correo, contraseña }),
+      });
+      const result = await response.json();
 
-    if (response.error) {
+      if (result.error) {
+        await Swal.fire({
+          title: "¡Error!",
+          text: result.error,
+          icon: "error",
+          confirmButtonText: "Aceptar",
+          confirmButtonColor: "#ff9400",
+          customClass: {
+            popup: "custom-swal-background",
+            title: "custom-swal-title",
+            htmlContainer: "custom-swal-text",
+          },
+        });
+      } else {
+        await Swal.fire({
+          title: "¡Éxito!",
+          text: result.success || "Registro exitoso.",
+          icon: "success",
+          confirmButtonText: "Aceptar",
+          confirmButtonColor: "#ff9400",
+          customClass: {
+            popup: "custom-swal-background",
+            icon: "custom-swal-icon",
+            title: "custom-swal-title",
+            htmlContainer: "custom-swal-text",
+          },
+        });
+        setContador(60);
+        setPuedeReenviar(false);
+        setUsuario("");
+        setCorreo("");
+        setContraseña("");
+        setConfirmarContraseña("");
+        // Verificar sesión después del registro (opcional, dependiendo del flujo)
+        const { data } = await supabase.auth.getUser();
+        if (data.user) {
+          navigate("/Dashboard", { replace: true });
+        }
+      }
+    } catch (err) {
+      console.error("Error durante el registro:", err);
       await Swal.fire({
         title: "¡Error!",
-        text: response.error,
+        text: "Ocurrió un error inesperado.",
         icon: "error",
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
-        customClass: {
-          popup: "custom-swal-background",
-          title: "custom-swal-title",
-          htmlContainer: "custom-swal-text",
-        },
       });
-    } else {
-      await Swal.fire({
-        title: "¡Éxito!",
-        text: response.success || "Registro exitoso.",
-        icon: "success",
-        confirmButtonText: "Aceptar",
-        confirmButtonColor: "#ff9400",
-        customClass: {
-          popup: "custom-swal-background",
-          icon: "custom-swal-icon",
-          title: "custom-swal-title",
-          htmlContainer: "custom-swal-text",
-        },
-      });
-      setContador(60);
-      setPuedeReenviar(false);
-      setUsuario("");
-      setCorreo("");
-      setContraseña("");
-      setConfirmarContraseña("");
     }
   };
 
@@ -179,7 +200,7 @@ const RegisterPage: React.FC = () => {
             </button>
           </form>
           <p className="mt-4 text-center text-gray-400">
-            ¿Ya tienes una cuenta?{' '}
+            ¿Ya tienes una cuenta?{" "}
             <Link to="/login" className="text-[#ff9404] hover:underline">
               Inicia sesión aquí
             </Link>

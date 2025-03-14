@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Dumbbell, Home, User, Calendar, Droplets, Activity, Settings, LogOut } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
-import { supabase } from "../../backend/lib/supabaseClient";
+import { supabase } from "../lib/supabaseClient";
 import DashboardNavItem from "./DashboardNavItem";
 
 const Sidebar: React.FC = () => {

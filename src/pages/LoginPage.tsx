@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Swal from "sweetalert2"; 
-import { Eye, EyeOff } from "lucide-react"; 
-import { loginUser } from "../../backend/auths/authService";
+import Swal from "sweetalert2";
+import { Eye, EyeOff } from "lucide-react";
 import PasswordRecovery from "../components/PasswordRecovery";
-import { supabase } from "../../backend/lib/supabaseClient"; 
+import { supabase } from "../lib/supabaseClient";
 
 const LoginPage = () => {
-  const [input, setInput] = useState(""); 
-  const [password, setPassword] = useState(""); 
+  const [input, setInput] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [recoveryModalOpen, setRecoveryModalOpen] = useState(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -19,7 +18,8 @@ const LoginPage = () => {
         const { data: { user }, error } = await supabase.auth.getUser();
 
         if (error) {
-          console.error("Error al verificar la sesión:", error.message);
+          console.log("Error al verificar la sesión (esperado si no hay sesión):", error.message);
+          // No redirigimos si no hay sesión, simplemente continuamos
           return;
         }
 
@@ -36,36 +36,57 @@ const LoginPage = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await loginUser(input, password);
-
-    if (result.error) {
+    try {
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input, password }),
+      });
+      const result = await response.json();
+  
+      if (result.error) {
+        await Swal.fire({
+          title: "¡Error!",
+          text: result.error,
+          icon: "error",
+          confirmButtonText: "Aceptar",
+          confirmButtonColor: "#ff9400",
+          customClass: {
+            popup: "custom-swal-background",
+            title: "custom-swal-title",
+            htmlContainer: "custom-swal-text",
+          },
+        });
+      } else if (result.success) {
+        // Configurar el token en Supabase
+        await supabase.auth.setSession({ access_token: result.token, refresh_token: "dummy-refresh-token" }); // Necesitas el refresh_token del backend
+        const { data } = await supabase.auth.getUser();
+        if (data.user) {
+          navigate("/Dashboard", { replace: true });
+        }
+        await Swal.fire({
+          title: "¡Éxito!",
+          text: "Inicio de sesión exitoso.",
+          icon: "success",
+          confirmButtonText: "Aceptar",
+          confirmButtonColor: "#ff9404",
+          customClass: {
+            popup: "custom-swal-background",
+            icon: "custom-swal-icon",
+            title: "custom-swal-title",
+            htmlContainer: "custom-swal-text",
+          },
+        });
+      }
+    } catch (err) {
+      console.log("Error al iniciar sesión:", err);
       await Swal.fire({
         title: "¡Error!",
-        text: result.error,
+        text: "Ocurrió un error inesperado.",
         icon: "error",
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
-        customClass: {
-          popup: "custom-swal-background",
-          title: "custom-swal-title",
-          htmlContainer: "custom-swal-text",
-        },
       });
-    } else if (result.success) {
-      await Swal.fire({
-        title: "¡Éxito!",
-        text: "Inicio de sesión exitoso.",
-        icon: "success",
-        confirmButtonText: "Aceptar",
-        confirmButtonColor: "#ff9404",
-        customClass: {
-          popup: "custom-swal-background",
-          icon: "custom-swal-icon",
-          title: "custom-swal-title",
-          htmlContainer: "custom-swal-text",
-        },
-      });
-      navigate("/Dashboard", { replace: true }); 
     }
   };
 
@@ -75,13 +96,12 @@ const LoginPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-16 relative bg-[#282c3c] text-white">
-
       {recoveryModalOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           onClick={(e) => {
-            e.stopPropagation(); 
-            setRecoveryModalOpen(false); 
+            e.stopPropagation();
+            setRecoveryModalOpen(false);
           }}
         >
           <div
@@ -119,7 +139,7 @@ const LoginPage = () => {
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"} 
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -128,7 +148,7 @@ const LoginPage = () => {
                   placeholder="••••••••"
                 />
                 <button
-                  type="button" 
+                  type="button"
                   onClick={togglePasswordVisibility}
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-[#ff9404]"
                 >

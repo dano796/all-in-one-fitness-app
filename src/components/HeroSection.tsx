@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { supabase } from "../../backend/lib/supabaseClient";
+import { supabase } from "../lib/supabaseClient";
 
 const carouselItemsLeft = [
   "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=300&h=400&fit=crop",
@@ -46,20 +46,20 @@ const rightCarouselVariants = {
 };
 
 const HeroSection: React.FC = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
 
   // Manejo de autenticación
   useEffect(() => {
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
-      setUser(data?.user);
+      setUser(data?.user ? { id: data.user.id, email: data.user.email || "" } : null);
     };
 
     fetchUser();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setUser(session?.user || null);
+        setUser(session?.user ? { id: session.user.id, email: session.user.email || "" } : null);
       }
     );
 
