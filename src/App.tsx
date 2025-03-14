@@ -11,6 +11,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ResetPassword from "./pages/ResetPassword"; 
 import { supabase } from "./lib/supabaseClient";
+import FoodSearch from "./components/FoodSearch";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<unknown>(null);
@@ -43,6 +44,7 @@ function App() {
           <Route path="/login" element={<LoginPage/>} />
           <Route path="/registro" element={<RegisterPage />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/FoodSearch" element={<FoodSearch />} />
         </Route>
 
         {/* Protected routes */}
