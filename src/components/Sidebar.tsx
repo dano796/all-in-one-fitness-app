@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Dumbbell, Home, User, Calendar, Droplets, Activity, Settings, LogOut } from "lucide-react";
+import { Dumbbell, Home, User, Calendar, Droplets, Activity, Settings, LogOut, Search, Utensils } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { supabase } from "../lib/supabaseClient";
 import DashboardNavItem from "./DashboardNavItem";
@@ -30,7 +30,7 @@ const Sidebar: React.FC = () => {
       {/* Navegación principal */}
       <nav className="flex-1 space-y-6 mt-32  ">
         <DashboardNavItem to="/dashboard" icon={<Home className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />
-        <DashboardNavItem to="/profile" icon={<User className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />
+        <DashboardNavItem to="/FoodSearch"icon={<Utensils className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />
         <DashboardNavItem to="/workouts" icon={<Calendar className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />
         <DashboardNavItem to="/water" icon={<Droplets className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />
         <DashboardNavItem to="/activity" icon={<Activity className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />

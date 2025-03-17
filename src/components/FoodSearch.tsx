@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { supabase } from "../lib/supabaseClient";
+import Swal from "sweetalert2"; // Importa SweetAlert2
 
 interface Food {
   food_id: string;
@@ -14,8 +15,8 @@ const FoodSearch: React.FC = () => {
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState<boolean>(false); // Nueva variable para rastrear si se ha realizado una búsqueda
 
-  // Verificar autenticación al cargar el componente
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -29,7 +30,7 @@ const FoodSearch: React.FC = () => {
   const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (!query.trim()) {
-      setError("Please enter a search term");
+      setError("Por favor ingresa un término de búsqueda");
       return;
     }
 
@@ -41,6 +42,7 @@ const FoodSearch: React.FC = () => {
 
     setLoading(true);
     setError(null);
+    setHasSearched(true); // Marca que se ha realizado una búsqueda
 
     try {
       const response = await axios.get("http://localhost:5000/api/foods/search", {
@@ -48,10 +50,35 @@ const FoodSearch: React.FC = () => {
       });
       const foodResults = response.data.foods?.food || [];
       setFoods(Array.isArray(foodResults) ? foodResults : []);
-      setSelectedFood(null);
+      if (foodResults.length === 0) {
+        await Swal.fire({
+          title: "¡Información!",
+          text: "No se encontraron alimentos para tu búsqueda.",
+          icon: "info",
+          confirmButtonText: "Aceptar",
+          confirmButtonColor: "#ff9404",
+          customClass: {
+            popup: "custom-swal-background",
+            title: "custom-swal-title",
+            htmlContainer: "custom-swal-text",
+          },
+        });
+      }
     } catch (err) {
-      setError("Error searching for foods");
-      console.error(err);
+      const axiosError = err as AxiosError<{ error?: string }>;
+      setError(axiosError.response?.data?.error || "Error al buscar alimentos");
+      await Swal.fire({
+        title: "¡Error!",
+        text: axiosError.response?.data?.error || "Ocurrió un error al buscar alimentos.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#ff9400",
+        customClass: {
+          popup: "custom-swal-background",
+          title: "custom-swal-title",
+          htmlContainer: "custom-swal-text",
+        },
+      });
     } finally {
       setLoading(false);
     }
@@ -62,28 +89,60 @@ const FoodSearch: React.FC = () => {
   };
 
   const handleAddFood = async () => {
-    if (selectedFood) {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        setError("Debes iniciar sesión para agregar alimentos.");
-        return;
-      }
+    if (!selectedFood) {
+      setError("Por favor selecciona un alimento.");
+      return;
+    }
 
-      try {
-        const response = await axios.post("http://localhost:5000/api/foods/log", {
-          user_id: user.id,
-          food_id: selectedFood.food_id,
-          nombre_comida: selectedFood.food_name,
-          descripcion: selectedFood.food_description,
-        });
-        console.log("Respuesta del backend:", response.data);
-        setSelectedFood(null);
-        setError(null);
-        alert("Comida registrada con éxito");
-      } catch (err) {
-        setError("Error al registrar la comida");
-        console.error(err);
-      }
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      setError("Debes iniciar sesión para agregar alimentos.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:5000/api/foods/add", {
+        email: user.email,
+        food_id: selectedFood.food_id,
+        food_name: selectedFood.food_name,
+        food_description: selectedFood.food_description,
+      });
+
+      await Swal.fire({
+        title: "¡Éxito!",
+        text: response.data.message,
+        icon: "success",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#ff9404",
+        customClass: {
+          popup: "custom-swal-background",
+          icon: "custom-swal-icon",
+          title: "custom-swal-title",
+          htmlContainer: "custom-swal-text",
+        },
+      });
+
+      setSelectedFood(null);
+      setFoods([]);
+      setQuery("");
+      setError(null);
+      setHasSearched(false); // Reinicia el estado de búsqueda
+    } catch (err) {
+      const axiosError = err as AxiosError<{ error?: string }>;
+      const errorMessage = axiosError.response?.data?.error || "Error al agregar el alimento";
+      setError(errorMessage);
+      await Swal.fire({
+        title: "¡Error!",
+        text: errorMessage,
+        icon: "error",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#ff9400",
+        customClass: {
+          popup: "custom-swal-background",
+          title: "custom-swal-title",
+          htmlContainer: "custom-swal-text",
+        },
+      });
     }
   };
 
@@ -99,7 +158,7 @@ const FoodSearch: React.FC = () => {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Enter a food (e.g., apple)"
+              placeholder="Ingresa un alimento (ejemplo: manzana)"
               disabled={loading}
               className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#1C2526] text-white placeholder-gray-400 focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
             />
@@ -110,7 +169,7 @@ const FoodSearch: React.FC = () => {
                 loading ? "opacity-50 cursor-not-allowed" : "hover:text-[#1C1C1E]"
               } transition duration-300`}
             >
-              {loading ? "Searching..." : "Search"}
+              {loading ? "Buscando..." : "Buscar"}
             </button>
           </div>
           {error && <p className="text-red-400 mt-4">{error}</p>}
@@ -118,14 +177,14 @@ const FoodSearch: React.FC = () => {
 
         {foods.length > 0 && (
           <div className="bg-[#3B4252] rounded-xl p-8 shadow-md">
-            <h2 className="text-2xl font-semibold mb-6 text-white">Results</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-white">Resultados</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-[#4B5563]">
-                    <th className="p-3 font-semibold">Select</th>
-                    <th className="p-3 font-semibold">Food Name</th>
-                    <th className="p-3 font-semibold">Description</th>
+                    <th className="p-3 font-semibold">Seleccionar</th>
+                    <th className="p-3 font-semibold">Nombre del Alimento</th>
+                    <th className="p-3 font-semibold">Descripción</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -160,12 +219,13 @@ const FoodSearch: React.FC = () => {
                   selectedFood ? "hover:text-[#1C1C1E]" : "opacity-50 cursor-not-allowed"
                 } transition duration-300`}
               >
-                Add Food
+                Agregar Alimento
               </button>
             </div>
           </div>
         )}
-        {!loading && foods.length === 0 && !error && <p className="text-gray-300 text-center">No results found</p>}
+        {/* Muestra "No se encontraron resultados" solo si se ha buscado y no hay resultados */}
+        {!loading && hasSearched && foods.length === 0 && !error && <p className="text-gray-300 text-center">No se encontraron resultados</p>}
       </div>
     </div>
   );
