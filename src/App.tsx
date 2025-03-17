@@ -12,6 +12,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ResetPassword from "./pages/ResetPassword"; 
 import { supabase } from "./lib/supabaseClient";
 import FoodSearch from "./components/FoodSearch";
+import FoodSearchLayout from "./layouts/FoodSearchLayout";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<unknown>(null);
@@ -26,7 +27,17 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     fetchUser();
   }, []);
 
-  if (loading) return <p>Cargando...</p>;
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-[#282c3c]">
+        <div className="text-6xl font-bold text-[#FF9500] flex space-x-4">
+          <span className="inline-block animate-accordion">All</span>
+          <span className="inline-block animate-accordion animation-delay-200">In</span>
+          <span className="inline-block animate-accordion animation-delay-400">One</span>
+        </div>
+      </div>
+    );
+  }
 
   return user ? <>{children}</> : <Navigate to="/login" />;
 };
@@ -44,7 +55,6 @@ function App() {
           <Route path="/login" element={<LoginPage/>} />
           <Route path="/registro" element={<RegisterPage />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/FoodSearch" element={<FoodSearch />} />
         </Route>
 
         {/* Protected routes */}
@@ -55,6 +65,16 @@ function App() {
               <DashboardLayout>
                 <Dashboard />
               </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/foodsearch"
+          element={
+            <ProtectedRoute>
+              <FoodSearchLayout>
+                <FoodSearch />
+              </FoodSearchLayout>
             </ProtectedRoute>
           }
         />
