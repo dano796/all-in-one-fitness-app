@@ -47,3 +47,11 @@ body {
 .animation-delay-400 {
   animation-delay: 0.4s;
 }
+/* En tu archivo CSS global (por ejemplo, index.css) */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE y Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari y Opera */
+}

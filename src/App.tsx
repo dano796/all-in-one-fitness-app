@@ -13,6 +13,8 @@ import ResetPassword from "./pages/ResetPassword";
 import { supabase } from "./lib/supabaseClient";
 import FoodSearch from "./components/FoodSearch";
 import FoodSearchLayout from "./layouts/FoodSearchLayout";
+import WaterLayout from "./layouts/WaterLayout"; // Importamos el WaterLayout
+import WaterTracker from "./components/WaterTracker"; // Importamos el WaterTracker
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<unknown>(null);
@@ -52,7 +54,7 @@ function App() {
           <Route path="/nosotros" element={<AboutPage />} />
           <Route path="/modulos" element={<ModulesPage />} />
           <Route path="/contacto" element={<ContactPage />} />
-          <Route path="/login" element={<LoginPage/>} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
           <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
@@ -75,6 +77,16 @@ function App() {
               <FoodSearchLayout>
                 <FoodSearch />
               </FoodSearchLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/water"
+          element={
+            <ProtectedRoute>
+              <WaterLayout>
+                <WaterTracker />
+              </WaterLayout>
             </ProtectedRoute>
           }
         />

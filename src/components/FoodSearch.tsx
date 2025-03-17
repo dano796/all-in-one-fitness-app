@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
+import { FaArrowLeft } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 interface Food {
   food_id: string;
@@ -147,9 +149,20 @@ const FoodSearch: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-[#3B4252] rounded-lg p-6 shadow-md">
-        <h2 className="text-sm font-semibold mb-4">Search for Foods</h2>
+    <div className="mt-0 ">
+      <div className="ml-0 mr-2 mt-0">
+        <Link to="/home" className="inline-block">
+          <button
+            className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10"
+          >
+            <FaArrowLeft className="mr-1 text-base" />
+            Volver
+          </button>
+        </Link>
+      </div>
+
+      <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-9">
+        <h2 className="text-sm font-semibold mb-2">Search for Foods</h2>
         <div className="flex items-center space-x-4">
           <input
             type="text"
@@ -162,68 +175,59 @@ const FoodSearch: React.FC = () => {
           <button
             onClick={handleSearch}
             disabled={loading}
-            className={`py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg ${
-              loading ? "opacity-50 cursor-not-allowed" : "hover:text-[#1C1C1E]"
-            } transition duration-300`}
+            className={`flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             {loading ? "Buscando..." : "Buscar"}
           </button>
         </div>
-        {error && <p className="text-red-400 mt-4 text-xs">{error}</p>}
-      </div>
+        {error && <p className="text-red-400 mt-2 text-xs">{error}</p>}
 
-      {foods.length > 0 && (
-        <div className="bg-[#3B4252] rounded-lg p-6 shadow-md">
-          <h2 className="text-sm font-semibold mb-4">Resultados</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-[#4B5563]">
-                  <th className="p-3 text-sm font-semibold">Seleccionar</th>
-                  <th className="p-3 text-sm font-semibold">Nombre del Alimento</th>
-                  <th className="p-3 text-sm font-semibold">Descripción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {foods.map((food) => (
-                  <tr
-                    key={food.food_id}
-                    className={`border-b border-gray-600 ${
-                      selectedFood?.food_id === food.food_id ? "bg-[#4B5563]" : "hover:bg-[#4B5563]"
-                    }`}
-                  >
-                    <td className="p-3">
-                      <input
-                        type="radio"
-                        name="foodSelection"
-                        checked={selectedFood?.food_id === food.food_id}
-                        onChange={() => handleSelectFood(food)}
-                        className="w-4 h-4 text-[#FF6B35]"
-                      />
-                    </td>
-                    <td className="p-3 text-sm font-medium">{food.food_name}</td>
-                    <td className="p-3 text-xs text-gray-300">{food.food_description}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {foods.length > 0 && (
+          <div className="mt-4">
+            <h3 className="text-sm font-semibold mb-2">Resultados</h3>
+            <div className="space-y-3 max-h-[calc(8*4.5rem)] overflow-y-auto scrollbar-hide">
+              {foods.map((food) => (
+                <div
+                  key={food.food_id}
+                  className={`p-3 rounded-lg border border-gray-600 ${
+                    selectedFood?.food_id === food.food_id ? "bg-[#4B5563]" : "hover:bg-[#4B5563]"
+                  } transition duration-200`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="foodSelection"
+                      checked={selectedFood?.food_id === food.food_id}
+                      onChange={() => handleSelectFood(food)}
+                      className="w-4 h-4 text-[#FF6B35]"
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{food.food_name}</p>
+                      <p className="text-xs text-gray-300">{food.food_description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 text-right">
+              <button
+                onClick={handleAddFood}
+                disabled={!selectedFood}
+                className={`py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10 ${
+                  !selectedFood ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                Agregar Alimento
+              </button>
+            </div>
           </div>
-          <div className="mt-6 text-right">
-            <button
-              onClick={handleAddFood}
-              disabled={!selectedFood}
-              className={`py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg ${
-                selectedFood ? "hover:text-[#1C1C1E]" : "opacity-50 cursor-not-allowed"
-              } transition duration-300`}
-            >
-              Agregar Alimento
-            </button>
-          </div>
-        </div>
-      )}
-      {!loading && hasSearched && foods.length === 0 && !error && (
-        <p className="text-gray-300 text-center text-xs">No se encontraron resultados</p>
-      )}
+        )}
+        {!loading && hasSearched && foods.length === 0 && !error && (
+          <p className="text-gray-300 text-center text-xs mt-2">No se encontraron resultados</p>
+        )}
+      </div>
     </div>
   );
 };
