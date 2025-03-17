@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Dumbbell, Home, User, Calendar, Droplets, Activity, Settings, LogOut, Search, Utensils } from "lucide-react";
+import { Dumbbell, Home, Calendar, Droplets, Activity, Settings, LogOut, Utensils } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { supabase } from "../lib/supabaseClient";
 import DashboardNavItem from "./DashboardNavItem";

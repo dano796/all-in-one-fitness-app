@@ -30,3 +30,20 @@ body {
 .custom-swal-text {
   color: #ffffff !important; 
 }
+@keyframes accordion {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(1.2); }
+}
+
+.animate-accordion {
+  display: inline-block;
+  animation: accordion 1.5s infinite ease-in-out;
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}

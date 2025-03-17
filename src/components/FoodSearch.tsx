@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import { supabase } from "../lib/supabaseClient";
-import Swal from "sweetalert2"; // Importa SweetAlert2
+import Swal from "sweetalert2";
 
 interface Food {
   food_id: string;
@@ -15,7 +15,7 @@ const FoodSearch: React.FC = () => {
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasSearched, setHasSearched] = useState<boolean>(false); // Nueva variable para rastrear si se ha realizado una búsqueda
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -42,7 +42,7 @@ const FoodSearch: React.FC = () => {
 
     setLoading(true);
     setError(null);
-    setHasSearched(true); // Marca que se ha realizado una búsqueda
+    setHasSearched(true);
 
     try {
       const response = await axios.get("http://localhost:5000/api/foods/search", {
@@ -126,7 +126,7 @@ const FoodSearch: React.FC = () => {
       setFoods([]);
       setQuery("");
       setError(null);
-      setHasSearched(false); // Reinicia el estado de búsqueda
+      setHasSearched(false);
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
       const errorMessage = axiosError.response?.data?.error || "Error al agregar el alimento";
@@ -147,86 +147,83 @@ const FoodSearch: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-5xl font-bold mb-8 pb-5 text-center text-white">Food Search</h1>
+    <div className="space-y-6">
+      <div className="bg-[#3B4252] rounded-lg p-6 shadow-md">
+        <h2 className="text-sm font-semibold mb-4">Search for Foods</h2>
+        <div className="flex items-center space-x-4">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Ingresa un alimento (ejemplo: manzana)"
+            disabled={loading}
+            className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#1C2526] text-white placeholder-gray-400 focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+          />
+          <button
+            onClick={handleSearch}
+            disabled={loading}
+            className={`py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg ${
+              loading ? "opacity-50 cursor-not-allowed" : "hover:text-[#1C1C1E]"
+            } transition duration-300`}
+          >
+            {loading ? "Buscando..." : "Buscar"}
+          </button>
+        </div>
+        {error && <p className="text-red-400 mt-4 text-xs">{error}</p>}
+      </div>
 
-        <div className="bg-[#3B4252] rounded-xl p-8 shadow-md mb-12">
-          <h2 className="text-2xl font-semibold mb-6 text-white">Search for Foods</h2>
-          <div className="flex items-center space-x-4">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ingresa un alimento (ejemplo: manzana)"
-              disabled={loading}
-              className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#1C2526] text-white placeholder-gray-400 focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
-            />
+      {foods.length > 0 && (
+        <div className="bg-[#3B4252] rounded-lg p-6 shadow-md">
+          <h2 className="text-sm font-semibold mb-4">Resultados</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#4B5563]">
+                  <th className="p-3 text-sm font-semibold">Seleccionar</th>
+                  <th className="p-3 text-sm font-semibold">Nombre del Alimento</th>
+                  <th className="p-3 text-sm font-semibold">Descripción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {foods.map((food) => (
+                  <tr
+                    key={food.food_id}
+                    className={`border-b border-gray-600 ${
+                      selectedFood?.food_id === food.food_id ? "bg-[#4B5563]" : "hover:bg-[#4B5563]"
+                    }`}
+                  >
+                    <td className="p-3">
+                      <input
+                        type="radio"
+                        name="foodSelection"
+                        checked={selectedFood?.food_id === food.food_id}
+                        onChange={() => handleSelectFood(food)}
+                        className="w-4 h-4 text-[#FF6B35]"
+                      />
+                    </td>
+                    <td className="p-3 text-sm font-medium">{food.food_name}</td>
+                    <td className="p-3 text-xs text-gray-300">{food.food_description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-6 text-right">
             <button
-              onClick={handleSearch}
-              disabled={loading}
+              onClick={handleAddFood}
+              disabled={!selectedFood}
               className={`py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg ${
-                loading ? "opacity-50 cursor-not-allowed" : "hover:text-[#1C1C1E]"
+                selectedFood ? "hover:text-[#1C1C1E]" : "opacity-50 cursor-not-allowed"
               } transition duration-300`}
             >
-              {loading ? "Buscando..." : "Buscar"}
+              Agregar Alimento
             </button>
           </div>
-          {error && <p className="text-red-400 mt-4">{error}</p>}
         </div>
-
-        {foods.length > 0 && (
-          <div className="bg-[#3B4252] rounded-xl p-8 shadow-md">
-            <h2 className="text-2xl font-semibold mb-6 text-white">Resultados</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-[#4B5563]">
-                    <th className="p-3 font-semibold">Seleccionar</th>
-                    <th className="p-3 font-semibold">Nombre del Alimento</th>
-                    <th className="p-3 font-semibold">Descripción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {foods.map((food) => (
-                    <tr
-                      key={food.food_id}
-                      className={`border-b border-gray-600 ${
-                        selectedFood?.food_id === food.food_id ? "bg-[#4B5563]" : "hover:bg-[#4B5563]"
-                      }`}
-                    >
-                      <td className="p-3">
-                        <input
-                          type="radio"
-                          name="foodSelection"
-                          checked={selectedFood?.food_id === food.food_id}
-                          onChange={() => handleSelectFood(food)}
-                          className="w-4 h-4 text-[#FF6B35]"
-                        />
-                      </td>
-                      <td className="p-3 font-medium">{food.food_name}</td>
-                      <td className="p-3 text-gray-300">{food.food_description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-6 text-right">
-              <button
-                onClick={handleAddFood}
-                disabled={!selectedFood}
-                className={`py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg ${
-                  selectedFood ? "hover:text-[#1C1C1E]" : "opacity-50 cursor-not-allowed"
-                } transition duration-300`}
-              >
-                Agregar Alimento
-              </button>
-            </div>
-          </div>
-        )}
-        {/* Muestra "No se encontraron resultados" solo si se ha buscado y no hay resultados */}
-        {!loading && hasSearched && foods.length === 0 && !error && <p className="text-gray-300 text-center">No se encontraron resultados</p>}
-      </div>
+      )}
+      {!loading && hasSearched && foods.length === 0 && !error && (
+        <p className="text-gray-300 text-center text-xs">No se encontraron resultados</p>
+      )}
     </div>
   );
 };
