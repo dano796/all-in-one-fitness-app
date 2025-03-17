@@ -2,13 +2,20 @@ import React, { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa"; // Agregamos FaArrowRight
 import { Link } from "react-router-dom";
 
 interface Food {
   food_id: string;
   food_name: string;
   food_description: string;
+}
+
+interface RegisteredFood {
+  id_comida: string;
+  nombre_comida: string;
+  descripcion: string;
+  fecha: string;
 }
 
 const FoodSearch: React.FC = () => {
@@ -18,16 +25,57 @@ const FoodSearch: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [date, setDate] = useState<string>(""); // Estado para la fecha
+  const [registeredFoods, setRegisteredFoods] = useState<RegisteredFood[]>([]); // Estado para las comidas registradas
+  const [userEmail, setUserEmail] = useState<string>(""); // Estado para el email del usuario autenticado
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
         setError("Debes iniciar sesión para buscar alimentos.");
+      } else {
+        setUserEmail(user.email || ""); // Guardar el email del usuario autenticado
+        setDate(new Date().toISOString().split("T")[0]); // Establecer la fecha actual por defecto
       }
     };
     checkAuth();
   }, []);
+
+  // Función para consultar las comidas registradas
+  const fetchRegisteredFoods = async () => {
+    if (!userEmail || !date) return;
+
+    try {
+      const response = await axios.get("http://localhost:5000/api/foods/user", {
+        params: { email: userEmail, date },
+      });
+      setRegisteredFoods(response.data.foods);
+    } catch (err) {
+      const axiosError = err as AxiosError<{ error?: string }>;
+      setError(axiosError.response?.data?.error || "Error al consultar las comidas registradas");
+    }
+  };
+
+  // Cargar las comidas registradas al cambiar la fecha o al montar el componente
+  useEffect(() => {
+    if (userEmail && date) {
+      fetchRegisteredFoods();
+    }
+  }, [userEmail, date]);
+
+  // Funciones para avanzar o retroceder un día
+  const handlePreviousDay = () => {
+    const currentDate = new Date(date);
+    currentDate.setDate(currentDate.getDate() - 1);
+    setDate(currentDate.toISOString().split("T")[0]);
+  };
+
+  const handleNextDay = () => {
+    const currentDate = new Date(date);
+    currentDate.setDate(currentDate.getDate() + 1);
+    setDate(currentDate.toISOString().split("T")[0]);
+  };
 
   const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -129,6 +177,9 @@ const FoodSearch: React.FC = () => {
       setQuery("");
       setError(null);
       setHasSearched(false);
+
+      // Actualizar las comidas registradas después de agregar una nueva
+      fetchRegisteredFoods();
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
       const errorMessage = axiosError.response?.data?.error || "Error al agregar el alimento";
@@ -149,18 +200,17 @@ const FoodSearch: React.FC = () => {
   };
 
   return (
-    <div className="mt-0 ">
+    <div className="mt-0">
       <div className="ml-0 mr-2 mt-0">
         <Link to="/home" className="inline-block">
-          <button
-            className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10"
-          >
+          <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10">
             <FaArrowLeft className="mr-1 text-base" />
             Volver
           </button>
         </Link>
       </div>
 
+      {/* Sección de búsqueda */}
       <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-9">
         <h2 className="text-sm font-semibold mb-2">Search for Foods</h2>
         <div className="flex items-center space-x-4">
@@ -226,6 +276,49 @@ const FoodSearch: React.FC = () => {
         )}
         {!loading && hasSearched && foods.length === 0 && !error && (
           <p className="text-gray-300 text-center text-xs mt-2">No se encontraron resultados</p>
+        )}
+      </div>
+
+      {/* Sección de comidas registradas */}
+      <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-6">
+        <h2 className="text-sm font-semibold mb-2">Comidas Registradas</h2>
+        <div className="flex items-center space-x-4 mb-4">
+          <button
+            onClick={handlePreviousDay}
+            className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10"
+          >
+            <FaArrowLeft className="text-base" />
+          </button>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="px-4 py-2 border border-gray-500 rounded-lg bg-[#1C2526] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+          />
+          <button
+            onClick={handleNextDay}
+            className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10"
+          >
+            <FaArrowRight className="text-base" />
+          </button>
+        </div>
+        {registeredFoods.length > 0 ? (
+          <div className="space-y-3 max-h-[calc(8*4.5rem)] overflow-y-auto scrollbar-hide">
+            {registeredFoods.map((food) => (
+              <div
+                key={food.id_comida}
+                className="p-3 rounded-lg border border-gray-600 hover:bg-[#4B5563] transition duration-200"
+              >
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{food.nombre_comida}</p>
+                  <p className="text-xs text-gray-300">{food.descripcion}</p>
+                  <p className="text-xs text-gray-400">{new Date(food.fecha).toLocaleString()}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-300 text-center text-xs">No hay comidas registradas para este día.</p>
         )}
       </div>
     </div>
