@@ -1,24 +1,41 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { supabase } from "../lib/supabaseClient";
+
+interface Food {
+  food_id: string;
+  food_name: string;
+  food_description: string;
+}
 
 const FoodSearch: React.FC = () => {
-  const [query, setQuery] = useState<string>('');
-  interface Food {
-    food_id: string;
-    food_name: string;
-    food_description: string;
-  }
-
+  const [query, setQuery] = useState<string>("");
   const [foods, setFoods] = useState<Food[]>([]);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Verificar autenticación al cargar el componente
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        setError("Debes iniciar sesión para buscar alimentos.");
+      }
+    };
+    checkAuth();
+  }, []);
+
   const handleSearch = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    console.log('Query:', query); // Depuración para verificar el valor ingresado
     if (!query.trim()) {
-      setError('Please enter a search term');
+      setError("Please enter a search term");
+      return;
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      setError("Debes iniciar sesión para buscar alimentos.");
       return;
     }
 
@@ -26,14 +43,14 @@ const FoodSearch: React.FC = () => {
     setError(null);
 
     try {
-      const response = await axios.get('http://localhost:5000/api/foods/search', {
+      const response = await axios.get("http://localhost:5000/api/foods/search", {
         params: { query, max_results: 10 },
       });
       const foodResults = response.data.foods?.food || [];
       setFoods(Array.isArray(foodResults) ? foodResults : []);
       setSelectedFood(null);
     } catch (err) {
-      setError('Error searching for foods');
+      setError("Error searching for foods");
       console.error(err);
     } finally {
       setLoading(false);
@@ -44,9 +61,29 @@ const FoodSearch: React.FC = () => {
     setSelectedFood(food);
   };
 
-  const handleAddFood = () => {
+  const handleAddFood = async () => {
     if (selectedFood) {
-      console.log('Food to add:', selectedFood);
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        setError("Debes iniciar sesión para agregar alimentos.");
+        return;
+      }
+
+      try {
+        const response = await axios.post("http://localhost:5000/api/foods/log", {
+          user_id: user.id,
+          food_id: selectedFood.food_id,
+          nombre_comida: selectedFood.food_name,
+          descripcion: selectedFood.food_description,
+        });
+        console.log("Respuesta del backend:", response.data);
+        setSelectedFood(null);
+        setError(null);
+        alert("Comida registrada con éxito");
+      } catch (err) {
+        setError("Error al registrar la comida");
+        console.error(err);
+      }
     }
   };
 
@@ -70,16 +107,15 @@ const FoodSearch: React.FC = () => {
               onClick={handleSearch}
               disabled={loading}
               className={`py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg ${
-                loading ? 'opacity-50 cursor-not-allowed' : 'hover:text-[#1C1C1E]'
+                loading ? "opacity-50 cursor-not-allowed" : "hover:text-[#1C1C1E]"
               } transition duration-300`}
             >
-              {loading ? 'Searching...' : 'Search'}
+              {loading ? "Searching..." : "Search"}
             </button>
           </div>
           {error && <p className="text-red-400 mt-4">{error}</p>}
         </div>
 
-        {/* Results Table */}
         {foods.length > 0 && (
           <div className="bg-[#3B4252] rounded-xl p-8 shadow-md">
             <h2 className="text-2xl font-semibold mb-6 text-white">Results</h2>
@@ -97,7 +133,7 @@ const FoodSearch: React.FC = () => {
                     <tr
                       key={food.food_id}
                       className={`border-b border-gray-600 ${
-                        selectedFood?.food_id === food.food_id ? 'bg-[#4B5563]' : 'hover:bg-[#4B5563]'
+                        selectedFood?.food_id === food.food_id ? "bg-[#4B5563]" : "hover:bg-[#4B5563]"
                       }`}
                     >
                       <td className="p-3">
@@ -121,7 +157,7 @@ const FoodSearch: React.FC = () => {
                 onClick={handleAddFood}
                 disabled={!selectedFood}
                 className={`py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg ${
-                  selectedFood ? 'hover:text-[#1C1C1E]' : 'opacity-50 cursor-not-allowed'
+                  selectedFood ? "hover:text-[#1C1C1E]" : "opacity-50 cursor-not-allowed"
                 } transition duration-300`}
               >
                 Add Food
@@ -129,9 +165,7 @@ const FoodSearch: React.FC = () => {
             </div>
           </div>
         )}
-        {!loading && foods.length === 0 && !error && (
-          <p className="text-gray-300 text-center">No results found</p>
-        )}
+        {!loading && foods.length === 0 && !error && <p className="text-gray-300 text-center">No results found</p>}
       </div>
     </div>
   );
