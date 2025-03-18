@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import axios, { AxiosError } from "axios";
-import { supabase } from "../lib/supabaseClient";
-import Swal from "sweetalert2";
-import { FaPlus, FaArrowLeft, FaArrowRight, FaTrash } from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
+import axios, { AxiosError } from 'axios';
+import { supabase } from '../lib/supabaseClient';
+import Swal from 'sweetalert2';
+import { FaArrowLeft, FaTrash } from 'react-icons/fa';
+import { Link, useSearchParams } from 'react-router-dom';
 
 // Interfaces actualizadas
 interface RegisteredFood {
@@ -27,22 +28,28 @@ interface FoodsResponse {
 }
 
 const RegisteredFoods: React.FC = () => {
-  const TIMEZONE = "America/Bogota";
+  const TIMEZONE = 'America/Bogota';
   const [date, setDate] = useState<string>(
-    new Date().toLocaleDateString("en-CA", { timeZone: TIMEZONE })
+    new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE })
   );
   const [foodsData, setFoodsData] = useState<FoodsResponse>({
     foods: { Desayuno: [], Almuerzo: [], Merienda: [], Cena: [] },
     currentFoodType: null,
     isToday: false,
   });
-  const [userEmail, setUserEmail] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>('');
   const [selectedFood, setSelectedFood] = useState<{
     id_comida: string;
     index: number;
     type: keyof OrganizedFoods;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const typeParam = searchParams.get('type')
+    ? (searchParams.get('type')!.charAt(0).toUpperCase() +
+       searchParams.get('type')!.slice(1).toLowerCase()) as keyof OrganizedFoods
+    : null;
+  const dateParam = searchParams.get('date') || date; // Use date from query param or current date
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -51,21 +58,21 @@ const RegisteredFoods: React.FC = () => {
         error,
       } = await supabase.auth.getUser();
       if (error || !user) {
-        setError("Debes iniciar sesión para ver las comidas registradas.");
+        setError('Debes iniciar sesión para ver las comidas registradas.');
       } else {
-        setUserEmail(user.email || "");
+        setUserEmail(user.email || '');
       }
     };
     checkAuth();
   }, []);
 
   const fetchFoods = async () => {
-    if (!userEmail || !date) return;
+    if (!userEmail || !dateParam) return;
     try {
       const response = await axios.get<FoodsResponse>(
-        "http://localhost:5000/api/foods/user",
+        'http://localhost:5000/api/foods/user',
         {
-          params: { email: userEmail, date },
+          params: { email: userEmail, date: dateParam },
         }
       );
       setFoodsData(response.data);
@@ -73,105 +80,78 @@ const RegisteredFoods: React.FC = () => {
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
       setError(
-        axiosError.response?.data?.error || "Error al consultar las comidas registradas"
+        axiosError.response?.data?.error || 'Error al consultar las comidas registradas'
       );
     }
   };
 
   useEffect(() => {
-    if (userEmail && date) fetchFoods();
-  }, [userEmail, date]);
-
-  const handlePreviousDay = () => {
-    const currentDate = new Date(date + "T00:00:00");
-    currentDate.setDate(currentDate.getDate() - 1);
-    setDate(currentDate.toLocaleDateString("en-CA", { timeZone: TIMEZONE }));
-    setSelectedFood(null);
-    setError(null);
-  };
-
-  const handleNextDay = () => {
-    const currentDate = new Date(date + "T00:00:00");
-    currentDate.setDate(currentDate.getDate() + 1);
-    setDate(currentDate.toLocaleDateString("en-CA", { timeZone: TIMEZONE }));
-    setSelectedFood(null);
-    setError(null);
-  };
+    setDate(dateParam); // Update local date state with query param or current date
+    if (userEmail && dateParam) fetchFoods();
+  }, [userEmail, dateParam]);
 
   const handleDeleteFood = async () => {
     if (!selectedFood) {
-      setError("Por favor selecciona una comida para eliminar.");
+      setError('Por favor selecciona una comida para eliminar.');
       return;
     }
     try {
-      const response = await axios.delete("http://localhost:5000/api/foods/delete", {
+      const response = await axios.delete('http://localhost:5000/api/foods/delete', {
         data: { email: userEmail, food_id: selectedFood.id_comida },
       });
       await Swal.fire({
-        title: "¡Éxito!",
+        title: '¡Éxito!',
         text: response.data.message,
-        icon: "success",
-        confirmButtonText: "Aceptar",
-        confirmButtonColor: "#ff9404",
+        icon: 'success',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#ff9404',
         customClass: {
-          popup: "custom-swal-background",
-          icon: "custom-swal-icon",
-          title: "custom-swal-title",
-          htmlContainer: "custom-swal-text",
+          popup: 'custom-swal-background',
+          icon: 'custom-swal-icon',
+          title: 'custom-swal-title',
+          htmlContainer: 'custom-swal-text',
         },
       });
       setSelectedFood(null);
       fetchFoods();
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
-      const errorMessage = axiosError.response?.data?.error || "Error al eliminar la comida";
+      const errorMessage = axiosError.response?.data?.error || 'Error al eliminar la comida';
       setError(errorMessage);
       await Swal.fire({
-        title: "¡Error!",
+        title: '¡Error!',
         text: errorMessage,
-        icon: "error",
-        confirmButtonText: "Aceptar",
-        confirmButtonColor: "#ff9400",
+        icon: 'error',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#ff9400',
         customClass: {
-          popup: "custom-swal-background",
-          title: "custom-swal-title",
-          htmlContainer: "custom-swal-text",
+          popup: 'custom-swal-background',
+          title: 'custom-swal-title',
+          htmlContainer: 'custom-swal-text',
         },
       });
     }
   };
 
-  const handleAddFood = (type: keyof OrganizedFoods) => {
-    window.location.href = `/foodsearch?type=${type}`;
-  };
-
   const renderFoodSection = (type: keyof OrganizedFoods, label: string) => {
-    const foods = foodsData.foods[type];
+    if (!typeParam || typeParam !== type) return null;
+
+    const foods = foodsData.foods[type] || [];
     return (
-      <div className="bg-[#2E3440] rounded-lg p-4 shadow-md">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-sm font-medium">{label}</h3>
-          {foodsData.currentFoodType === type && (
-            <button
-              onClick={() => handleAddFood(type)}
-              className="flex items-center py-1 px-2 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10"
-            >
-              <FaPlus className="text-base" />
-            </button>
-          )}
-        </div>
+      <div className="bg-[#2E3440] rounded-xl p-6 shadow-lg max-w-2xl mx-auto w-full">
+        <h3 className="text-lg font-semibold mb-4 text-center text-white">{label}</h3>
         {foods.length > 0 ? (
-          <div className="space-y-2 max-h-[calc(5*4rem)] overflow-y-auto no-scrollbar">
+          <div className="space-y-4 max-h-[calc(5*5rem)] overflow-y-auto no-scrollbar">
             {foods.map((food, index) => (
               <div
                 key={`${food.id_comida}-${index}`}
-                className={`p-2 rounded-lg border border-gray-600 ${
+                className={`p-4 rounded-xl border border-gray-600 ${
                   selectedFood?.index === index && selectedFood.type === type
-                    ? "bg-[#4B5563]"
-                    : "hover:bg-[#4B5563]"
+                    ? 'bg-[#4B5563]'
+                    : 'hover:bg-[#4B5563]'
                 } transition duration-200`}
               >
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-4">
                   {food.isEditable && (
                     <input
                       type="radio"
@@ -180,101 +160,90 @@ const RegisteredFoods: React.FC = () => {
                       onChange={() =>
                         setSelectedFood({ id_comida: food.id_comida, index, type })
                       }
-                      className="w-4 h-4 text-[#FF6B35]"
+                      className="w-5 h-5 text-[#FF6B35]"
                     />
                   )}
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{food.nombre_comida}</p>
-                    <p className="text-xs text-gray-300">{food.descripcion}</p>
+                    <p className="text-md font-medium text-white">{food.nombre_comida}</p>
+                    <p className="text-sm text-gray-300">{food.descripcion}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-400 text-xs">No hay {label.toLowerCase()} registrados.</p>
+          <p className="text-gray-400 text-center text-sm">No hay {label.toLowerCase()} registrados.</p>
         )}
       </div>
     );
   };
 
   return (
-    <div className="registered-foods-container" style={{ height: "calc(100vh - 4rem)", overflow: "hidden" }}>
+    <div className="registered-foods-container h-[70vh] bg-[#282c3c] p-6 flex flex-col items-center justify-start overflow-hidden">
       <style>
         {`
-          /* Ocultar scrollbar globalmente */
           html, body {
-            -ms-overflow-style: none; /* IE y Edge */
-            scrollbar-width: none; /* Firefox */
-            overflow-y: hidden; /* Evita scroll en el body */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            overflow-y: hidden;
           }
           html::-webkit-scrollbar, body::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera */
+            display: none;
           }
-
-          /* Clase para ocultar scrollbar en contenedores específicos */
           .no-scrollbar::-webkit-scrollbar {
             display: none;
           }
           .no-scrollbar {
-            -ms-overflow-style: none; /* IE y Edge */
-            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
           }
-
-          /* Asegurar que el contenedor principal no genere scroll */
           .registered-foods-container {
             overflow: hidden;
           }
         `}
       </style>
-      <div className="flex justify-between items-center mb-4 p-4">
-        <h2 className="text-sm font-semibold">
-          Comidas Registradas -{" "}
-          {new Date(date + "T00:00:00").toLocaleDateString("es-ES", {
+
+      {/* Botón Volver */}
+      <div className="mb-6 w-full max-w-2xl">
+        <Link to="/dashboard" className="inline-block">
+          <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10">
+            <FaArrowLeft className="mr-1 text-base" />
+            Volver
+          </button>
+        </Link>
+      </div>
+
+      <div className="mb-6 w-full max-w-2xl">
+        <h2 className="text-md font-semibold text-white text-center">
+          Comidas Registradas -{' '}
+          {new Date(date + 'T00:00:00').toLocaleDateString('es-ES', {
             timeZone: TIMEZONE,
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
           })}
         </h2>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={handlePreviousDay}
-            className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10"
-          >
-            <FaArrowLeft className="text-base" />
-          </button>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="px-4 py-2 border border-gray-500 rounded-lg bg-[#1C2526] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
-          />
-          <button
-            onClick={handleNextDay}
-            className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10"
-          >
-            <FaArrowRight className="text-base" />
-          </button>
+      </div>
+
+      {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
+
+      {/* Renderizar solo la sección seleccionada */}
+      {typeParam && (
+        <div className="w-full max-w-2xl">
+          {renderFoodSection(typeParam, typeParam)}
         </div>
-      </div>
-
-      {error && <p className="text-red-400 text-xs mb-2 p-4">{error}</p>}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-        {renderFoodSection("Desayuno", "Desayuno")}
-        {renderFoodSection("Almuerzo", "Almuerzo")}
-        {renderFoodSection("Merienda", "Merienda")}
-        {renderFoodSection("Cena", "Cena")}
-      </div>
+      )}
+      {!typeParam && (
+        <p className="text-gray-400 text-sm text-center">Por favor selecciona un tipo de comida desde el dashboard.</p>
+      )}
 
       {selectedFood && (
-        <div className="mt-4 text-right p-4">
+        <div className="mt-6 text-right w-full max-w-2xl">
           <button
             onClick={handleDeleteFood}
             disabled={!foodsData.isToday}
             className={`ml-auto flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10 ${
-              !foodsData.isToday ? "opacity-50 cursor-not-allowed" : ""
+              !foodsData.isToday ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
             <FaTrash className="mr-1 text-base" />

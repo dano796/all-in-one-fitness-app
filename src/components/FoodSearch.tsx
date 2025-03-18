@@ -154,7 +154,7 @@ const FoodSearch: React.FC = () => {
   return (
     <div className="mt-0">
       <div className="ml-0 mr-2 mt-0">
-        <Link to="/comidas" className="inline-block">
+        <Link to="/dashboard" className="inline-block">
           <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10">
             <FaArrowLeft className="mr-1 text-base" />
             Volver

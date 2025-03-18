@@ -24,7 +24,7 @@ const leftCarouselVariants = {
   animate: {
     y: ["0%", "-50%"],
     transition: {
-      duration: 10,
+      duration: 50,
       ease: "linear",
       repeat: Infinity,
       repeatType: "reverse" as const,
@@ -37,7 +37,7 @@ const rightCarouselVariants = {
   animate: {
     y: ["-50%", "0%"],
     transition: {
-      duration: 10,
+      duration: 50,
       ease: "linear",
       repeat: Infinity,
       repeatType: "reverse" as const,
