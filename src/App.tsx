@@ -15,6 +15,7 @@ import FoodSearch from "./components/FoodSearch";
 import FoodSearchLayout from "./layouts/FoodSearchLayout";
 import WaterLayout from "./layouts/WaterLayout"; // Importamos el WaterLayout
 import WaterTracker from "./components/WaterTracker"; // Importamos el WaterTracker
+import ComidasRegistro from "./pages/RegisteredFoods"; // Importamos el WaterTracker
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<unknown>(null);
@@ -87,6 +88,16 @@ function App() {
               <WaterLayout>
                 <WaterTracker />
               </WaterLayout>
+            </ProtectedRoute>
+          }
+        />
+                <Route
+          path="/comidas"
+          element={
+            <ProtectedRoute>
+              <FoodSearchLayout>
+                <ComidasRegistro />
+              </FoodSearchLayout>
             </ProtectedRoute>
           }
         />

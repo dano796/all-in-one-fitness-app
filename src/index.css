@@ -55,3 +55,16 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari y Opera */
 }
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: auto; /* Permite desplazamiento solo si es necesario */
+  margin: 0;
+  padding: 0;
+  -ms-overflow-style: none; /* IE y Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}

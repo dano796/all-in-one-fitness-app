@@ -30,7 +30,7 @@ const Sidebar: React.FC = () => {
       {/* Navegación principal */}
       <nav className="flex-1 space-y-6 mt-32  ">
         <DashboardNavItem to="/dashboard" icon={<Home className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />
-        <DashboardNavItem to="/FoodSearch"icon={<Utensils className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />
+        <DashboardNavItem to="/comidas"icon={<Utensils className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />
         <DashboardNavItem to="/workouts" icon={<Calendar className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />
         <DashboardNavItem to="/water" icon={<Droplets className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />
         <DashboardNavItem to="/activity" icon={<Activity className="h-6 w-6 hover:text-[#ff9404] transition-all duration-300" />} />
