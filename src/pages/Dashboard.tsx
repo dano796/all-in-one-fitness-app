@@ -11,9 +11,10 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import { Doughnut } from 'react-chartjs-2';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Progress } from '@/components/ui/progress';
 
 ChartJS.register(
   CategoryScale,
@@ -27,7 +28,7 @@ ChartJS.register(
   ArcElement
 );
 
-// Función para obtener el número de semana
+// Function to get the week number
 const getWeekNumber = (dateStr: string) => {
   const date = new Date(dateStr + 'T00:00:00');
   const oneJan = new Date(date.getFullYear(), 0, 1);
@@ -43,49 +44,36 @@ const Dashboard: React.FC = () => {
   const [date, setDate] = React.useState<string>(todayStr);
   const dateInputRef = useRef<HTMLInputElement>(null);
 
-  const macroData = {
+  // Data for the calories circle
+  const totalCaloriesGoal = 2381;
+  const consumedCalories = 624;
+  const burnedCalories = 0;
+  const remainingCalories = totalCaloriesGoal - consumedCalories;
+  const caloriesData = {
     datasets: [
       {
-        data: [85, 92, 96],
-        backgroundColor: ['#3B82F6', '#8B5CF6', '#F59E0B'],
-        borderWidth: 0,
-        circumference: 270,
-        rotation: 225,
+        data: [consumedCalories, remainingCalories],
+        backgroundColor: ['#ff9404', '#4B5563'],
+        borderWidth: 5,
+        borderColor: '#3B4252',
+        circumference: 240,
+        rotation: 240,
       },
     ],
   };
 
-  const weeklyData = {
-    labels: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
-    datasets: [
-      {
-        data: [2100, 1950, 1800, 2000, 1750, 1900, 2000],
-        backgroundColor: '#ff9404',
-        borderRadius: 4,
-        barThickness: 20,
-      },
-    ],
-  };
-
-  const weightData = {
-    labels: Array.from({ length: 30 }, (_, i) => `Día ${i + 1}`),
-    datasets: [
-      {
-        data: Array.from({ length: 30 }, () => 75 + Math.random() * 2),
-        borderColor: '#ff9404',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4,
-        fill: true,
-        pointRadius: 2,
-      },
-    ],
-  };
+  // Data for the progress bars
+  const progressData = [
+    { name: 'Carbs', value: 51, max: 232 },
+    { name: 'Protein', value: 34, max: 174 },
+    { name: 'Fat', value: 28, max: 77 },
+  ];
 
   const meals = [
     { id: 1, type: 'Desayuno', calories: 714, icon: '🍞' },
     { id: 2, type: 'Almuerzo', calories: 850, icon: '🍽️' },
-    { id: 4, type: 'Merienda', calories: 123, icon: '🍎' },
     { id: 3, type: 'Cena', calories: 595, icon: '🍳' },
+    { id: 4, type: 'Merienda', calories: 123, icon: '🍎' },
   ];
 
   const handleMealClick = (type: string) => {
@@ -101,7 +89,7 @@ const Dashboard: React.FC = () => {
     setDate(selectedDate);
   };
 
-  const openDatePicker = () => {
+  const handleDatePicker = () => {
     if (dateInputRef.current) {
       dateInputRef.current.showPicker();
     }
@@ -113,8 +101,8 @@ const Dashboard: React.FC = () => {
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
 
-    if (selectedDate.getTime() === today.getTime()) return 'Today';
-    if (selectedDate.getTime() === yesterday.getTime()) return 'Yesterday';
+    if (selectedDate.getTime() === today.getTime()) return 'Hoy';
+    if (selectedDate.getTime() === yesterday.getTime()) return 'Ayer';
     return selectedDate.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
@@ -123,13 +111,13 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-hidden">
+    <div className="p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-auto -mt-12">
       <style>
         {`
           html, body {
             -ms-overflow-style: none;
             scrollbar-width: none;
-            overflow-y: hidden;
+            overflow-y: auto;
           }
           html::-webkit-scrollbar, body::-webkit-scrollbar {
             display: none;
@@ -152,18 +140,18 @@ const Dashboard: React.FC = () => {
             height: 0;
           }
           .summary-section {
-            max-width: 700px; /* Ancho del resumen */
+            max-width: 700px;
             margin: 0 auto;
             background: #3B4252;
             border-radius: 8px;
             padding: 20px;
           }
           .nutrition-section {
-            max-width: 700px; /* Mismo ancho que el resumen */
+            max-width: 700px;
             margin: 0 auto;
           }
           .meal-item {
-            max-width: 100%; /* Ocupa todo el ancho del contenedor padre (nutrition-section) */
+            max-width: 100%;
             background: #3B4252;
             border-radius: 8px;
             padding: 10px;
@@ -176,6 +164,52 @@ const Dashboard: React.FC = () => {
           .add-food-button:hover {
             transform: scale(1.2);
           }
+          .progress-bar .bg-primary {
+            background-color: #ff9404 !important;
+            border-radius: 9999px;
+          }
+          .progress-bar {
+            background-color: #4B5563 !important;
+            border-radius: 9999px;
+          }
+          .circle-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .eaten-label {
+            position: absolute;
+            left: -120px;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          .burned-label {
+            position: absolute;
+            right: -120px;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          .remaining-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
           @media (max-width: 640px) {
             .date-button {
               font-size: 0.875rem;
@@ -183,13 +217,32 @@ const Dashboard: React.FC = () => {
               min-width: 100px;
             }
             .summary-section {
-              max-width: 90%;
+              max-width: 100%;
+              padding: 15px;
             }
             .nutrition-section {
-              max-width: 90%;
+              max-width: 100%;
             }
             .meal-item {
               max-width: 100%;
+            }
+            .circle-container {
+              width: 100%;
+              height: 100%;
+            }
+            .eaten-label {
+              left: -70px;
+              font-size: 0.875rem;
+            }
+            .burned-label {
+              right: -70px;
+              font-size: 0.875rem;
+            }
+            .remaining-label {
+              font-size: 1.25rem;
+            }
+            .progress-bar {
+              height: 6px;
             }
           }
           @media (min-width: 641px) {
@@ -203,10 +256,10 @@ const Dashboard: React.FC = () => {
 
       {/* Date Navigation at the Top */}
       <div className="mb-6 text-center">
-        <div className="mb-2 text-xs text-gray-400">Week {getWeek()}</div>
+        <div className="mb-2 text-xs text-gray-400">Semana {getWeek()}</div>
         <div>
           <button
-            onClick={openDatePicker}
+            onClick={handleDatePicker}
             className="px-6 py-2 bg-[#3B4252] text-white font-semibold rounded-lg date-button"
           >
             {getDateLabel()}
@@ -225,49 +278,49 @@ const Dashboard: React.FC = () => {
       {/* Summary Section */}
       <div className="summary-section">
         <h2 className="text-sm font-semibold mb-4">Resumen</h2>
-        <div className="h-48 relative mb-8">
-          <Doughnut
-            data={macroData}
-            options={{
-              cutout: '80%',
-              plugins: {
-                legend: { display: false },
-              },
-            }}
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-2xl font-bold">624</div>
-              <div className="text-xs text-gray-400">Consumidas</div>
-              <div className="text-2xl font-bold">1,757</div>
-              <div className="text-xs text-gray-400">Restantes</div>
-              <div className="text-2xl font-bold">0</div>
-              <div className="text-xs text-gray-400">Quemadas</div>
+        <div className="relative flex justify-center mb-8 -mt-7"> {/* Added -mt-2 to move the circle up */}
+          <div className="relative w-48 h-48 sm:w-56 sm:h-56">
+            <Doughnut
+              data={caloriesData}
+              options={{
+                cutout: '85%',
+                plugins: {
+                  legend: { display: false },
+                },
+                maintainAspectRatio: true,
+              }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center mt-4">
+              <div className="circle-container">
+                <div className="eaten-label">
+                  <div className="text-lg font-bold sm:text-xl">{consumedCalories}</div>
+                  <div className="text-xs text-gray-400">Consumido</div>
+                </div>
+                <div className="remaining-label">
+                  <div className="text-2xl font-bold sm:text-3xl">{remainingCalories}</div>
+                  <div className="text-xs text-gray-400">Restante</div>
+                </div>
+                <div className="burned-label">
+                  <div className="text-lg font-bold sm:text-xl">{burnedCalories}</div>
+                  <div className="text-xs text-gray-400">Quemado</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-xs">Carbohidratos</div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div className="bg-[#3B82F6] h-2 rounded-full" style={{ width: '50%' }}></div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {progressData.map((item) => (
+            <div key={item.name} className="text-center">
+              <div className="text-xs text-gray-400 mb-1">{item.name}</div>
+              <Progress
+                value={(item.value / item.max) * 100}
+                className="w-full h-2 progress-bar"
+              />
+              <div className="text-xs text-gray-400 mt-1">
+                {item.value}/{item.max} g
+              </div>
             </div>
-            <div className="text-xs">51/232g</div>
-          </div>
-          <div>
-            <div className="text-xs">Proteína</div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div className="bg-[#3B82F6] h-2 rounded-full" style={{ width: '20%' }}></div>
-            </div>
-            <div className="text-xs">34/174g</div>
-          </div>
-          <div>
-            <div className="text-xs">Grasas</div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div className="bg-[#3B82F6] h-2 rounded-full" style={{ width: '36%' }}></div>
-            </div>
-            <div className="text-xs">28/77g</div>
-          </div>
+          ))}
         </div>
       </div>
 
@@ -299,51 +352,6 @@ const Dashboard: React.FC = () => {
               </button>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Optional Weekly and Weight Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 hidden">
-        <div className="bg-[#3B4252] rounded-lg p-6 shadow-md">
-          <h2 className="text-sm font-semibold mb-4">Ingesta Calórica - Semana</h2>
-          <Bar
-            data={weeklyData}
-            options={{
-              responsive: true,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  grid: { color: '#282c3c' },
-                  ticks: { color: '#fff' },
-                },
-                x: {
-                  grid: { display: false },
-                  ticks: { color: '#fff' },
-                },
-              },
-            }}
-          />
-        </div>
-        <div className="bg-[#3B4252] rounded-lg p-6 shadow-md">
-          <h2 className="text-sm font-semibold mb-4">Peso - Mes</h2>
-          <Line
-            data={weightData}
-            options={{
-              responsive: true,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: {
-                  grid: { color: '#282c3c' },
-                  ticks: { color: '#fff' },
-                },
-                x: {
-                  grid: { display: false },
-                  ticks: { color: '#fff' },
-                },
-              },
-            }}
-          />
         </div>
       </div>
     </div>
