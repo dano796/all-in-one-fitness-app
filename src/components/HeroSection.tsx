@@ -24,7 +24,7 @@ const leftCarouselVariants = {
   animate: {
     y: ["0%", "-50%"],
     transition: {
-      duration: 50,
+      duration: 55,
       ease: "linear",
       repeat: Infinity,
       repeatType: "reverse" as const,
@@ -37,7 +37,7 @@ const rightCarouselVariants = {
   animate: {
     y: ["-50%", "0%"],
     transition: {
-      duration: 50,
+      duration: 55,
       ease: "linear",
       repeat: Infinity,
       repeatType: "reverse" as const,
@@ -52,14 +52,20 @@ const HeroSection: React.FC = () => {
   useEffect(() => {
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
-      setUser(data?.user ? { id: data.user.id, email: data.user.email || "" } : null);
+      setUser(
+        data?.user ? { id: data.user.id, email: data.user.email || "" } : null
+      );
     };
 
     fetchUser();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setUser(session?.user ? { id: session.user.id, email: session.user.email || "" } : null);
+        setUser(
+          session?.user
+            ? { id: session.user.id, email: session.user.email || "" }
+            : null
+        );
       }
     );
 

@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
 import ModulesPage from "./pages/ModulesPage";
@@ -9,21 +14,27 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import ResetPassword from "./pages/ResetPassword"; 
+import ResetPassword from "./pages/ResetPassword";
 import { supabase } from "./lib/supabaseClient";
 import FoodSearch from "./components/FoodSearch";
 import FoodSearchLayout from "./layouts/FoodSearchLayout";
-import WaterLayout from "./layouts/WaterLayout"; // Importamos el WaterLayout
-import WaterTracker from "./components/WaterTracker"; // Importamos el WaterTracker
-import ComidasRegistro from "./pages/RegisteredFoods"; // Importamos el WaterTracker
+import WaterLayout from "./layouts/WaterLayout";
+import WaterTracker from "./components/WaterTracker";
+import ComidasRegistro from "./pages/RegisteredFoods";
+import CalorieCalculator from "./components/CalorieCalculator";
+import CalorieCalculatorLayout from "./layouts/CalorieCalculatorLayout";
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUser(user);
       setLoading(false);
     };
@@ -35,8 +46,12 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
       <div className="fixed inset-0 flex items-center justify-center bg-[#282c3c]">
         <div className="text-6xl font-bold text-[#FF9500] flex space-x-4">
           <span className="inline-block animate-accordion">All</span>
-          <span className="inline-block animate-accordion animation-delay-200">In</span>
-          <span className="inline-block animate-accordion animation-delay-400">One</span>
+          <span className="inline-block animate-accordion animation-delay-200">
+            In
+          </span>
+          <span className="inline-block animate-accordion animation-delay-400">
+            One
+          </span>
         </div>
       </div>
     );
@@ -91,13 +106,23 @@ function App() {
             </ProtectedRoute>
           }
         />
-                <Route
+        <Route
           path="/comidas"
           element={
             <ProtectedRoute>
               <FoodSearchLayout>
                 <ComidasRegistro />
               </FoodSearchLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/calorie-calculator"
+          element={
+            <ProtectedRoute>
+              <CalorieCalculatorLayout>
+                <CalorieCalculator />
+              </CalorieCalculatorLayout>
             </ProtectedRoute>
           }
         />
