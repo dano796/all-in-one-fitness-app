@@ -1,11 +1,13 @@
 import React from "react";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/CalorieCalculator"; // Asegúrate de que la ruta sea correcta
 
-interface FoodSearchLayoutProps {
+interface CalorieCalculatorLayoutProps {
   children: React.ReactNode;
 }
 
-const FoodSearchLayout: React.FC<FoodSearchLayoutProps> = ({ children }) => {
+const CalorieCalculatorLayout: React.FC<CalorieCalculatorLayoutProps> = ({
+  children,
+}) => {
   return (
     <div className="flex h-screen bg-[#282c3c] text-white">
       <Sidebar />
@@ -16,4 +18,4 @@ const FoodSearchLayout: React.FC<FoodSearchLayoutProps> = ({ children }) => {
   );
 };
 
-export default FoodSearchLayout;
+export default CalorieCalculatorLayout;

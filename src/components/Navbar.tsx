@@ -35,17 +35,19 @@ const Navbar: React.FC = () => {
 
     fetchUser();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-        if (session.user.email) {
-          fetchUserData(session.user.email);
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user) {
+          setUser(session.user);
+          if (session.user.email) {
+            fetchUserData(session.user.email);
+          }
+        } else {
+          setUser(null);
+          setUserData(null);
         }
-      } else {
-        setUser(null);
-        setUserData(null);
       }
-    });
+    );
 
     return () => {
       listener.subscription.unsubscribe();
@@ -69,22 +71,34 @@ const Navbar: React.FC = () => {
           <div className="flex-1 flex justify-center">
             <ul className="flex space-x-6">
               <li>
-                <Link to="/" className="hover:text-[#FF9500] font-semibold transition">
+                <Link
+                  to="/"
+                  className="hover:text-[#FF9500] font-semibold transition"
+                >
                   Inicio
                 </Link>
               </li>
               <li>
-                <Link to="/nosotros" className="hover:text-[#FF9500] font-semibold transition">
+                <Link
+                  to="/nosotros"
+                  className="hover:text-[#FF9500] font-semibold transition"
+                >
                   Nosotros
                 </Link>
               </li>
               <li>
-                <Link to="/modulos" className="hover:text-[#FF9500] font-semibold transition">
+                <Link
+                  to="/modulos"
+                  className="hover:text-[#FF9500] font-semibold transition"
+                >
                   Módulos
                 </Link>
               </li>
               <li>
-                <Link to="/contacto" className="hover:text-[#FF9500] font-semibold transition">
+                <Link
+                  to="/contacto"
+                  className="hover:text-[#FF9500] font-semibold transition"
+                >
                   Contacto
                 </Link>
               </li>
@@ -93,11 +107,21 @@ const Navbar: React.FC = () => {
 
           {/* User-related options or login/register buttons */}
           <div className="flex items-center space-x-4">
-            {user && <Link to="/dashboard" className="hover:text-[#FF9500] transition text-white">Dashboard</Link>}
+            {user && (
+              <Link
+                to="/dashboard"
+                className="hover:text-[#FF9500] transition font-semibold text-white"
+              >
+                Dashboard
+              </Link>
+            )}
 
             {user ? (
               <div className="relative" ref={menuRef}>
-                <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center gap-2">
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="flex items-center gap-2"
+                >
                   <UserCircle className="w-8 h-8 text-gray-300" />
                 </button>
                 {menuOpen && (
@@ -105,7 +129,9 @@ const Navbar: React.FC = () => {
                     <div className="flex items-center gap-3 pb-3 border-b border-gray-500">
                       <UserCircle className="w-10 h-10 text-gray-400" />
                       <div>
-                        <p className="text-sm font-semibold text-white">{userData || "Usuario"}</p>
+                        <p className="text-sm font-semibold text-white">
+                          {userData || "Usuario"}
+                        </p>
                         <p className="text-xs text-gray-400">{user.email}</p>
                       </div>
                     </div>
@@ -118,7 +144,8 @@ const Navbar: React.FC = () => {
                       }}
                       className="flex items-center w-full mt-3 text-sm text-red-500 hover:bg-gray-800 p-2 rounded transition"
                     >
-                      <LogOut className="w-5 h-5 mr-2" />Cerrar sesión
+                      <LogOut className="w-5 h-5 mr-2" />
+                      Cerrar sesión
                     </button>
                   </div>
                 )}
@@ -143,20 +170,51 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Botón menú hamburguesa */}
-        <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        <button
+          className="md:hidden text-white"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <Menu className="w-6 h-6" />
+          )}
         </button>
       </nav>
 
       {/* Menú para móviles */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[secondary] border-t border-gray-700 p-4">
-          <Link to="/" className="block py-2 hover:text-[#FF9500] transition">Inicio</Link>
-          <Link to="/nosotros" className="block py-2 hover:text-[#FF9500] transition">Nosotros</Link>
-          <Link to="/modulos" className="block py-2 hover:text-[#FF9500] transition">Módulos</Link>
-          <Link to="/contacto" className="block py-2 hover:text-[#FF9500] transition">Contacto</Link>
+          <Link to="/" className="block py-2 hover:text-[#FF9500] transition">
+            Inicio
+          </Link>
+          <Link
+            to="/nosotros"
+            className="block py-2 hover:text-[#FF9500] transition"
+          >
+            Nosotros
+          </Link>
+          <Link
+            to="/modulos"
+            className="block py-2 hover:text-[#FF9500] transition"
+          >
+            Módulos
+          </Link>
+          <Link
+            to="/contacto"
+            className="block py-2 hover:text-[#FF9500] transition"
+          >
+            Contacto
+          </Link>
 
-          {user && <Link to="/dashboard" className="block py-2 text-gray-300 hover:text-[#FF9500] transition">Dashboard</Link>}
+          {user && (
+            <Link
+              to="/dashboard"
+              className="block py-2 text-gray-300 hover:text-[#FF9500] transition"
+            >
+              Dashboard
+            </Link>
+          )}
 
           {user ? (
             <>
@@ -169,13 +227,24 @@ const Navbar: React.FC = () => {
                 }}
                 className="w-full text-left py-2 hover:bg-gray-800 p-2 rounded transition"
               >
-                <LogOut className="w-5 h-5 inline-block mr-2" />Cerrar sesión
+                <LogOut className="w-5 h-5 inline-block mr-2" />
+                Cerrar sesión
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="block py-2 hover:text-[#FF9500] transition">Iniciar Sesión</Link>
-              <Link to="/registro" className="block py-2 hover:text-[#FF9500] transition">Registrarse</Link>
+              <Link
+                to="/login"
+                className="block py-2 hover:text-[#FF9500] transition"
+              >
+                Iniciar Sesión
+              </Link>
+              <Link
+                to="/registro"
+                className="block py-2 hover:text-[#FF9500] transition"
+              >
+                Registrarse
+              </Link>
             </>
           )}
         </div>

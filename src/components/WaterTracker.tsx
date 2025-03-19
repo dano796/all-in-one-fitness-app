@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSpring, animated } from "react-spring";
-import EmptyBottle from "../asets/empty-bottle.png"; // Ajusta la ruta según tu estructura
-import FilledBottle from "../asets/filled-bottle.png"; // Ajusta la ruta según tu estructura
+import EmptyBottle from "../assets/empty-bottle.png"; // Ajusta la ruta según tu estructura
+import FilledBottle from "../assets/filled-bottle.png"; // Ajusta la ruta según tu estructura
 
 const WaterTracker: React.FC = () => {
   const totalBottles = 8; // Total de 8 botellas
@@ -77,7 +77,9 @@ const WaterTracker: React.FC = () => {
             onClick={handleRemoveBottle}
             disabled={filledBottles === 0}
             className={`px-6 py-3 bg-[#ff9404] text-white font-semibold rounded-lg text-xl ${
-              filledBottles === 0 ? "opacity-50 cursor-not-allowed" : "hover:text-[#1C1C1E]"
+              filledBottles === 0
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:text-[#1C1C1E]"
             } transition duration-300`}
           >
             -
@@ -86,7 +88,9 @@ const WaterTracker: React.FC = () => {
             onClick={handleAddBottle}
             disabled={filledBottles === totalBottles}
             className={`px-6 py-3 bg-[#ff9404] text-white font-semibold rounded-lg text-xl ${
-              filledBottles === totalBottles ? "opacity-50 cursor-not-allowed" : "hover:text-[#1C1C1E]"
+              filledBottles === totalBottles
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:text-[#1C1C1E]"
             } transition duration-300`}
           >
             +
