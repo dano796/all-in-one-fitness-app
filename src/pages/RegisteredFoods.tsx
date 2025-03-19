@@ -137,6 +137,7 @@ const RegisteredFoods: React.FC = () => {
     if (!typeParam || typeParam !== type) return null;
 
     const foods = foodsData.foods[type] || [];
+
     return (
       <div className="bg-[#2E3440] rounded-xl p-6 shadow-lg max-w-2xl mx-auto w-full">
         <h3 className="text-lg font-semibold mb-4 text-center text-white">{label}</h3>
@@ -152,14 +153,15 @@ const RegisteredFoods: React.FC = () => {
                 } transition duration-200`}
               >
                 <div className="flex items-center space-x-4">
-                  {food.isEditable && (
+                  {/* Mostrar el input de radio solo si es "hoy" */}
+                  {foodsData.isToday && (
                     <input
                       type="radio"
                       name="registeredFoodSelection"
                       checked={selectedFood?.index === index && selectedFood.type === type}
-                      onChange={() =>
-                        setSelectedFood({ id_comida: food.id_comida, index, type })
-                      }
+                      onChange={() => {
+                        setSelectedFood({ id_comida: food.id_comida, index, type });
+                      }}
                       className="w-5 h-5 text-[#FF6B35]"
                     />
                   )}
@@ -179,13 +181,13 @@ const RegisteredFoods: React.FC = () => {
   };
 
   return (
-    <div className="registered-foods-container h-[70vh] bg-[#282c3c] p-6 flex flex-col items-center justify-start overflow-hidden">
+    <div className="registered-foods-container min-h-screen bg-[#282c3c] p-6 flex flex-col items-center justify-start">
       <style>
         {`
           html, body {
             -ms-overflow-style: none;
             scrollbar-width: none;
-            overflow-y: hidden;
+            overflow-y: auto;
           }
           html::-webkit-scrollbar, body::-webkit-scrollbar {
             display: none;
@@ -198,7 +200,7 @@ const RegisteredFoods: React.FC = () => {
             scrollbar-width: none;
           }
           .registered-foods-container {
-            overflow: hidden;
+            overflow-y: auto;
           }
         `}
       </style>
@@ -237,14 +239,12 @@ const RegisteredFoods: React.FC = () => {
         <p className="text-gray-400 text-sm text-center">Por favor selecciona un tipo de comida desde el dashboard.</p>
       )}
 
-      {selectedFood && (
-        <div className="mt-6 text-right w-full max-w-2xl">
+      {/* Botón Eliminar: Solo se muestra si es "hoy" y hay una comida seleccionada */}
+      {selectedFood && foodsData.isToday && (
+        <div className="mt-6 text-right w-full max-w-2xl sticky bottom-0 z-10">
           <button
             onClick={handleDeleteFood}
-            disabled={!foodsData.isToday}
-            className={`ml-auto flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10 ${
-              !foodsData.isToday ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className="ml-auto flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10"
           >
             <FaTrash className="mr-1 text-base" />
             Eliminar

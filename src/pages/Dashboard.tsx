@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,6 +15,8 @@ import { Doughnut } from 'react-chartjs-2';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
+import axios, { AxiosError } from 'axios';
+import { supabase } from '../lib/supabaseClient';
 
 ChartJS.register(
   CategoryScale,
@@ -37,18 +39,141 @@ const getWeekNumber = (dateStr: string) => {
   return weekNumber;
 };
 
+// Interfaces para los datos de las comidas
+interface RegisteredFood {
+  id_comida: string;
+  nombre_comida: string;
+  descripcion: string;
+  fecha: string;
+  calorias: string | null;
+  grasas: string | null;
+  carbs: string | null;
+  proteina: string | null;
+  tipo: string;
+  isEditable: boolean;
+}
+
+interface OrganizedFoods {
+  Desayuno: RegisteredFood[];
+  Almuerzo: RegisteredFood[];
+  Merienda: RegisteredFood[];
+  Cena: RegisteredFood[];
+}
+
+interface FoodsResponse {
+  foods: OrganizedFoods;
+  currentFoodType: keyof OrganizedFoods | null;
+  isToday: boolean;
+}
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const TIMEZONE = 'America/Bogota';
   const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
   const [date, setDate] = React.useState<string>(todayStr);
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [foodsData, setFoodsData] = useState<FoodsResponse>({
+    foods: { Desayuno: [], Almuerzo: [], Merienda: [], Cena: [] },
+    currentFoodType: null,
+    isToday: false,
+  });
+  const [error, setError] = useState<string | null>(null);
 
-  // Data for the calories circle
-  const totalCaloriesGoal = 2381;
-  const consumedCalories = 624;
-  const burnedCalories = 0;
+  // Verificar autenticación y obtener el email del usuario
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      if (error || !user) {
+        setError('Debes iniciar sesión para ver el dashboard.');
+      } else {
+        setUserEmail(user.email || '');
+      }
+    };
+    checkAuth();
+  }, []);
+
+  // Consultar las comidas registradas
+  const fetchFoods = async () => {
+    if (!userEmail || !date) return;
+    try {
+      const response = await axios.get<FoodsResponse>(
+        'http://localhost:5000/api/foods/user',
+        {
+          params: { email: userEmail, date: date },
+        }
+      );
+      setFoodsData(response.data);
+      setError(null);
+    } catch (err) {
+      const axiosError = err as AxiosError<{ error?: string }>;
+      setError(
+        axiosError.response?.data?.error || 'Error al consultar las comidas registradas'
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (userEmail && date) fetchFoods();
+  }, [userEmail, date]);
+
+  // Calcular calorías por tipo de comida
+  const calculateCaloriesByType = (type: keyof OrganizedFoods) => {
+    const foods = foodsData.foods[type] || [];
+    return foods.reduce((total, food) => {
+      const calories = parseFloat(food.calorias || '0');
+      return total + (isNaN(calories) ? 0 : calories);
+    }, 0);
+  };
+
+  // Calcular valores totales para progressData
+  const calculateTotalNutrition = () => {
+    const allFoods = [
+      ...foodsData.foods.Desayuno,
+      ...foodsData.foods.Almuerzo,
+      ...foodsData.foods.Merienda,
+      ...foodsData.foods.Cena,
+    ];
+
+    const totalCalories = allFoods.reduce((total, food) => {
+      const calories = parseFloat(food.calorias || '0');
+      return total + (isNaN(calories) ? 0 : calories);
+    }, 0);
+
+    const totalCarbs = allFoods.reduce((total, food) => {
+      const carbs = parseFloat(food.carbs || '0');
+      return total + (isNaN(carbs) ? 0 : carbs);
+    }, 0);
+
+    const totalProtein = allFoods.reduce((total, food) => {
+      const protein = parseFloat(food.proteina || '0');
+      return total + (isNaN(protein) ? 0 : protein);
+    }, 0);
+
+    const totalFat = allFoods.reduce((total, food) => {
+      const fat = parseFloat(food.grasas || '0');
+      return total + (isNaN(fat) ? 0 : fat);
+    }, 0);
+
+    return {
+      totalCalories,
+      totalCarbs: Math.floor(totalCarbs), // Redondeamos a entero
+      totalProtein: Math.floor(totalProtein), // Redondeamos a entero
+      totalFat: Math.floor(totalFat), // Redondeamos a entero
+    };
+  };
+
+  // Valores calculados
+  const totalCaloriesGoal = 2381; // Este valor podría venir del backend o ser configurable
+  const { totalCalories, totalCarbs, totalProtein, totalFat } = calculateTotalNutrition();
+  const consumedCalories = totalCalories;
+  const burnedCalories = 0; // Este valor podría venir del backend si se implementa
   const remainingCalories = totalCaloriesGoal - consumedCalories;
+
+  // Datos para el gráfico de calorías
   const caloriesData = {
     datasets: [
       {
@@ -62,18 +187,50 @@ const Dashboard: React.FC = () => {
     ],
   };
 
-  // Data for the progress bars
+  // Datos para las barras de progreso
   const progressData = [
-    { name: 'Carbs', value: 51, max: 232 },
-    { name: 'Protein', value: 34, max: 174 },
-    { name: 'Fat', value: 28, max: 77 },
+    { name: 'Carbs', value: totalCarbs, max: 232 },
+    { name: 'Protein', value: totalProtein, max: 174 },
+    { name: 'Fat', value: totalFat, max: 77 },
   ];
 
+  // Calorías por tipo de comida con límites específicos
+  const mealCalorieLimits = {
+    Desayuno: 714,
+    Almuerzo: 953,
+    Merienda: 119,
+    Cena: 595,
+  };
+
   const meals = [
-    { id: 1, type: 'Desayuno', calories: 714, icon: '🍞' },
-    { id: 2, type: 'Almuerzo', calories: 850, icon: '🍽️' },
-    { id: 3, type: 'Cena', calories: 595, icon: '🍳' },
-    { id: 4, type: 'Merienda', calories: 123, icon: '🍎' },
+    {
+      id: 1,
+      type: 'Desayuno',
+      calories: calculateCaloriesByType('Desayuno'),
+      maxCalories: mealCalorieLimits.Desayuno,
+      icon: '🍞',
+    },
+    {
+      id: 2,
+      type: 'Almuerzo',
+      calories: calculateCaloriesByType('Almuerzo'),
+      maxCalories: mealCalorieLimits.Almuerzo,
+      icon: '🍽️',
+    },
+    {
+      id: 3,
+      type: 'Cena',
+      calories: calculateCaloriesByType('Cena'),
+      maxCalories: mealCalorieLimits.Cena,
+      icon: '🍳',
+    },
+    {
+      id: 4,
+      type: 'Merienda',
+      calories: calculateCaloriesByType('Merienda'),
+      maxCalories: mealCalorieLimits.Merienda,
+      icon: '🍎',
+    },
   ];
 
   const handleMealClick = (type: string) => {
@@ -278,7 +435,7 @@ const Dashboard: React.FC = () => {
       {/* Summary Section */}
       <div className="summary-section">
         <h2 className="text-sm font-semibold mb-4">Resumen</h2>
-        <div className="relative flex justify-center mb-8 -mt-7"> {/* Added -mt-2 to move the circle up */}
+        <div className="relative flex justify-center mb-8 -mt-7">
           <div className="relative w-48 h-48 sm:w-56 sm:h-56">
             <Doughnut
               data={caloriesData}
@@ -338,7 +495,9 @@ const Dashboard: React.FC = () => {
                 <span className="text-xl">{meal.icon}</span>
                 <div>
                   <h3 className="text-sm font-semibold">{meal.type}</h3>
-                  <p className="text-xs text-gray-400">0/{meal.calories} kcal</p>
+                  <p className="text-xs text-gray-400">
+                    {meal.calories}/{meal.maxCalories} kcal
+                  </p>
                 </div>
               </div>
               <button
