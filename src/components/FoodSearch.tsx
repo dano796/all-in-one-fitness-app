@@ -3,7 +3,7 @@ import axios, { AxiosError } from "axios";
 import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
 import { FaArrowLeft } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 interface Food {
   food_id: string;
@@ -19,6 +19,11 @@ const FoodSearch: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>("");
+
+  // Obtener el parámetro 'type' de la URL
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const type = searchParams.get("type") || "";
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -105,13 +110,25 @@ const FoodSearch: React.FC = () => {
       return;
     }
 
+    // Validar que type no esté vacío
+    if (!type) {
+      setError("No se especificó el tipo de comida (Desayuno, Almuerzo, etc.).");
+      return;
+    }
+
+    const normalizedType = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+
+    // Log del cuerpo completo antes de enviar
+    const requestBody = {
+      email: user.email,
+      food_id: selectedFood.food_id,
+      food_name: selectedFood.food_name,
+      food_description: selectedFood.food_description,
+      type: normalizedType,
+    };
+
     try {
-      const response = await axios.post("http://localhost:5000/api/foods/add", {
-        email: user.email,
-        food_id: selectedFood.food_id,
-        food_name: selectedFood.food_name,
-        food_description: selectedFood.food_description,
-      });
+      const response = await axios.post("http://localhost:5000/api/foods/add", requestBody);
 
       await Swal.fire({
         title: "¡Éxito!",
@@ -163,7 +180,7 @@ const FoodSearch: React.FC = () => {
       </div>
 
       <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-9">
-        <h2 className="text-sm font-semibold mb-2">Search for Foods</h2>
+        <h2 className="text-sm font-semibold mb-2">Buscar Alimentos</h2>
         <div className="flex items-center space-x-4">
           <input
             type="text"
