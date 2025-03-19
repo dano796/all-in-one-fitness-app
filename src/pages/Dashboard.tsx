@@ -85,7 +85,6 @@ const Dashboard: React.FC = () => {
     const checkAuth = async () => {
       const {
         data: { user },
-        error,
       } = await supabase.auth.getUser();
       if (error || !user) {
         setError('Debes iniciar sesión para ver el dashboard.');
@@ -238,7 +237,10 @@ const Dashboard: React.FC = () => {
   };
 
   const handleAddFoodClick = (type: string) => {
-    navigate(`/foodsearch?type=${type.toLowerCase()}&date=${date}`);
+    // Pasamos un estado adicional para indicar que la navegación proviene del botón +
+    navigate(`/foodsearch?type=${type.toLowerCase()}&date=${date}`, {
+      state: { fromAddButton: true },
+    });
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -500,15 +502,18 @@ const Dashboard: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <button
-                className="add-food-button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddFoodClick(meal.type);
-                }}
-              >
-                <Plus className="h-4 w-4 text-white" />
-              </button>
+              {/* Mostrar el botón de agregar solo si es "hoy" */}
+              {foodsData.isToday && (
+                <button
+                  className="add-food-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddFoodClick(meal.type);
+                  }}
+                >
+                  <Plus className="h-4 w-4 text-white" />
+                </button>
+              )}
             </div>
           ))}
         </div>

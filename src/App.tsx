@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
@@ -24,6 +25,7 @@ import ComidasRegistro from "./pages/RegisteredFoods";
 import CalorieCalculator from "./components/CalorieCalculator";
 import CalorieCalculatorLayout from "./layouts/CalorieCalculatorLayout";
 
+// Componente de protección para rutas generales
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -60,6 +62,55 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   return user ? <>{children}</> : <Navigate to="/login" />;
 };
 
+// Componente de protección específico para la ruta /foodsearch
+const FoodSearchProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [user, setUser] = useState<unknown>(null);
+  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+    fetchUser();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-[#282c3c]">
+        <div className="text-6xl font-bold text-[#FF9500] flex space-x-4">
+          <span className="inline-block animate-accordion">All</span>
+          <span className="inline-block animate-accordion animation-delay-200">
+            In
+          </span>
+          <span className="inline-block animate-accordion animation-delay-400">
+            One
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Verificar si el usuario está autenticado
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  // Verificar si la navegación proviene del botón + (mirando el estado)
+  const fromAddButton = location.state?.fromAddButton || false;
+  if (!fromAddButton) {
+    return <Navigate to="/dashboard" />;
+  }
+
+  return <>{children}</>;
+};
+
 function App() {
   return (
     <Router>
@@ -89,11 +140,11 @@ function App() {
         <Route
           path="/foodsearch"
           element={
-            <ProtectedRoute>
+            <FoodSearchProtectedRoute>
               <FoodSearchLayout>
                 <FoodSearch />
               </FoodSearchLayout>
-            </ProtectedRoute>
+            </FoodSearchProtectedRoute>
           }
         />
         <Route
