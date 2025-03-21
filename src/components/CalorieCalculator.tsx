@@ -3,6 +3,67 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import axios from "axios";
 import { Calculator } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast, Toaster } from "react-hot-toast";
+import GalaxyBackground from "./GalaxyBackground";
+
+// Estilos personalizados para scrollbar, dropdown y radio buttons
+const customStyles = `
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #3B4252;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #6B7280;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
+  }
+
+  /* Custom Dropdown Arrow */
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.5em;
+  }
+
+  /* Custom Radio Button Styles */
+  input[type="radio"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #000000;
+    border-radius: 50%;
+    background-clip: content-box;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  input[type="radio"]:hover {
+    border-color: #ff9404;
+    box-shadow: 0 0 8px rgba(255, 148, 4, 0.5);
+  }
+  input[type="radio"]:checked {
+    background-color: #ffffff;
+  }
+  input[type="radio"]:checked::after {
+    content: '';
+    display: block;
+    width: 12px;
+    height: 12px;
+    background: #ff9404;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+`;
 
 const CalorieCalculator: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +76,7 @@ const CalorieCalculator: React.FC = () => {
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const activityMultipliers = {
     basal: 1.2,
@@ -70,31 +132,38 @@ const CalorieCalculator: React.FC = () => {
       weight <= 0
     ) {
       setCalories(null);
+      toast.error("Please enter valid values for all fields.");
       return;
     }
 
-    let bmr: number;
-    if (gender === "male") {
-      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-    } else {
-      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
-    }
+    setIsLoading(true);
+    setTimeout(() => {
+      let bmr: number;
+      if (gender === "male") {
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+      } else {
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+      }
 
-    const activityFactor =
-      activityMultipliers[activityLevel as keyof typeof activityMultipliers];
-    const baseTDEE = Math.round(bmr * activityFactor);
+      const activityFactor =
+        activityMultipliers[activityLevel as keyof typeof activityMultipliers];
+      const baseTDEE = Math.round(bmr * activityFactor);
 
-    const goalCalories: { [key: string]: number } = {};
-    for (const [goal, adjustment] of Object.entries(goalAdjustments)) {
-      goalCalories[goal] = Math.round(baseTDEE * adjustment);
-    }
+      const goalCalories: { [key: string]: number } = {};
+      for (const [goal, adjustment] of Object.entries(goalAdjustments)) {
+        goalCalories[goal] = Math.round(baseTDEE * adjustment);
+      }
 
-    setCalories(goalCalories);
+      setCalories(goalCalories);
+      setIsLoading(false);
+      toast.success("Calories calculated successfully!");
+    }, 1500);
   };
 
   const handleGoalSelect = async (goal: string, calorieValue: number) => {
     if (!userEmail) {
       setError("Debes estar autenticado para seleccionar un objetivo.");
+      toast.error("Authentication required.");
       return;
     }
 
@@ -107,12 +176,15 @@ const CalorieCalculator: React.FC = () => {
       });
 
       if (response.data.success) {
+        toast.success("Calorie goal set successfully!");
         navigate("/dashboard");
       } else {
         setError(response.data.error || "Error al establecer el límite de calorías.");
+        toast.error(response.data.error || "Error setting calorie goal.");
       }
     } catch (err) {
       setError("Error al conectar con el servidor. Intenta de nuevo.");
+      toast.error("Server error. Please try again.");
     }
   };
 
@@ -154,203 +226,252 @@ const CalorieCalculator: React.FC = () => {
     weight <= 0;
 
   return (
-    <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white min-h-screen">
-      <div className="max-w-2xl mx-auto w-full">
-        <h1 className="text-5xl font-bold mb-12 text-center text-white flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center p-6 relative w-full">
+      <GalaxyBackground /> {/* Partículas solo en esta página */}
+      <style>{customStyles}</style>
+      <Toaster position="top-right" reverseOrder={false} />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 50 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="max-w-2xl w-full bg-[#3B4252] rounded-xl shadow-md p-8 relative z-10"
+      >
+        <h1 className="text-4xl font-bold text-center text-white mb-8 flex items-center justify-center gap-3">
+          <Calculator className="w-8 h-8 text-[#ff9404]" />
           Calorie Calculator
         </h1>
 
-        {error && <p className="text-red-400 mb-4 text-center">{error}</p>}
-
-        <div className="bg-[#3B4252] rounded-xl p-6 shadow-md">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              calculateCalories();
-            }}
-            className="space-y-6"
+        {error && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-red-400 mb-4 text-center"
           >
-            <div>
-              <label
-                htmlFor="age"
-                className="block text-sm font-medium text-white mb-1"
-              >
-                Age (15-80)
-              </label>
-              <input
-                type="number"
-                id="age"
-                value={age ?? ""}
-                onChange={handleAgeChange}
-                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
-                placeholder="Enter age"
-              />
-            </div>
+            {error}
+          </motion.p>
+        )}
 
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">
-                Gender
-              </label>
-              <div className="flex space-x-4">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="male"
-                    checked={gender === "male"}
-                    onChange={() => setGender("male")}
-                    className="mr-2 text-[#FF6B35] focus:ring-[#FF6B35]"
-                  />
-                  Male
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="female"
-                    checked={gender === "female"}
-                    onChange={() => setGender("female")}
-                    className="mr-2 text-[#FF6B35] focus:ring-[#FF6B35]"
-                  />
-                  Female
-                </label>
-              </div>
-            </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            calculateCalories();
+          }}
+          className="space-y-6"
+        >
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Age (15-80)
+            </label>
+            <input
+              type="number"
+              id="age"
+              value={age ?? ""}
+              onChange={handleAgeChange}
+              className="w-full px-4 py-3 bg-[#282c3c] border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#ff9404] focus:border-transparent transition-all duration-300 placeholder-gray-400 hover:bg-[#2f3447]"
+              placeholder="Enter your age"
+            />
+          </motion.div>
 
-            <div>
-              <label
-                htmlFor="height"
-                className="block text-sm font-medium text-white mb-1"
-              >
-                Height (cm)
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Gender
+            </label>
+            <div className="flex space-x-6">
+              <label className="flex items-center text-gray-200">
+                <input
+                  type="radio"
+                  value="male"
+                  checked={gender === "male"}
+                  onChange={() => setGender("male")}
+                  className="mr-2"
+                />
+                Male
               </label>
-              <input
-                type="number"
-                id="height"
-                value={height ?? ""}
-                onChange={handleHeightChange}
-                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
-                placeholder="Enter height in cm"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="weight"
-                className="block text-sm font-medium text-white mb-1"
-              >
-                Weight (kg)
+              <label className="flex items-center text-gray-200">
+                <input
+                  type="radio"
+                  value="female"
+                  checked={gender === "female"}
+                  onChange={() => setGender("female")}
+                  className="mr-2"
+                />
+                Female
               </label>
-              <input
-                type="number"
-                id="weight"
-                value={weight ?? ""}
-                onChange={handleWeightChange}
-                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
-                placeholder="Enter weight in kg"
-              />
             </div>
+          </motion.div>
 
-            <div>
-              <label
-                htmlFor="activity"
-                className="block text-sm font-medium text-white mb-1"
-              >
-                Activity Level
-              </label>
-              <select
-                id="activity"
-                value={activityLevel}
-                onChange={(e) => setActivityLevel(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
-              >
-                <option value="basal">Basal Metabolic Rate (BMR)</option>
-                <option value="sedentary">
-                  Sedentary: little or no exercise
-                </option>
-                <option value="light">Light: exercise 1-3 times/week</option>
-                <option value="moderate">
-                  Moderate: exercise 4-5 times/week
-                </option>
-                <option value="active">
-                  Active: daily exercise or intense 3-4 times/week
-                </option>
-                <option value="veryActive">
-                  Very Active: intense exercise 6-7 times/week
-                </option>
-                <option value="extraActive">
-                  Extra Active: very intense daily or physical job
-                </option>
-              </select>
-            </div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Height (cm)
+            </label>
+            <input
+              type="number"
+              id="height"
+              value={height ?? ""}
+              onChange={handleHeightChange}
+              className="w-full px-4 py-3 bg-[#282c3c] border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#ff9404] focus:border-transparent transition-all duration-300 placeholder-gray-400 hover:bg-[#2f3447]"
+              placeholder="Enter your height"
+            />
+          </motion.div>
 
-            <button
-              type="submit"
-              className="w-full py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg hover:text-[#1C1C1E] transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed"
-              disabled={isButtonDisabled}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Weight (kg)
+            </label>
+            <input
+              type="number"
+              id="weight"
+              value={weight ?? ""}
+              onChange={handleWeightChange}
+              className="w-full px-4 py-3 bg-[#282c3c] border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#ff9404] focus:border-transparent transition-all duration-300 placeholder-gray-400 hover:bg-[#2f3447]"
+              placeholder="Enter your weight"
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Activity Level
+            </label>
+            <select
+              id="activity"
+              value={activityLevel}
+              onChange={(e) => setActivityLevel(e.target.value)}
+              className="w-full px-4 py-3 bg-[#282c3c] border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#ff9404] focus:border-transparent transition-all duration-300 hover:bg-[#2f3447]"
             >
-              Calculate Calories
-            </button>
+              <option value="basal">Basal Metabolic Rate (BMR)</option>
+              <option value="sedentary">Sedentary: little or no exercise</option>
+              <option value="light">Light: exercise 1-3 times/week</option>
+              <option value="moderate">Moderate: exercise 4-5 times/week</option>
+              <option value="active">Active: daily exercise or intense 3-4 times/week</option>
+              <option value="veryActive">Very Active: intense exercise 6-7 times/week</option>
+              <option value="extraActive">Extra Active: very intense daily or physical job</option>
+            </select>
+          </motion.div>
 
-            {calories && (
-              <div className="mt-6 space-y-4">
-                <h2 className="text-xl mt-12 mb-8 font-semibold text-white text-center">
-                  Estimated Daily Calorie Needs
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-medium text-white mb-4 text-center">
-                      Weight Loss Estimates
-                    </h3>
-                    <div className="space-y-4">
-                      {["maintain", "mildLoss", "loss", "extremeLoss"].map((goal) => (
-                        <div
-                          key={goal}
-                          className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition duration-200 ${
-                            selectedGoal === goal ? "border-2 border-[#ff9404]" : ""
-                          }`}
-                          onClick={() => handleGoalSelect(goal, calories[goal])}
-                        >
-                          <p className="font-medium text-[#ff9404]">
-                            {goalLabels[goal]}
-                          </p>
-                          <p className="text-lg">
-                            {calories[goal]} kcal/day (
-                            {Math.round((calories[goal] / calories.maintain) * 100)}%)
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            type="submit"
+            className="w-full py-3 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            disabled={isButtonDisabled || isLoading}
+          >
+            {isLoading ? (
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                />
+              </svg>
+            ) : (
+              "Calculate Calories"
+            )}
+          </motion.button>
+        </form>
+
+        <AnimatePresence>
+          {calories && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mt-8"
+            >
+              <h2 className="text-2xl font-semibold text-center text-white mb-6">
+                Estimated Daily Calorie Needs
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-medium text-[#ff9404] mb-4 text-center">
+                    Weight Loss Estimates
+                  </h3>
+                  <div className="space-y-4">
+                    {["maintain", "mildLoss", "loss", "extremeLoss"].map((goal) => (
+                      <motion.div
+                        key={goal}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-[#2f3447] ${
+                          selectedGoal === goal ? "border-2 border-[#ff9404]" : "border border-gray-600"
+                        }`}
+                        onClick={() => handleGoalSelect(goal, calories[goal])}
+                      >
+                        <p className="font-medium text-[#ff9404]">{goalLabels[goal]}</p>
+                        <p className="text-lg text-gray-200">
+                          {calories[goal]} kcal/day (
+                          {Math.round((calories[goal] / calories.maintain) * 100)}%)
+                        </p>
+                      </motion.div>
+                    ))}
                   </div>
+                </div>
 
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-4 text-center">
-                      Weight Gain Estimates
-                    </h3>
-                    <div className="space-y-4">
-                      {["mildGain", "gain", "fastGain"].map((goal) => (
-                        <div
-                          key={goal}
-                          className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition duration-200 ${
-                            selectedGoal === goal ? "border-2 border-[#ff9404]" : ""
-                          }`}
-                          onClick={() => handleGoalSelect(goal, calories[goal])}
-                        >
-                          <p className="font-medium text-[#ff9404]">
-                            {goalLabels[goal]}
-                          </p>
-                          <p className="text-lg">
-                            {calories[goal]} kcal/day (
-                            {Math.round((calories[goal] / calories.maintain) * 100)}%)
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                <div>
+                  <h3 className="text-lg font-medium text-[#ff9404] mb-4 text-center">
+                    Weight Gain Estimates
+                  </h3>
+                  <div className="space-y-4">
+                    {["mildGain", "gain", "fastGain"].map((goal) => (
+                      <motion.div
+                        key={goal}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-[#2f3447] ${
+                          selectedGoal === goal ? "border-2 border-[#ff9404]" : "border border-gray-600"
+                        }`}
+                        onClick={() => handleGoalSelect(goal, calories[goal])}
+                      >
+                        <p className="font-medium text-[#ff9404]">{goalLabels[goal]}</p>
+                        <p className="text-lg text-gray-200">
+                          {calories[goal]} kcal/day (
+                          {Math.round((calories[goal] / calories.maintain) * 100)}%)
+                        </p>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               </div>
-            )}
-          </form>
-        </div>
-      </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };

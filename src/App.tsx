@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -25,78 +25,22 @@ import ComidasRegistro from "./pages/RegisteredFoods";
 import CalorieCalculator from "./components/CalorieCalculator";
 import CalorieCalculatorLayout from "./layouts/CalorieCalculatorLayout";
 import FoodQuantityAdjust from "./components/FoodQuantityAdjust";
+import Loader from "./components/Loader";
 
-// Componente de protección para rutas generales
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
+// Protected Route Component
+const ProtectedRoute: React.FC<{ children: React.ReactNode; user: unknown }> = ({
   children,
+  user,
 }) => {
-  const [user, setUser] = useState<unknown>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
-    };
-    fetchUser();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[#282c3c]">
-        <div className="text-6xl font-bold text-[#FF9500] flex space-x-4">
-          <span className="inline-block animate-accordion">All</span>
-          <span className="inline-block animate-accordion animation-delay-200">
-            In
-          </span>
-          <span className="inline-block animate-accordion animation-delay-400">
-            One
-          </span>
-        </div>
-      </div>
-    );
-  }
-
   return user ? <>{children}</> : <Navigate to="/login" />;
 };
 
-// Componente de protección específico para la ruta /foodsearch
-const FoodSearchProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
+// Food Search Protected Route Component
+const FoodSearchProtectedRoute: React.FC<{ children: React.ReactNode; user: unknown }> = ({
   children,
+  user,
 }) => {
-  const [user, setUser] = useState<unknown>(null);
-  const [loading, setLoading] = useState(true);
   const location = useLocation();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
-    };
-    fetchUser();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[#282c3c]">
-        <div className="text-6xl font-bold text-[#FF9500] flex space-x-4">
-          <span className="inline-block animate-accordion">All</span>
-          <span className="inline-block animate-accordion animation-delay-200">
-            In
-          </span>
-          <span className="inline-block animate-accordion animation-delay-400">
-            One
-          </span>
-        </div>
-      </div>
-    );
-  }
 
   if (!user) {
     return <Navigate to="/login" />;
@@ -111,80 +55,117 @@ const FoodSearchProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 };
 
 function App() {
+  const [user, setUser] = useState<unknown>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserWithDelay = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      
+      // Simular retraso de 2 segundos (2000ms) para todas las rutas
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setUser(user);
+      setIsLoading(false);
+    };
+    fetchUserWithDelay();
+
+    // Escuchar cambios en la autenticación
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Limpiar el listener al desmontar
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const renderRoutes = () => (
+    <Routes>
+      {/* Public routes */}
+      <Route element={<AuthLayout />}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/nosotros" element={<AboutPage />} />
+        <Route path="/modulos" element={<ModulesPage />} />
+        <Route path="/contacto" element={<ContactPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/registro" element={<RegisterPage />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+      </Route>
+
+      {/* Protected routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute user={user}>
+            <DashboardLayout>
+              <Dashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/foodsearch"
+        element={
+          <FoodSearchProtectedRoute user={user}>
+            <FoodSearchLayout>
+              <FoodSearch />
+            </FoodSearchLayout>
+          </FoodSearchProtectedRoute>
+        }
+      />
+      <Route
+        path="/food-quantity-adjust"
+        element={
+          <FoodSearchLayout>
+            <FoodQuantityAdjust />
+          </FoodSearchLayout>
+        }
+      />
+      <Route
+        path="/water"
+        element={
+          <ProtectedRoute user={user}>
+            <WaterLayout>
+              <WaterTracker />
+            </WaterLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/comidas"
+        element={
+          <ProtectedRoute user={user}>
+            <FoodSearchLayout>
+              <ComidasRegistro />
+            </FoodSearchLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/calorie-calculator"
+        element={
+          <ProtectedRoute user={user}>
+            <CalorieCalculatorLayout>
+              <CalorieCalculator />
+            </CalorieCalculatorLayout>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+
   return (
     <Router>
-      <Routes>
-        {/* Public routes */}
-        <Route element={<AuthLayout />}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/nosotros" element={<AboutPage />} />
-          <Route path="/modulos" element={<ModulesPage />} />
-          <Route path="/contacto" element={<ContactPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/registro" element={<RegisterPage />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-        </Route>
-
-        {/* Protected routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <Dashboard />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/foodsearch"
-          element={
-            <FoodSearchProtectedRoute>
-              <FoodSearchLayout>
-                <FoodSearch />
-              </FoodSearchLayout>
-            </FoodSearchProtectedRoute>
-          }
-        />
-        <Route
-          path="/food-quantity-adjust"
-          element={
-            <FoodSearchLayout>
-              <FoodQuantityAdjust />
-            </FoodSearchLayout>
-          }
-        />
-        <Route
-          path="/water"
-          element={
-            <ProtectedRoute>
-              <WaterLayout>
-                <WaterTracker />
-              </WaterLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/comidas"
-          element={
-            <ProtectedRoute>
-              <FoodSearchLayout>
-                <ComidasRegistro />
-              </FoodSearchLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/calorie-calculator"
-          element={
-            <ProtectedRoute>
-              <CalorieCalculatorLayout>
-                <CalorieCalculator />
-              </CalorieCalculatorLayout>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+      <Suspense fallback={<Loader />}>
+        <div className="relative min-h-screen">
+          {renderRoutes()}
+          {isLoading && <Loader />}
+        </div>
+      </Suspense>
     </Router>
   );
 }

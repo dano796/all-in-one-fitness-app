@@ -1,5 +1,5 @@
 import React from "react";
-import Sidebar from '../components/Sidebar';
+import Sidebar from "../components/Sidebar";
 
 interface CalorieCalculatorLayoutProps {
   children: React.ReactNode;
@@ -19,6 +19,3 @@ const CalorieCalculatorLayout: React.FC<CalorieCalculatorLayoutProps> = ({
 };
 
 export default CalorieCalculatorLayout;
-
-
-

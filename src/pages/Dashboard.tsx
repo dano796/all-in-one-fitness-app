@@ -18,6 +18,8 @@ import { Progress } from '@/components/ui/progress';
 import axios, { AxiosError } from 'axios';
 import { supabase } from '../lib/supabaseClient';
 import Swal from 'sweetalert2';
+import { motion } from 'framer-motion';
+import GalaxyBackground from '../components/GalaxyBackground';
 
 ChartJS.register(
   CategoryScale,
@@ -173,7 +175,7 @@ const Dashboard: React.FC = () => {
       confirmButtonText: 'Sí',
       cancelButtonText: 'No',
       customClass: {
-        container: 'dashboard-swal-container', // Unique class for scoping
+        container: 'dashboard-swal-container',
         popup: 'dashboard-swal-popup',
         icon: 'dashboard-swal-icon',
         title: 'dashboard-swal-title',
@@ -199,7 +201,7 @@ const Dashboard: React.FC = () => {
             icon: 'success',
             confirmButtonColor: '#ff9404',
             customClass: {
-              container: 'dashboard-swal-container', // Unique class for scoping
+              container: 'dashboard-swal-container',
               popup: 'dashboard-swal-popup',
               icon: 'dashboard-swal-icon',
               title: 'dashboard-swal-title',
@@ -381,7 +383,10 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-auto -mt-12">
+    <div className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-auto -mt-12">
+      {/* Partículas en el fondo */}
+      <GalaxyBackground />
+
       <style>
         {`
           /* General styles remain unchanged */
@@ -435,13 +440,19 @@ const Dashboard: React.FC = () => {
           .add-food-button:hover {
             transform: scale(1.2);
           }
-          .progress-bar .bg-primary {
-            background-color: #ff9404 !important;
-            border-radius: 9999px;
-          }
           .progress-bar {
             background-color: #4B5563 !important;
             border-radius: 9999px;
+          }
+          .progress-bar .bg-primary {
+            background-color: #ff9404 !important;
+            border-radius: 9999px;
+            transition: width 1.5s ease-out;
+          }
+          /* Ensure no orange fill when value is 0 */
+          .progress-bar[data-value="0"] .bg-primary {
+            width: 0 !important;
+            display: none !important;
           }
           .circle-container {
             position: relative;
@@ -474,7 +485,7 @@ const Dashboard: React.FC = () => {
           .remaining-label {
             position: absolute;
             top: 50%;
-            left: 50%;
+            left: 35%;
             transform: translate(-50%, -50%);
             text-align: center;
             display: flex;
@@ -533,6 +544,38 @@ const Dashboard: React.FC = () => {
           }
           .remove-goal-text:hover {
             color: #ff4444;
+          }
+          /* Circular Progress Ring Styles */
+          .circular-progress-container {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .circular-progress {
+            transform: rotate(-90deg);
+          }
+          .circular-progress-bg {
+            fill: none;
+            stroke: #4B5563;
+            stroke-width: 4;
+          }
+          .circular-progress-fill {
+            fill: none;
+            stroke: #ff9404;
+            stroke-width: 4;
+            stroke-linecap: round;
+            transition: stroke-dasharray 1.5s ease-out;
+          }
+          .circular-progress-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            line-height: 1;
           }
 
           /* Scoped SweetAlert2 styles for Dashboard */
@@ -600,11 +643,11 @@ const Dashboard: React.FC = () => {
               height: 100%;
             }
             .eaten-label {
-              left: -70px;
+              left: -150px;
               font-size: 0.875rem;
             }
             .burned-label {
-              right: -70px;
+              right: -150px;
               font-size: 0.875rem;
             }
             .remaining-label {
@@ -612,6 +655,13 @@ const Dashboard: React.FC = () => {
             }
             .progress-bar {
               height: 6px;
+            }
+            .circular-progress-container {
+              width: 36px;
+              height: 36px;
+            }
+            .circular-progress-icon {
+              font-size: 18px;
             }
             .calorie-goal-input {
               width: 50px;
@@ -654,12 +704,28 @@ const Dashboard: React.FC = () => {
       </style>
 
       {/* Date Navigation at the Top */}
-      <div className="mb-6 text-center">
-        <div className="mb-2 text-xs text-gray-400">Semana {getWeek()}</div>
-        <div>
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
+        className="mb-6 text-center"
+      >
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="mb-2 text-xs text-gray-400"
+        >
+          Semana {getWeek()}
+        </motion.div>
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.8 }}
+        >
           <button
             onClick={handleDatePicker}
-            className="px-6 py-2 bg-[#3B4252] text-white font-semibold rounded-lg date-button"
+            className="px-6 py-2 bg-[#3B4252] text-white font-semibold rounded-lg date-button hover:bg-[#4B5563] transition duration-300"
           >
             {getDateLabel()}
           </button>
@@ -671,19 +737,40 @@ const Dashboard: React.FC = () => {
             max={todayStr}
             className="hidden-date-input"
           />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Summary Section */}
-      <div className="summary-section">
-        <div className="calorie-goal-header">
-          <h2 className="text-sm font-semibold">Resumen</h2>
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
+        className="summary-section relative z-10"
+      >
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="calorie-goal-header"
+        >
+          <h2 className="text-sm font-semibold text-white">Resumen</h2>
           {totalCaloriesGoal ? (
-            <p onClick={handleRemoveCalorieGoal} className="remove-goal-text">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              onClick={handleRemoveCalorieGoal}
+              className="remove-goal-text"
+            >
               Eliminar límite
-            </p>
+            </motion.p>
           ) : (
-            <div className="calorie-goal-actions">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="calorie-goal-actions"
+            >
               <input
                 type="number"
                 id="customCalorieGoal"
@@ -702,16 +789,37 @@ const Dashboard: React.FC = () => {
               >
                 Ir a la calculadora
               </p>
-            </div>
+            </motion.div>
           )}
-        </div>
-        {error && <p className="text-red-400 mb-4 text-center">{error}</p>}
+        </motion.div>
+        {error && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-red-400 mb-4 text-center"
+          >
+            {error}
+          </motion.p>
+        )}
         {calorieGoalError && (
-          <p className="text-red-400 mb-4 text-center text-xs">{calorieGoalError}</p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-red-400 mb-4 text-center text-xs"
+          >
+            {calorieGoalError}
+          </motion.p>
         )}
 
-        {/* Calories chart and progress bars */}
-        <div className="relative flex justify-center mb-8 -mt-7">
+        {/* Calories chart with animation */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut", delay: 0.8 }}
+          className="relative flex justify-center mb-8"
+        >
           <div className="relative w-48 h-48 sm:w-56 sm:h-56">
             <Doughnut
               data={caloriesData}
@@ -721,67 +829,149 @@ const Dashboard: React.FC = () => {
                 maintainAspectRatio: true,
               }}
             />
-            <div className="absolute inset-0 flex items-center justify-center mt-4">
+            <div className="absolute inset-0 flex items-center justify-center">
               <div className="circle-container">
-                <div className="eaten-label">
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.0, duration: 0.8 }}
+                  className="eaten-label"
+                >
                   <div className="text-lg font-bold sm:text-xl">{consumedCalories}</div>
                   <div className="text-xs text-gray-400">Consumido</div>
-                </div>
-                <div className="remaining-label">
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.2, duration: 0.8 }}
+                  className="remaining-label"
+                >
                   <div className="text-2xl font-bold sm:text-3xl">
                     {remainingCalories > 0 ? remainingCalories : 0}
                   </div>
                   <div className="text-xs text-gray-400">Restante</div>
-                </div>
-                <div className="burned-label">
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.0, duration: 0.8 }}
+                  className="burned-label"
+                >
                   <div className="text-lg font-bold sm:text-xl">{burnedCalories}</div>
                   <div className="text-xs text-gray-400">Quemado</div>
-                </div>
+                </motion.div>
               </div>
             </div>
           </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {progressData.map((item) => (
-            <div key={item.name} className="text-center">
-              <div className="text-xs text-gray-400 mb-1">{item.name}</div>
-              <Progress
-                value={item.max > 0 ? Math.min((item.value / item.max) * 100, 100) : 0}
-                className="w-full h-2 progress-bar"
-              />
-              <div className="text-xs text-gray-400 mt-1">
-                {item.value}/{item.max} g
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+        </motion.div>
 
-      {/* Nutrition Section */}
-      <div className="nutrition-section mt-6">
-        <h2 className="text-sm font-semibold mb-4">Nutrición</h2>
-        <div className="space-y-2">
-          {meals.map((meal) => {
-            const isMealLimitExceeded = totalCaloriesGoal ? meal.calories > meal.maxCalories : false;
-            const isTotalLimitExceeded = totalCaloriesGoal ? remainingCalories <= 0 : false;
+        {/* Progress bars with animation */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {progressData.map((item, index) => {
+            // Explicitly set progress to 0 if value is 0
+            const progressValue = item.value > 0 && item.max > 0 ? Math.min((item.value / item.max) * 100, 100) : 0;
 
             return (
-              <div
+              <motion.div
+                key={item.name}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.0 + index * 0.3, duration: 1.0 }}
+                className="text-center"
+              >
+                <div className="text-xs text-gray-400 mb-1">{item.name}</div>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  transition={{ delay: 1.2 + index * 0.3, duration: 1.5, ease: "easeOut" }}
+                >
+                  <Progress
+                    value={progressValue}
+                    className="w-full h-2 progress-bar"
+                    data-value={progressValue === 0 ? "0" : "non-zero"}
+                  />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.5 + index * 0.3, duration: 0.8 }}
+                  className="text-xs text-gray-400 mt-1"
+                >
+                  {item.value}/{item.max} g
+                </motion.div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </motion.div>
+
+      {/* Nutrition Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: "easeOut", delay: 1.2 }}
+        className="nutrition-section mt-6 relative z-10"
+      >
+        <motion.h2
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1.4, duration: 0.8 }}
+          className="text-sm font-semibold mb-4 text-white"
+        >
+          Nutrición
+        </motion.h2>
+        <div className="space-y-2">
+          {meals.map((meal, index) => {
+            const progressPercentage = meal.maxCalories > 0 && meal.calories > 0 ? Math.min((meal.calories / meal.maxCalories) * 100, 100) : 0;
+            const circumference = 2 * Math.PI * 15; // Radius of the circle is 15
+            const strokeDasharray = `${(progressPercentage / 100) * circumference} ${circumference}`;
+
+            return (
+              <motion.div
                 key={meal.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.6 + index * 0.3, duration: 1.0 }}
                 className="meal-item flex items-center justify-between cursor-pointer hover:bg-[#4B5563] transition duration-200"
                 onClick={() => handleMealClick(meal.type)}
               >
-                <div className="flex items-center space-x-3">
-                  <span className="text-xl">{meal.icon}</span>
+                <div className="flex items-center space-x-3 flex-1">
+                  <div className="circular-progress-container">
+                    <svg className="circular-progress" width="40" height="40">
+                      <circle
+                        className="circular-progress-bg"
+                        cx="20"
+                        cy="20"
+                        r="15"
+                      />
+                      {progressPercentage > 0 && (
+                        <motion.circle
+                          className="circular-progress-fill"
+                          cx="20"
+                          cy="20"
+                          r="15"
+                          strokeDasharray={circumference}
+                          initial={{ strokeDasharray: `0 ${circumference}` }}
+                          animate={{ strokeDasharray }}
+                          transition={{ delay: 2.0 + index * 0.3, duration: 1.5, ease: "easeOut" }}
+                        />
+                      )}
+                    </svg>
+                    <span className="circular-progress-icon">{meal.icon}</span>
+                  </div>
                   <div>
-                    <h3 className="text-sm font-semibold">{meal.type}</h3>
+                    <h3 className="text-sm font-semibold text-white">{meal.type}</h3>
                     <p className="text-xs text-gray-400">
                       {meal.calories}/{meal.maxCalories} kcal
                     </p>
                   </div>
                 </div>
-                {foodsData.isToday && totalCaloriesGoal && !isMealLimitExceeded && !isTotalLimitExceeded && (
-                  <button
+                {/* Show "+" button only for today */}
+                {foodsData.isToday && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 2.0 + index * 0.3, duration: 0.8 }}
                     className="add-food-button"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -789,15 +979,16 @@ const Dashboard: React.FC = () => {
                     }}
                   >
                     <Plus className="h-4 w-4 text-white" />
-                  </button>
+                  </motion.button>
                 )}
-              </div>
+              </motion.div>
             );
           })}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
+
 
 export default Dashboard;
