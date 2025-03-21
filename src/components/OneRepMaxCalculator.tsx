@@ -1,5 +1,145 @@
 import React, { useState } from "react";
 
+const customStyles = `
+  /* Estilo para Inputs Numéricos */
+  .calorie-goal-input {
+    width: 100%;
+    padding: 6px 10px; /* Padding simétrico */
+    font-size: 0.875rem;
+    border: 1px solid #6B7280;
+    border-radius: 6px;
+    background: #2D3242;
+    color: #E5E7EB;
+    text-align: center; /* Centrado del texto */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  }
+  .calorie-goal-input::-webkit-outer-spin-button,
+  .calorie-goal-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .calorie-goal-input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  .calorie-goal-input:focus {
+    outline: none;
+    border-color: #ff9404;
+    box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
+    background: #2D3242;
+    transform: scale(1.02);
+  }
+  .calorie-goal-input::placeholder {
+    color: #6B7280;
+    opacity: 1;
+    text-align: center; /* Centrado del placeholder */
+  }
+  .calorie-goal-input.error {
+    border-color: #ff4444;
+  }
+
+  /* Estilo para Input con Botón de Unidad */
+  .calorie-goal-input-with-unit {
+    padding-right: 48px; /* Espacio para el botón */
+  }
+
+  /* Estilo para Select (Dropdown) */
+  .calorie-goal-select {
+    width: 100%;
+    padding: 6px 30px 6px 10px; /* Ajustamos el padding para centrar el texto */
+    font-size: 0.875rem;
+    border: 1px solid #6B7280;
+    border-radius: 6px;
+    background: #2D3242;
+    color: #E5E7EB;
+    text-align: center; /* Centrado del texto */
+    text-align-last: center; /* Centrado en algunos navegadores */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.5em;
+  }
+  .calorie-goal-select:focus {
+    outline: none;
+    border-color: #ff9404;
+    box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
+    background: #2D3242;
+    transform: scale(1.02);
+  }
+  .calorie-goal-select option {
+    text-align: center; /* Intentamos centrar las opciones (puede no funcionar en todos los navegadores) */
+  }
+
+  /* Estilo para el Botón de Unidad */
+  .unit-toggle-button {
+    padding: 2px 6px;
+    font-size: 0.65rem;
+    background: linear-gradient(45deg, #ff9404, #e08503);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(255, 148, 4, 0.3);
+    transition: all 0.3s ease;
+    line-height: 1;
+  }
+  .unit-toggle-button:hover {
+    background: linear-gradient(45deg, #e08503, #ff9404);
+    box-shadow: 0 0 10px rgba(255, 148, 4, 0.5);
+    transform: scale(1.05);
+  }
+  .unit-toggle-button:active {
+    transform: scale(0.95);
+  }
+
+  /* Estilo para el Botón de Calcular */
+  .calculate-button {
+    width: 100%;
+    padding: 8px 16px;
+    font-size: 0.875rem;
+    background: linear-gradient(45deg, #ff9404, #e08503);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .calculate-button:hover {
+    background: linear-gradient(45deg, #e08503, #ff9404);
+    box-shadow: 0 0 10px rgba(255, 148, 4, 0.5);
+    transform: scale(1.02);
+  }
+  .calculate-button:disabled {
+    background: #6B7280;
+    cursor: not-allowed;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 640px) {
+    .calorie-goal-input {
+      width: 100%;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+    }
+    .calorie-goal-input-with-unit {
+      padding-right: 40px;
+    }
+    .calorie-goal-select {
+      font-size: 0.75rem;
+      padding: 4px 24px 4px 8px; /* Ajustamos el padding para pantallas pequeñas */
+    }
+    .unit-toggle-button {
+      padding: 2px 4px;
+      font-size: 0.6rem;
+    }
+    .calculate-button {
+      font-size: 0.75rem;
+      padding: 6px 12px;
+    }
+  }
+`;
+
 const OneRepMaxCalculator: React.FC = () => {
   const [weight, setWeight] = useState<number | undefined>(undefined);
   const [unit, setUnit] = useState<"kg" | "lb">("kg");
@@ -125,6 +265,7 @@ const OneRepMaxCalculator: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white min-h-screen">
+      <style>{customStyles}</style>
       <div className="max-w-2xl mx-auto w-full">
         <h1 className="text-5xl font-bold mb-12 text-center text-white flex items-center justify-center">
           1RM Calculator
@@ -152,13 +293,13 @@ const OneRepMaxCalculator: React.FC = () => {
                   id="weight"
                   value={weight ?? ""}
                   onChange={handleWeightChange}
-                  className="w-full px-4 py-2 pr-16 border border-gray-500 rounded-lg bg-[#282c3c] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
-                  placeholder={`Enter weight`}
+                  className="calorie-goal-input calorie-goal-input-with-unit"
+                  placeholder="Enter weight"
                 />
                 <button
                   type="button"
                   onClick={handleUnitChange}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-[#ff9404] text-white font-semibold rounded-lg hover:text-[#1C1C1E] transition duration-300 text-sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 unit-toggle-button"
                 >
                   {unit}
                 </button>
@@ -178,7 +319,7 @@ const OneRepMaxCalculator: React.FC = () => {
                 id="reps"
                 value={reps ?? ""}
                 onChange={handleRepsChange}
-                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+                className="calorie-goal-input"
                 placeholder="Enter number of reps"
               />
             </div>
@@ -196,7 +337,7 @@ const OneRepMaxCalculator: React.FC = () => {
                 id="rpe"
                 value={rpe ?? ""}
                 onChange={handleRpeChange}
-                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+                className="calorie-goal-input"
                 placeholder="Enter RPE (1-10)"
               />
             </div>
@@ -213,7 +354,7 @@ const OneRepMaxCalculator: React.FC = () => {
                 id="exercise"
                 value={exercise}
                 onChange={(e) => setExercise(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+                className="calorie-goal-select"
               >
                 {exercises.map((ex) => (
                   <option key={ex} value={ex}>
@@ -226,7 +367,7 @@ const OneRepMaxCalculator: React.FC = () => {
             {/* Calculate Button */}
             <button
               type="submit"
-              className="w-full py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg hover:text-[#1C1C1E] transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed"
+              className="calculate-button"
               disabled={isButtonDisabled}
             >
               Calculate 1RM

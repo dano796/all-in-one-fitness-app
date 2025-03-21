@@ -11,6 +11,106 @@ interface Food {
   food_description: string;
 }
 
+const customStyles = `
+  /* Estilo para Inputs de Texto */
+  .calorie-goal-input {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 0.875rem;
+    border: 1px solid #6B7280;
+    border-radius: 6px;
+    background: #2D3242;
+    color: #E5E7EB;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  }
+  .calorie-goal-input:focus {
+    outline: none;
+    border-color: #ff9404;
+    box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
+    background: #2D3242;
+    transform: scale(1.02);
+  }
+  .calorie-goal-input::placeholder {
+    color: #6B7280;
+    opacity: 1;
+  }
+  .calorie-goal-input.error {
+    border-color: #ff4444;
+  }
+  .calorie-goal-input:disabled {
+    background: #3B4252;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  /* Estilo para el Scrollbar */
+  .scrollbar-hide::-webkit-scrollbar {
+    width: 8px;
+  }
+  .scrollbar-hide::-webkit-scrollbar-track {
+    background: #3B4252;
+  }
+  .scrollbar-hide::-webkit-scrollbar-thumb {
+    background: #6B7280;
+    border-radius: 4px;
+  }
+  .scrollbar-hide::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
+  }
+
+  /* Scoped SweetAlert2 styles */
+  .custom-swal-background {
+    background-color: #3B4252 !important;
+    color: #fff !important;
+  }
+  .custom-swal-icon {
+    color: #ff9404 !important;
+  }
+  .swal2-success .swal2-success-ring {
+    border-color: #ff9404 !important;
+  }
+  .custom-swal-title {
+    color: #fff !important;
+    font-size: 1.5rem !important;
+  }
+  .custom-swal-text {
+    color: #fff !important;
+    font-size: 1rem !important;
+  }
+  .swal2-confirm {
+    background: linear-gradient(45deg, #ff9404, #e08503) !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 20px !important;
+    border-radius: 4px !important;
+    font-size: 0.875rem !important;
+    box-shadow: 0 0 10px rgba(255, 148, 4, 0.3) !important;
+    transition: all 0.3s ease !important;
+  }
+  .swal2-confirm:hover {
+    background: linear-gradient(45deg, #e08503, #ff9404) !important;
+    box-shadow: 0 0 15px rgba(255, 148, 4, 0.5) !important;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 640px) {
+    .calorie-goal-input {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+    }
+    .custom-swal-title {
+      font-size: 1.25rem !important;
+    }
+    .custom-swal-text {
+      font-size: 0.875rem !important;
+    }
+    .swal2-confirm {
+      padding: 8px 16px !important;
+      font-size: 0.75rem !important;
+    }
+  }
+`;
+
 const FoodSearch: React.FC = () => {
   const [query, setQuery] = useState<string>("");
   const [foods, setFoods] = useState<Food[]>([]);
@@ -201,6 +301,7 @@ const FoodSearch: React.FC = () => {
 
   return (
     <div className="mt-0">
+      <style>{customStyles}</style>
       <div className="ml-0 mr-2 mt-0">
         <Link to="/dashboard" className="inline-block">
           <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10">
@@ -217,10 +318,10 @@ const FoodSearch: React.FC = () => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown} // Añadimos el evento onKeyDown
+            onKeyDown={handleKeyDown}
             placeholder="Ingresa un alimento (ejemplo: manzana)"
             disabled={loading}
-            className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#1C2526] text-white placeholder-gray-400 focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+            className="calorie-goal-input"
           />
           <button
             onClick={handleSearch}

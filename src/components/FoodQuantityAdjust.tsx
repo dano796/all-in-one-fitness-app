@@ -22,6 +22,96 @@ interface NutritionalValues {
   peru: number | null;
 }
 
+const customStyles = `
+  /* Estilo para Inputs Numéricos */
+  .calorie-goal-input {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 0.875rem;
+    border: 1px solid #6B7280;
+    border-radius: 6px;
+    background: #2D3242;
+    color: #E5E7EB;
+    text-align: center;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  }
+  .calorie-goal-input::-webkit-outer-spin-button,
+  .calorie-goal-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .calorie-goal-input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  .calorie-goal-input:focus {
+    outline: none;
+    border-color: #ff9404;
+    box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
+    background: #2D3242;
+    transform: scale(1.02);
+  }
+  .calorie-goal-input::placeholder {
+    color: #6B7280;
+    opacity: 1;
+  }
+  .calorie-goal-input.error {
+    border-color: #ff4444;
+  }
+
+  /* Scoped SweetAlert2 styles */
+  .custom-swal-background {
+    background-color: #3B4252 !important;
+    color: #fff !important;
+  }
+  .custom-swal-icon {
+    color: #ff9404 !important;
+  }
+  .swal2-success .swal2-success-ring {
+    border-color: #ff9404 !important;
+  }
+  .custom-swal-title {
+    color: #fff !important;
+    font-size: 1.5rem !important;
+  }
+  .custom-swal-text {
+    color: #fff !important;
+    font-size: 1rem !important;
+  }
+  .swal2-confirm {
+    background: linear-gradient(45deg, #ff9404, #e08503) !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 20px !important;
+    border-radius: 4px !important;
+    font-size: 0.875rem !important;
+    box-shadow: 0 0 10px rgba(255, 148, 4, 0.3) !important;
+    transition: all 0.3s ease !important;
+  }
+  .swal2-confirm:hover {
+    background: linear-gradient(45deg, #e08503, #ff9404) !important;
+    box-shadow: 0 0 15px rgba(255, 148, 4, 0.5) !important;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 640px) {
+    .calorie-goal-input {
+      width: 100%;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+    }
+    .custom-swal-title {
+      font-size: 1.25rem !important;
+    }
+    .custom-swal-text {
+      font-size: 0.875rem !important;
+    }
+    .swal2-confirm {
+      padding: 8px 16px !important;
+      font-size: 0.75rem !important;
+    }
+  }
+`;
+
 const FoodQuantityAdjust: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -238,41 +328,41 @@ const FoodQuantityAdjust: React.FC = () => {
       baseQuantity = originalValues.peru || 1;
     }
 
-    const newQuantityValue = evaluateFraction(newQuantity);
-    const factor = newQuantityValue / baseQuantity;
+    let factor: number;
+    if (newQuantity === "") {
+      factor = 0; // Si la cantidad está vacía, mostrar valores como 0
+    } else {
+      const newQuantityValue = evaluateFraction(newQuantity);
+      factor = newQuantityValue / baseQuantity;
+    }
 
     // Ajustar los valores nutricionales
     setNutritionalValues({
       ...originalValues,
-      calories: originalValues.calories
-        ? Math.round(originalValues.calories * factor)
-        : null,
-      fat: originalValues.fat
-        ? Number((originalValues.fat * factor).toFixed(2))
-        : null,
-      carbs: originalValues.carbs
-        ? Number((originalValues.carbs * factor).toFixed(2))
-        : null,
-      protein: originalValues.protein
-        ? Number((originalValues.protein * factor).toFixed(2))
-        : null,
-      perg: fixedUnit === "g" ? parseInt(newQuantity, 10) : originalValues.perg,
-      peroz:
-        fixedUnit === "oz"
-          ? evaluateFraction(newQuantity)
-          : originalValues.peroz,
-      percup:
-        fixedUnit === "cup"
-          ? evaluateFraction(newQuantity)
-          : originalValues.percup,
-      peru:
-        fixedUnit === "unit" ? parseInt(newQuantity, 10) : originalValues.peru,
+      calories: factor === 0 ? 0 : originalValues.calories ? Math.round(originalValues.calories * factor) : null,
+      fat: factor === 0 ? 0 : originalValues.fat ? Number((originalValues.fat * factor).toFixed(2)) : null,
+      carbs: factor === 0 ? 0 : originalValues.carbs ? Number((originalValues.carbs * factor).toFixed(2)) : null,
+      protein: factor === 0 ? 0 : originalValues.protein ? Number((originalValues.protein * factor).toFixed(2)) : null,
+      perg: fixedUnit === "g" ? (newQuantity === "" ? null : parseInt(newQuantity, 10)) : originalValues.perg,
+      peroz: fixedUnit === "oz" ? (newQuantity === "" ? null : evaluateFraction(newQuantity)) : originalValues.peroz,
+      percup: fixedUnit === "cup" ? (newQuantity === "" ? null : evaluateFraction(newQuantity)) : originalValues.percup,
+      peru: fixedUnit === "unit" ? (newQuantity === "" ? null : parseInt(newQuantity, 10)) : originalValues.peru,
     });
   };
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDisplayQuantity = e.target.value;
-    if (newDisplayQuantity === "" || parseFloat(newDisplayQuantity) < 0) return;
+
+    if (newDisplayQuantity === "") {
+      setQuantity("");
+      setDisplayQuantity("");
+      recalculateNutritionalValues("");
+      return;
+    }
+
+    // Validar que el valor sea un número positivo
+    const numericValue = parseFloat(newDisplayQuantity);
+    if (isNaN(numericValue) || numericValue < 0) return;
 
     let newQuantity: string;
 
@@ -282,8 +372,6 @@ const FoodQuantityAdjust: React.FC = () => {
       newQuantity = newDisplayQuantity;
     } else if (fixedUnit === "oz" || fixedUnit === "cup") {
       // Para onzas y tazas, permitir decimales y convertir a fracciones
-      const numericValue = parseFloat(newDisplayQuantity);
-      if (isNaN(numericValue)) return;
       newQuantity = convertToFraction(numericValue, fixedUnit === "cup");
     } else {
       return;
@@ -297,6 +385,11 @@ const FoodQuantityAdjust: React.FC = () => {
   const handleSaveFood = async () => {
     if (!food || !type || !userEmail) {
       setError("Faltan datos necesarios para guardar el alimento.");
+      return;
+    }
+
+    if (quantity === "") {
+      setError("Por favor ingresa una cantidad válida.");
       return;
     }
 
@@ -385,6 +478,7 @@ const FoodQuantityAdjust: React.FC = () => {
 
   return (
     <div className="mt-0">
+      <style>{customStyles}</style>
       <div className="ml-0 mr-2 mt-0">
         <Link
           to={`/foodsearch?type=${type}`}
@@ -413,8 +507,8 @@ const FoodQuantityAdjust: React.FC = () => {
               type="number"
               value={displayQuantity}
               onChange={handleQuantityChange}
-              className="w-full mt-2 px-4 py-2 border border-gray-500 rounded-lg bg-[#1C2526] text-white placeholder-gray-400 focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
-              min={fixedUnit === "g" || fixedUnit === "unit" ? "1" : "0.25"}
+              className="calorie-goal-input mt-2"
+              min={fixedUnit === "g" || fixedUnit === "unit" ? "0" : "0"}
               step={fixedUnit === "g" || fixedUnit === "unit" ? "1" : "0.25"}
             />
           </div>
@@ -425,7 +519,9 @@ const FoodQuantityAdjust: React.FC = () => {
             </h3>
             <p className="text-xs text-gray-300">
               Per{" "}
-              {fixedUnit === "oz" || fixedUnit === "cup"
+              {quantity === ""
+                ? "0"
+                : fixedUnit === "oz" || fixedUnit === "cup"
                 ? convertToFraction(
                     evaluateFraction(quantity),
                     fixedUnit === "cup"

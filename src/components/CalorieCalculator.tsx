@@ -5,7 +5,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, Toaster } from "react-hot-toast";
 
-// Estilos personalizados para scrollbar, dropdown y radio buttons
+// Estilos personalizados para scrollbar, dropdown, radio buttons e inputs
 const customStyles = `
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
@@ -60,6 +60,73 @@ const customStyles = `
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+  }
+
+  /* Estilo para Inputs Numéricos */
+  .calorie-goal-input {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 0.875rem;
+    border: 1px solid #6B7280;
+    border-radius: 6px;
+    background: #2D3242;
+    color: #E5E7EB;
+    text-align: center;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  }
+  .calorie-goal-input::-webkit-outer-spin-button,
+  .calorie-goal-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .calorie-goal-input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  .calorie-goal-input:focus {
+    outline: none;
+    border-color: #ff9404;
+    box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
+    background: #2D3242;
+    transform: scale(1.02);
+  }
+  .calorie-goal-input::placeholder {
+    color: #6B7280;
+    opacity: 1;
+  }
+  .calorie-goal-input.error {
+    border-color: #ff4444;
+  }
+
+  /* Estilo para Select (Dropdown) */
+  .calorie-goal-select {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 0.875rem;
+    border: 1px solid #6B7280;
+    border-radius: 6px;
+    background: #2D3242;
+    color: #E5E7EB;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  }
+  .calorie-goal-select:focus {
+    outline: none;
+    border-color: #ff9404;
+    box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
+    background: #2D3242;
+    transform: scale(1.02);
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 640px) {
+    .calorie-goal-input {
+      width: 100%;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+    }
+    .calorie-goal-select {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+    }
   }
 `;
 
@@ -276,7 +343,7 @@ const CalorieCalculator: React.FC = () => {
               id="age"
               value={age ?? ""}
               onChange={handleAgeChange}
-              className="w-full px-4 py-3 bg-[#282c3c] border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#ff9404] focus:border-transparent transition-all duration-300 placeholder-gray-400 hover:bg-[#2f3447]"
+              className="calorie-goal-input"
               placeholder="Enter your age"
             />
           </motion.div>
@@ -326,7 +393,7 @@ const CalorieCalculator: React.FC = () => {
               id="height"
               value={height ?? ""}
               onChange={handleHeightChange}
-              className="w-full px-4 py-3 bg-[#282c3c] border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#ff9404] focus:border-transparent transition-all duration-300 placeholder-gray-400 hover:bg-[#2f3447]"
+              className="calorie-goal-input"
               placeholder="Enter your height"
             />
           </motion.div>
@@ -344,7 +411,7 @@ const CalorieCalculator: React.FC = () => {
               id="weight"
               value={weight ?? ""}
               onChange={handleWeightChange}
-              className="w-full px-4 py-3 bg-[#282c3c] border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#ff9404] focus:border-transparent transition-all duration-300 placeholder-gray-400 hover:bg-[#2f3447]"
+              className="calorie-goal-input"
               placeholder="Enter your weight"
             />
           </motion.div>
@@ -361,7 +428,7 @@ const CalorieCalculator: React.FC = () => {
               id="activity"
               value={activityLevel}
               onChange={(e) => setActivityLevel(e.target.value)}
-              className="w-full px-4 py-3 bg-[#282c3c] border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#ff9404] focus:border-transparent transition-all duration-300 hover:bg-[#2f3447]"
+              className="calorie-goal-select"
             >
               <option value="basal">Basal Metabolic Rate (BMR)</option>
               <option value="sedentary">

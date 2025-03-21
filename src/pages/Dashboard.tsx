@@ -153,10 +153,12 @@ const Dashboard: React.FC = () => {
   // Handle setting custom calorie goal
   const handleSetCustomCalorieGoal = async () => {
     const goal = parseInt(customCalorieGoal, 10);
+    const inputElement = document.getElementById("customCalorieGoal");
     if (isNaN(goal) || goal < 2000) {
       setCalorieGoalError(
         "El límite de calorías debe ser un número mayor o igual a 2000."
       );
+      inputElement?.classList.add("error");
       return;
     }
 
@@ -173,10 +175,12 @@ const Dashboard: React.FC = () => {
         setTotalCaloriesGoal(goal);
         setCustomCalorieGoal("");
         setCalorieGoalError(null);
+        inputElement?.classList.remove("error");
       } else {
         setCalorieGoalError(
           response.data.error || "Error al establecer el límite de calorías."
         );
+        inputElement?.classList.add("error");
       }
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
@@ -184,6 +188,7 @@ const Dashboard: React.FC = () => {
         axiosError.response?.data?.error ||
           "Error al conectar con el servidor. Intenta de nuevo."
       );
+      inputElement?.classList.add("error");
     }
   };
 
@@ -449,16 +454,6 @@ const Dashboard: React.FC = () => {
             -ms-overflow-style: none;
             scrollbar-width: none;
           }
-          .date-button {
-            min-width: 120px;
-            transition: all 0.3s ease;
-          }
-          .hidden-date-input {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-          }
           .summary-section {
             max-width: 700px;
             margin: 0 auto;
@@ -475,14 +470,6 @@ const Dashboard: React.FC = () => {
             background: #3B4252;
             border-radius: 8px;
             padding: 10px;
-          }
-          .add-food-button {
-            background: none;
-            padding: 2px;
-            transition: transform 0.2s ease;
-          }
-          .add-food-button:hover {
-            transform: scale(1.2);
           }
           .progress-bar {
             background-color: #4B5563 !important;
@@ -508,7 +495,7 @@ const Dashboard: React.FC = () => {
           }
           .eaten-label {
             position: absolute;
-            left: -120px;
+            left: -135px;
             top: 50%;
             transform: translateY(-50%);
             text-align: center;
@@ -518,7 +505,7 @@ const Dashboard: React.FC = () => {
           }
           .burned-label {
             position: absolute;
-            right: -120px;
+            right: -135px;
             top: 50%;
             transform: translateY(-50%);
             text-align: center;
@@ -529,56 +516,131 @@ const Dashboard: React.FC = () => {
           .remaining-label {
             position: absolute;
             top: 50%;
-            left: 35%;
+            left: 33%;
             transform: translate(-50%, -50%);
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 80px; /* Ancho fijo para evitar movimiento */
           }
+          .remaining-label .remaining-value {
+            font-size: 2rem; /* Tamaño fijo para el valor */
+            font-weight: bold;
+            line-height: 1; /* Evita que el alto de línea afecte el centrado */
+            display: inline-block;
+            min-width: 60px; /* Ancho mínimo para el valor */
+            text-align: center;
+          }
+          .remaining-label .remaining-text {
+            font-size: 0.75rem;
+            color: #6B7280;
+            line-height: 1;
+          }
+
           .calorie-goal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
           }
-          .calorie-goal-input {
-            width: 60px;
-            padding: 4px 8px;
-            font-size: 0.875rem;
-            border: 1px solid #6B7280;
-            border-radius: 4px;
-            background: #282c3c;
-            color: white;
-            text-align: center;
+
+          /* Date Button (Selección de Fecha) */
+          .date-button {
+            min-width: 120px;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(45deg, #2D3242, #3B4252);
+            color: #E5E7EB;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid #ff9404;
+            box-shadow: 0 0 10px rgba(255, 148, 4, 0.3);
+            transition: all 0.3s ease;
           }
-          .calorie-goal-button {
-            padding: 4px 8px;
-            font-size: 0.75rem;
-            background-color: #ff9404;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: color 0.3s ease;
+          .date-button:hover {
+            background: linear-gradient(45deg, #3B4252, #4B5563);
+            box-shadow: 0 0 15px rgba(255, 148, 4, 0.5);
+            transform: scale(1.05);
           }
-          .calorie-goal-button:hover {
-            color: #1C1C1E;
+          .date-button:active {
+            transform: scale(0.95);
           }
-          .calorie-goal-text {
-            color: #ff9404;
-            cursor: pointer;
-            transition: text-decoration 0.3s ease;
-            font-size: 0.875rem;
-            margin-left: 8px;
+          .hidden-date-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
           }
-          .calorie-goal-text:hover {
-            text-decoration: underline;
-          }
+
+          /* Calorie Goal Input Section */
           .calorie-goal-actions {
             display: flex;
             align-items: center;
             gap: 8px;
+          }
+          .calorie-goal-input {
+            width: 70px;
+            padding: 6px 10px;
+            font-size: 0.875rem;
+            border: 1px solid #6B7280;
+            border-radius: 6px;
+            background: #2D3242;
+            color: #E5E7EB;
+            text-align: center;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+          }
+          .calorie-goal-input::-webkit-outer-spin-button,
+          .calorie-goal-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+          }
+          .calorie-goal-input[type="number"] {
+            -moz-appearance: textfield;
+          }
+          .calorie-goal-input:focus {
+            outline: none;
+            border-color: #ff9404;
+            box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
+            background: #2D3242;
+            transform: scale(1.02);
+          }
+          .calorie-goal-input::placeholder {
+            color: #6B7280;
+            opacity: 1;
+          }
+          .calorie-goal-input.error {
+            border-color: #ff4444;
+          }
+          .calorie-goal-button {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+            background: linear-gradient(45deg, #ff9404, #e08503);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 148, 4, 0.3);
+            transition: all 0.3s ease;
+          }
+          .calorie-goal-button:hover {
+            background: linear-gradient(45deg, #e08503, #ff9404);
+            box-shadow: 0 0 15px rgba(255, 148, 4, 0.5);
+            transform: scale(1.1);
+          }
+          .calorie-goal-button:active {
+            transform: scale(0.95);
+          }
+          .calorie-goal-text {
+            color: #ff9404;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            position: relative;
+          }
+          .calorie-goal-text:hover {
+            color: #e08503;
+            text-shadow: 0 0 10px rgba(255, 148, 4, 0.5);
+            text-decoration: none;
           }
           .remove-goal-text {
             color: white;
@@ -589,6 +651,27 @@ const Dashboard: React.FC = () => {
           .remove-goal-text:hover {
             color: #ff4444;
           }
+
+          /* Add Food Button (Botón "+") */
+          .add-food-button {
+            background: none;
+            padding: 2px;
+            transition: transform 0.2s ease;
+          }
+          .add-food-button:hover {
+            transform: scale(1.2);
+          }
+          .add-food-button:active {
+            transform: scale(0.9);
+          }
+          .add-food-button .lucide-plus {
+            color: #FFFFFF; /* Color blanco para el ícono */
+            transition: color 0.3s ease;
+          }
+          .add-food-button:hover .lucide-plus {
+            color: #ff9404; /* Color naranja al pasar el mouse */
+          }
+
           /* Circular Progress Ring Styles */
           .circular-progress-container {
             position: relative;
@@ -649,20 +732,32 @@ const Dashboard: React.FC = () => {
             font-size: 1rem !important;
           }
           .dashboard-swal-container .dashboard-swal-confirm-button {
-            background-color: #ff9404 !important;
+            background: linear-gradient(45deg, #ff9404, #e08503) !important;
             color: white !important;
             border: none !important;
             padding: 10px 20px !important;
             border-radius: 4px !important;
             font-size: 0.875rem !important;
+            box-shadow: 0 0 10px rgba(255, 148, 4, 0.3) !important;
+            transition: all 0.3s ease !important;
+          }
+          .dashboard-swal-container .dashboard-swal-confirm-button:hover {
+            background: linear-gradient(45deg, #e08503, #ff9404) !important;
+            box-shadow: 0 0 15px rgba(255, 148, 4, 0.5) !important;
           }
           .dashboard-swal-container .dashboard-swal-cancel-button {
-            background-color: #d33 !important;
+            background: linear-gradient(45deg, #d33, #b32) !important;
             color: white !important;
             border: none !important;
             padding: 10px 20px !important;
             border-radius: 4px !important;
             font-size: 0.875rem !important;
+            box-shadow: 0 0 10px rgba(221, 51, 51, 0.3) !important;
+            transition: all 0.3s ease !important;
+          }
+          .dashboard-swal-container .dashboard-swal-cancel-button:hover {
+            background: linear-gradient(45deg, #b32, #d33) !important;
+            box-shadow: 0 0 15px rgba(221, 51, 51, 0.5) !important;
           }
 
           /* Responsive adjustments */
@@ -696,6 +791,14 @@ const Dashboard: React.FC = () => {
             }
             .remaining-label {
               font-size: 1.25rem;
+              width: 60px; /* Ajuste para pantallas pequeñas */
+            }
+            .remaining-label .remaining-value {
+              font-size: 1.5rem;
+              min-width: 40px;
+            }
+            .remaining-label .remaining-text {
+              font-size: 0.625rem;
             }
             .progress-bar {
               height: 6px;
@@ -708,20 +811,19 @@ const Dashboard: React.FC = () => {
               font-size: 18px;
             }
             .calorie-goal-input {
-              width: 50px;
+              width: 60px;
               font-size: 0.75rem;
-              padding: 3px 6px;
+              padding: 4px 8px;
             }
             .calorie-goal-button {
-              padding: 3px 6px;
-              font-size: 0.625rem;
+              padding: 4px 8px;
+              font-size: 0.75rem;
             }
             .calorie-goal-text {
               font-size: 0.75rem;
-              margin-left: 4px;
             }
             .calorie-goal-actions {
-              gap: 4px;
+              gap: 6px;
             }
             .remove-goal-text {
               font-size: 0.75rem;
@@ -769,7 +871,7 @@ const Dashboard: React.FC = () => {
         >
           <button
             onClick={handleDatePicker}
-            className="px-6 py-2 bg-[#3B4252] text-white font-semibold rounded-lg date-button hover:bg-[#4B5563] transition duration-300"
+            className="date-button"
           >
             {getDateLabel()}
           </button>
@@ -895,10 +997,10 @@ const Dashboard: React.FC = () => {
                   transition={{ delay: 1.2, duration: 0.8 }}
                   className="remaining-label"
                 >
-                  <div className="text-2xl font-bold sm:text-3xl">
+                  <div className="remaining-value">
                     {remainingCalories > 0 ? remainingCalories : 0}
                   </div>
-                  <div className="text-xs text-gray-400">Restante</div>
+                  <div className="remaining-text">Restante</div>
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
@@ -919,7 +1021,6 @@ const Dashboard: React.FC = () => {
         {/* Progress bars with animation */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {progressData.map((item, index) => {
-            // Explicitly set progress to 0 if value is 0
             const progressValue =
               item.value > 0 && item.max > 0
                 ? Math.min((item.value / item.max) * 100, 100)
@@ -984,7 +1085,7 @@ const Dashboard: React.FC = () => {
               meal.maxCalories > 0 && meal.calories > 0
                 ? Math.min((meal.calories / meal.maxCalories) * 100, 100)
                 : 0;
-            const circumference = 2 * Math.PI * 15; // Radius of the circle is 15
+            const circumference = 2 * Math.PI * 15;
             const strokeDasharray = `${
               (progressPercentage / 100) * circumference
             } ${circumference}`;
@@ -1035,7 +1136,6 @@ const Dashboard: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                {/* Show "+" button only for today */}
                 {foodsData.isToday && (
                   <motion.button
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -1047,7 +1147,7 @@ const Dashboard: React.FC = () => {
                       handleAddFoodClick(meal.type);
                     }}
                   >
-                    <Plus className="h-4 w-4 text-white" />
+                    <Plus className="h-4 w-4 lucide-plus" />
                   </motion.button>
                 )}
               </motion.div>
