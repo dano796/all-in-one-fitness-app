@@ -1,6 +1,6 @@
-import React from 'react';
-import HeroSection from '../components/HeroSection';
-import FeaturesSection from '../components/FeaturesSection';
+import React from "react";
+import HeroSection from "../components/HeroSection";
+import FeaturesSection from "../components/FeaturesSection";
 
 const LandingPage: React.FC = () => {
   return (

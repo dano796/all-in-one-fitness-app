@@ -1,9 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React from "react";
+import { motion } from "framer-motion";
 
 const Loader: React.FC = () => {
-  
-  const word = "ALL    IN    ONE".split('');
+  const word = "ALL    IN    ONE".split("");
 
   const letterVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -11,10 +10,10 @@ const Loader: React.FC = () => {
       opacity: 1,
       y: 0,
       transition: {
-        delay: i * 0.1, 
+        delay: i * 0.1,
         duration: 0.5,
-        repeat: Infinity, 
-        repeatType: 'reverse' as const, 
+        repeat: Infinity,
+        repeatType: "reverse" as const,
       },
     }),
   };

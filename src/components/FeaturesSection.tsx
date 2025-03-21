@@ -5,22 +5,26 @@ const features = [
   {
     icon: <Utensils className="w-8 h-8 text-[#ff9404]" />,
     title: "Conteo de Calorías",
-    description: "Registra tus comidas y monitorea tus macronutrientes diarios de forma sencilla.",
+    description:
+      "Registra tus comidas y monitorea tus macronutrientes diarios de forma sencilla.",
   },
   {
     icon: <Dumbbell className="w-8 h-8 text-[#ff9404]" />,
     title: "Registro de Entrenamientos",
-    description: "Planifica y registra tus rutinas de ejercicio, series y repeticiones.",
+    description:
+      "Planifica y registra tus rutinas de ejercicio, series y repeticiones.",
   },
   {
     icon: <Activity className="w-8 h-8 text-[#ff9404]" />,
     title: "Monitoreo de Pasos",
-    description: "Lleva un registro de tu actividad diaria y calorías quemadas.",
+    description:
+      "Lleva un registro de tu actividad diaria y calorías quemadas.",
   },
   {
     icon: <Droplets className="w-8 h-8 text-[#ff9404]" />,
     title: "Control de Hidratación",
-    description: "Mantén un registro de tu consumo diario de agua y alcanza tus metas.",
+    description:
+      "Mantén un registro de tu consumo diario de agua y alcanza tus metas.",
   },
 ];
 
@@ -34,7 +38,10 @@ const FeaturesSection: React.FC = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <div key={index} className="bg-[#3B4252] text-white rounded-xl p-6 shadow-lg">
+            <div
+              key={index}
+              className="bg-[#3B4252] text-white rounded-xl p-6 shadow-lg"
+            >
               <div className="border rounded-lg w-16 h-16 flex items-center justify-center mb-4">
                 {feature.icon}
               </div>

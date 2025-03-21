@@ -15,7 +15,10 @@ const WaterBottleForm: React.FC = () => {
       return;
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       setError("Debes iniciar sesión para agregar una botella.");
       return;
@@ -25,10 +28,13 @@ const WaterBottleForm: React.FC = () => {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/water/add-bottle", {
-        email: user.email,
-        capacity,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/water/add-bottle",
+        {
+          email: user.email,
+          capacity,
+        }
+      );
 
       await Swal.fire({
         title: "¡Éxito!",
@@ -46,7 +52,8 @@ const WaterBottleForm: React.FC = () => {
       setCapacity(0);
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
-      const errorMessage = axiosError.response?.data?.error || "Error al agregar la botella";
+      const errorMessage =
+        axiosError.response?.data?.error || "Error al agregar la botella";
       setError(errorMessage);
       await Swal.fire({
         title: "¡Error!",

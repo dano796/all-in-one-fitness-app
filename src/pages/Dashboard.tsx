@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,16 +10,16 @@ import {
   Tooltip,
   Legend,
   ArcElement,
-} from 'chart.js';
-import { Doughnut } from 'react-chartjs-2';
-import { Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Progress } from '@/components/ui/progress';
-import axios, { AxiosError } from 'axios';
-import { supabase } from '../lib/supabaseClient';
-import Swal from 'sweetalert2';
-import { motion } from 'framer-motion';
-import GalaxyBackground from '../components/GalaxyBackground';
+} from "chart.js";
+import { Doughnut } from "react-chartjs-2";
+import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Progress } from "@/components/ui/progress";
+import axios, { AxiosError } from "axios";
+import { supabase } from "../lib/supabaseClient";
+import Swal from "sweetalert2";
+import { motion } from "framer-motion";
+import GalaxyBackground from "../components/GalaxyBackground";
 
 ChartJS.register(
   CategoryScale,
@@ -35,9 +35,11 @@ ChartJS.register(
 
 // Function to get the week number
 const getWeekNumber = (dateStr: string) => {
-  const date = new Date(dateStr + 'T00:00:00');
+  const date = new Date(dateStr + "T00:00:00");
   const oneJan = new Date(date.getFullYear(), 0, 1);
-  const days = Math.floor((date.getTime() - oneJan.getTime()) / (24 * 60 * 60 * 1000));
+  const days = Math.floor(
+    (date.getTime() - oneJan.getTime()) / (24 * 60 * 60 * 1000)
+  );
   const weekNumber = Math.ceil((days + oneJan.getDay() + 1) / 7);
   return weekNumber;
 };
@@ -71,19 +73,23 @@ interface FoodsResponse {
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const TIMEZONE = 'America/Bogota';
-  const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+  const TIMEZONE = "America/Bogota";
+  const todayStr = new Date().toLocaleDateString("en-CA", {
+    timeZone: TIMEZONE,
+  });
   const [date, setDate] = React.useState<string>(todayStr);
   const dateInputRef = useRef<HTMLInputElement>(null);
-  const [userEmail, setUserEmail] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>("");
   const [foodsData, setFoodsData] = useState<FoodsResponse>({
     foods: { Desayuno: [], Almuerzo: [], Merienda: [], Cena: [] },
     currentFoodType: null,
     isToday: false,
   });
   const [error, setError] = useState<string | null>(null);
-  const [totalCaloriesGoal, setTotalCaloriesGoal] = useState<number | null>(null);
-  const [customCalorieGoal, setCustomCalorieGoal] = useState<string>('');
+  const [totalCaloriesGoal, setTotalCaloriesGoal] = useState<number | null>(
+    null
+  );
+  const [customCalorieGoal, setCustomCalorieGoal] = useState<string>("");
   const [calorieGoalError, setCalorieGoalError] = useState<string | null>(null);
 
   // Check authentication and fetch user email
@@ -94,22 +100,25 @@ const Dashboard: React.FC = () => {
         error: authError,
       } = await supabase.auth.getUser();
       if (authError || !user) {
-        setError('Debes iniciar sesión para ver el dashboard.');
-        navigate('/login');
+        setError("Debes iniciar sesión para ver el dashboard.");
+        navigate("/login");
       } else {
-        const email = user.email || '';
+        const email = user.email || "";
         setUserEmail(email);
 
         // Fetch user's calorie goal
         try {
-          const response = await axios.get('http://localhost:5000/api/get-calorie-goal', {
-            params: { email },
-          });
+          const response = await axios.get(
+            "http://localhost:5000/api/get-calorie-goal",
+            {
+              params: { email },
+            }
+          );
           if (response.data.calorieGoal) {
             setTotalCaloriesGoal(response.data.calorieGoal);
           }
         } catch (err) {
-          setError('Error al obtener el límite de calorías.');
+          setError("Error al obtener el límite de calorías.");
         }
       }
     };
@@ -120,15 +129,19 @@ const Dashboard: React.FC = () => {
   const fetchFoods = async () => {
     if (!userEmail || !date) return;
     try {
-      const response = await axios.get<FoodsResponse>('http://localhost:5000/api/foods/user', {
-        params: { email: userEmail, date: date },
-      });
+      const response = await axios.get<FoodsResponse>(
+        "http://localhost:5000/api/foods/user",
+        {
+          params: { email: userEmail, date: date },
+        }
+      );
       setFoodsData(response.data);
       setError(null);
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
       setError(
-        axiosError.response?.data?.error || 'Error al consultar las comidas registradas'
+        axiosError.response?.data?.error ||
+          "Error al consultar las comidas registradas"
       );
     }
   };
@@ -141,80 +154,98 @@ const Dashboard: React.FC = () => {
   const handleSetCustomCalorieGoal = async () => {
     const goal = parseInt(customCalorieGoal, 10);
     if (isNaN(goal) || goal < 2000) {
-      setCalorieGoalError('El límite de calorías debe ser un número mayor o igual a 2000.');
+      setCalorieGoalError(
+        "El límite de calorías debe ser un número mayor o igual a 2000."
+      );
       return;
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/set-calorie-goal', {
-        email: userEmail,
-        calorieGoal: goal,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/set-calorie-goal",
+        {
+          email: userEmail,
+          calorieGoal: goal,
+        }
+      );
 
       if (response.data.success) {
         setTotalCaloriesGoal(goal);
-        setCustomCalorieGoal('');
+        setCustomCalorieGoal("");
         setCalorieGoalError(null);
       } else {
-        setCalorieGoalError(response.data.error || 'Error al establecer el límite de calorías.');
+        setCalorieGoalError(
+          response.data.error || "Error al establecer el límite de calorías."
+        );
       }
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
-      setCalorieGoalError(axiosError.response?.data?.error || 'Error al conectar con el servidor. Intenta de nuevo.');
+      setCalorieGoalError(
+        axiosError.response?.data?.error ||
+          "Error al conectar con el servidor. Intenta de nuevo."
+      );
     }
   };
 
   // Handle removing calorie goal with scoped Swal styles
   const handleRemoveCalorieGoal = async () => {
     const result = await Swal.fire({
-      title: 'Seguro de que quiere eliminar su límite?',
-      icon: 'warning',
+      title: "Seguro de que quiere eliminar su límite?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#ff9404',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí',
-      cancelButtonText: 'No',
+      confirmButtonColor: "#ff9404",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí",
+      cancelButtonText: "No",
       customClass: {
-        container: 'dashboard-swal-container',
-        popup: 'dashboard-swal-popup',
-        icon: 'dashboard-swal-icon',
-        title: 'dashboard-swal-title',
-        htmlContainer: 'dashboard-swal-text',
-        confirmButton: 'dashboard-swal-confirm-button',
-        cancelButton: 'dashboard-swal-cancel-button',
+        container: "dashboard-swal-container",
+        popup: "dashboard-swal-popup",
+        icon: "dashboard-swal-icon",
+        title: "dashboard-swal-title",
+        htmlContainer: "dashboard-swal-text",
+        confirmButton: "dashboard-swal-confirm-button",
+        cancelButton: "dashboard-swal-cancel-button",
       },
     });
 
     if (result.isConfirmed) {
       try {
-        const response = await axios.post('http://localhost:5000/api/set-calorie-goal', {
-          email: userEmail,
-          calorieGoal: 0,
-        });
+        const response = await axios.post(
+          "http://localhost:5000/api/set-calorie-goal",
+          {
+            email: userEmail,
+            calorieGoal: 0,
+          }
+        );
 
         if (response.data.success) {
           setTotalCaloriesGoal(null);
           setCalorieGoalError(null);
           Swal.fire({
-            title: 'Límite eliminado',
-            text: 'El límite de calorías ha sido eliminado exitosamente.',
-            icon: 'success',
-            confirmButtonColor: '#ff9404',
+            title: "Límite eliminado",
+            text: "El límite de calorías ha sido eliminado exitosamente.",
+            icon: "success",
+            confirmButtonColor: "#ff9404",
             customClass: {
-              container: 'dashboard-swal-container',
-              popup: 'dashboard-swal-popup',
-              icon: 'dashboard-swal-icon',
-              title: 'dashboard-swal-title',
-              htmlContainer: 'dashboard-swal-text',
-              confirmButton: 'dashboard-swal-confirm-button',
+              container: "dashboard-swal-container",
+              popup: "dashboard-swal-popup",
+              icon: "dashboard-swal-icon",
+              title: "dashboard-swal-title",
+              htmlContainer: "dashboard-swal-text",
+              confirmButton: "dashboard-swal-confirm-button",
             },
           });
         } else {
-          setCalorieGoalError(response.data.error || 'Error al eliminar el límite de calorías.');
+          setCalorieGoalError(
+            response.data.error || "Error al eliminar el límite de calorías."
+          );
         }
       } catch (err) {
         const axiosError = err as AxiosError<{ error?: string }>;
-        setCalorieGoalError(axiosError.response?.data?.error || 'Error al conectar con el servidor. Intenta de nuevo.');
+        setCalorieGoalError(
+          axiosError.response?.data?.error ||
+            "Error al conectar con el servidor. Intenta de nuevo."
+        );
       }
     }
   };
@@ -223,7 +254,7 @@ const Dashboard: React.FC = () => {
   const calculateCaloriesByType = (type: keyof OrganizedFoods) => {
     const foods = foodsData.foods[type] || [];
     return foods.reduce((total, food) => {
-      const calories = parseFloat(food.calorias || '0');
+      const calories = parseFloat(food.calorias || "0");
       return total + (isNaN(calories) ? 0 : calories);
     }, 0);
   };
@@ -238,22 +269,22 @@ const Dashboard: React.FC = () => {
     ];
 
     const totalCalories = allFoods.reduce((total, food) => {
-      const calories = parseFloat(food.calorias || '0');
+      const calories = parseFloat(food.calorias || "0");
       return total + (isNaN(calories) ? 0 : calories);
     }, 0);
 
     const totalCarbs = allFoods.reduce((total, food) => {
-      const carbs = parseFloat(food.carbs || '0');
+      const carbs = parseFloat(food.carbs || "0");
       return total + (isNaN(carbs) ? 0 : carbs);
     }, 0);
 
     const totalProtein = allFoods.reduce((total, food) => {
-      const protein = parseFloat(food.proteina || '0');
+      const protein = parseFloat(food.proteina || "0");
       return total + (isNaN(protein) ? 0 : protein);
     }, 0);
 
     const totalFat = allFoods.reduce((total, food) => {
-      const fat = parseFloat(food.grasas || '0');
+      const fat = parseFloat(food.grasas || "0");
       return total + (isNaN(fat) ? 0 : fat);
     }, 0);
 
@@ -266,10 +297,13 @@ const Dashboard: React.FC = () => {
   };
 
   // Calculated values
-  const { totalCalories, totalCarbs, totalProtein, totalFat } = calculateTotalNutrition();
+  const { totalCalories, totalCarbs, totalProtein, totalFat } =
+    calculateTotalNutrition();
   const consumedCalories = totalCalories;
   const burnedCalories = 0;
-  const remainingCalories = totalCaloriesGoal ? totalCaloriesGoal - consumedCalories : 0;
+  const remainingCalories = totalCaloriesGoal
+    ? totalCaloriesGoal - consumedCalories
+    : 0;
 
   // Calculate meal calorie limits based on totalCaloriesGoal
   const mealCalorieLimits = totalCaloriesGoal
@@ -287,9 +321,15 @@ const Dashboard: React.FC = () => {
       };
 
   // Calculate macronutrient goals based on totalCaloriesGoal
-  const carbGoal = totalCaloriesGoal ? Math.round((totalCaloriesGoal * 0.4) / 4) : 0;
-  const proteinGoal = totalCaloriesGoal ? Math.round((totalCaloriesGoal * 0.3) / 4) : 0;
-  const fatGoal = totalCaloriesGoal ? Math.round((totalCaloriesGoal * 0.3) / 9) : 0;
+  const carbGoal = totalCaloriesGoal
+    ? Math.round((totalCaloriesGoal * 0.4) / 4)
+    : 0;
+  const proteinGoal = totalCaloriesGoal
+    ? Math.round((totalCaloriesGoal * 0.3) / 4)
+    : 0;
+  const fatGoal = totalCaloriesGoal
+    ? Math.round((totalCaloriesGoal * 0.3) / 9)
+    : 0;
 
   // Data for calories chart (visually limited to 100%)
   const caloriesData = {
@@ -299,9 +339,9 @@ const Dashboard: React.FC = () => {
           Math.min(consumedCalories, totalCaloriesGoal || consumedCalories),
           remainingCalories > 0 ? remainingCalories : 0,
         ],
-        backgroundColor: ['#ff9404', '#4B5563'],
+        backgroundColor: ["#ff9404", "#4B5563"],
         borderWidth: 5,
-        borderColor: '#3B4252',
+        borderColor: "#3B4252",
         circumference: 240,
         rotation: 240,
       },
@@ -310,39 +350,39 @@ const Dashboard: React.FC = () => {
 
   // Data for progress bars (visually limited to 100%)
   const progressData = [
-    { name: 'Carbs', value: totalCarbs, max: carbGoal },
-    { name: 'Protein', value: totalProtein, max: proteinGoal },
-    { name: 'Fat', value: totalFat, max: fatGoal },
+    { name: "Carbs", value: totalCarbs, max: carbGoal },
+    { name: "Protein", value: totalProtein, max: proteinGoal },
+    { name: "Fat", value: totalFat, max: fatGoal },
   ];
 
   const meals = [
     {
       id: 1,
-      type: 'Desayuno',
-      calories: calculateCaloriesByType('Desayuno'),
+      type: "Desayuno",
+      calories: calculateCaloriesByType("Desayuno"),
       maxCalories: mealCalorieLimits.Desayuno,
-      icon: '🍞',
+      icon: "🍞",
     },
     {
       id: 2,
-      type: 'Almuerzo',
-      calories: calculateCaloriesByType('Almuerzo'),
+      type: "Almuerzo",
+      calories: calculateCaloriesByType("Almuerzo"),
       maxCalories: mealCalorieLimits.Almuerzo,
-      icon: '🍽️',
+      icon: "🍽️",
     },
     {
       id: 3,
-      type: 'Cena',
-      calories: calculateCaloriesByType('Cena'),
+      type: "Cena",
+      calories: calculateCaloriesByType("Cena"),
       maxCalories: mealCalorieLimits.Cena,
-      icon: '🍳',
+      icon: "🍳",
     },
     {
       id: 4,
-      type: 'Merienda',
-      calories: calculateCaloriesByType('Merienda'),
+      type: "Merienda",
+      calories: calculateCaloriesByType("Merienda"),
       maxCalories: mealCalorieLimits.Merienda,
-      icon: '🍎',
+      icon: "🍎",
     },
   ];
 
@@ -368,14 +408,18 @@ const Dashboard: React.FC = () => {
   };
 
   const getDateLabel = () => {
-    const selectedDate = new Date(date + 'T00:00:00');
-    const today = new Date(todayStr + 'T00:00:00');
+    const selectedDate = new Date(date + "T00:00:00");
+    const today = new Date(todayStr + "T00:00:00");
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
 
-    if (selectedDate.getTime() === today.getTime()) return 'Hoy';
-    if (selectedDate.getTime() === yesterday.getTime()) return 'Ayer';
-    return selectedDate.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    if (selectedDate.getTime() === today.getTime()) return "Hoy";
+    if (selectedDate.getTime() === yesterday.getTime()) return "Ayer";
+    return selectedDate.toLocaleDateString("es-CO", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   };
 
   const getWeek = () => {
@@ -779,12 +823,15 @@ const Dashboard: React.FC = () => {
                 className="calorie-goal-input"
                 placeholder="2000+"
               />
-              <button onClick={handleSetCustomCalorieGoal} className="calorie-goal-button">
+              <button
+                onClick={handleSetCustomCalorieGoal}
+                className="calorie-goal-button"
+              >
                 Agregar
               </button>
               <p className="text-sm text-gray-400">o</p>
               <p
-                onClick={() => navigate('/calorie-calculator')}
+                onClick={() => navigate("/calorie-calculator")}
                 className="calorie-goal-text"
               >
                 Ir a la calculadora
@@ -824,7 +871,7 @@ const Dashboard: React.FC = () => {
             <Doughnut
               data={caloriesData}
               options={{
-                cutout: '85%',
+                cutout: "85%",
                 plugins: { legend: { display: false } },
                 maintainAspectRatio: true,
               }}
@@ -837,7 +884,9 @@ const Dashboard: React.FC = () => {
                   transition={{ delay: 1.0, duration: 0.8 }}
                   className="eaten-label"
                 >
-                  <div className="text-lg font-bold sm:text-xl">{consumedCalories}</div>
+                  <div className="text-lg font-bold sm:text-xl">
+                    {consumedCalories}
+                  </div>
                   <div className="text-xs text-gray-400">Consumido</div>
                 </motion.div>
                 <motion.div
@@ -857,7 +906,9 @@ const Dashboard: React.FC = () => {
                   transition={{ delay: 1.0, duration: 0.8 }}
                   className="burned-label"
                 >
-                  <div className="text-lg font-bold sm:text-xl">{burnedCalories}</div>
+                  <div className="text-lg font-bold sm:text-xl">
+                    {burnedCalories}
+                  </div>
                   <div className="text-xs text-gray-400">Quemado</div>
                 </motion.div>
               </div>
@@ -869,7 +920,10 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {progressData.map((item, index) => {
             // Explicitly set progress to 0 if value is 0
-            const progressValue = item.value > 0 && item.max > 0 ? Math.min((item.value / item.max) * 100, 100) : 0;
+            const progressValue =
+              item.value > 0 && item.max > 0
+                ? Math.min((item.value / item.max) * 100, 100)
+                : 0;
 
             return (
               <motion.div
@@ -882,8 +936,12 @@ const Dashboard: React.FC = () => {
                 <div className="text-xs text-gray-400 mb-1">{item.name}</div>
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: '100%' }}
-                  transition={{ delay: 1.2 + index * 0.3, duration: 1.5, ease: "easeOut" }}
+                  animate={{ width: "100%" }}
+                  transition={{
+                    delay: 1.2 + index * 0.3,
+                    duration: 1.5,
+                    ease: "easeOut",
+                  }}
                 >
                   <Progress
                     value={progressValue}
@@ -922,9 +980,14 @@ const Dashboard: React.FC = () => {
         </motion.h2>
         <div className="space-y-2">
           {meals.map((meal, index) => {
-            const progressPercentage = meal.maxCalories > 0 && meal.calories > 0 ? Math.min((meal.calories / meal.maxCalories) * 100, 100) : 0;
+            const progressPercentage =
+              meal.maxCalories > 0 && meal.calories > 0
+                ? Math.min((meal.calories / meal.maxCalories) * 100, 100)
+                : 0;
             const circumference = 2 * Math.PI * 15; // Radius of the circle is 15
-            const strokeDasharray = `${(progressPercentage / 100) * circumference} ${circumference}`;
+            const strokeDasharray = `${
+              (progressPercentage / 100) * circumference
+            } ${circumference}`;
 
             return (
               <motion.div
@@ -953,14 +1016,20 @@ const Dashboard: React.FC = () => {
                           strokeDasharray={circumference}
                           initial={{ strokeDasharray: `0 ${circumference}` }}
                           animate={{ strokeDasharray }}
-                          transition={{ delay: 2.0 + index * 0.3, duration: 1.5, ease: "easeOut" }}
+                          transition={{
+                            delay: 2.0 + index * 0.3,
+                            duration: 1.5,
+                            ease: "easeOut",
+                          }}
                         />
                       )}
                     </svg>
                     <span className="circular-progress-icon">{meal.icon}</span>
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-white">{meal.type}</h3>
+                    <h3 className="text-sm font-semibold text-white">
+                      {meal.type}
+                    </h3>
                     <p className="text-xs text-gray-400">
                       {meal.calories}/{meal.maxCalories} kcal
                     </p>
@@ -989,6 +1058,5 @@ const Dashboard: React.FC = () => {
     </div>
   );
 };
-
 
 export default Dashboard;

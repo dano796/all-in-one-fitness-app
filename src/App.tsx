@@ -26,20 +26,22 @@ import CalorieCalculator from "./components/CalorieCalculator";
 import CalorieCalculatorLayout from "./layouts/CalorieCalculatorLayout";
 import FoodQuantityAdjust from "./components/FoodQuantityAdjust";
 import Loader from "./components/Loader";
+import OneRMCalculator from "./components/OneRepMaxCalculator";
+import OneRMCalculatorLayout from "./layouts/OneRMCalculatorLayout";
 
 // Protected Route Component
-const ProtectedRoute: React.FC<{ children: React.ReactNode; user: unknown }> = ({
-  children,
-  user,
-}) => {
+const ProtectedRoute: React.FC<{
+  children: React.ReactNode;
+  user: unknown;
+}> = ({ children, user }) => {
   return user ? <>{children}</> : <Navigate to="/login" />;
 };
 
 // Food Search Protected Route Component
-const FoodSearchProtectedRoute: React.FC<{ children: React.ReactNode; user: unknown }> = ({
-  children,
-  user,
-}) => {
+const FoodSearchProtectedRoute: React.FC<{
+  children: React.ReactNode;
+  user: unknown;
+}> = ({ children, user }) => {
   const location = useLocation();
 
   if (!user) {
@@ -63,19 +65,21 @@ function App() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      
+
       // Simular retraso de 2 segundos (2000ms) para todas las rutas
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       setUser(user);
       setIsLoading(false);
     };
     fetchUserWithDelay();
 
     // Escuchar cambios en la autenticación
-    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null);
-    });
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
 
     // Limpiar el listener al desmontar
     return () => {
@@ -152,6 +156,16 @@ function App() {
             <CalorieCalculatorLayout>
               <CalorieCalculator />
             </CalorieCalculatorLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/onerm-calculator"
+        element={
+          <ProtectedRoute user={user}>
+            <OneRMCalculatorLayout>
+              <OneRMCalculator />
+            </OneRMCalculatorLayout>
           </ProtectedRoute>
         }
       />

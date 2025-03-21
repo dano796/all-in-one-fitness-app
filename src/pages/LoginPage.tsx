@@ -15,10 +15,16 @@ const LoginPage = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
 
         if (error) {
-          console.log("Error al verificar la sesión (esperado si no hay sesión):", error.message);
+          console.log(
+            "Error al verificar la sesión (esperado si no hay sesión):",
+            error.message
+          );
           // No redirigimos si no hay sesión, simplemente continuamos
           return;
         }
@@ -37,13 +43,16 @@ const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input, password }),
-      });
+      const response = await fetch(
+        import.meta.env.VITE_BACKEND_URL + "/api/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ input, password }),
+        }
+      );
       const result = await response.json();
-  
+
       if (result.error) {
         await Swal.fire({
           title: "¡Error!",
@@ -59,7 +68,10 @@ const LoginPage = () => {
         });
       } else if (result.success) {
         // Configurar el token en Supabase
-        await supabase.auth.setSession({ access_token: result.token, refresh_token: "dummy-refresh-token" }); // Necesitas el refresh_token del backend
+        await supabase.auth.setSession({
+          access_token: result.token,
+          refresh_token: "dummy-refresh-token",
+        }); // Necesitas el refresh_token del backend
         const { data } = await supabase.auth.getUser();
         if (data.user) {
           navigate("/Dashboard", { replace: true });
@@ -114,12 +126,17 @@ const LoginPage = () => {
       )}
 
       <div className="max-w-md mx-auto">
-        <h1 className="text-4xl font-bold mb-8 pb-3 text-center">Iniciar Sesión</h1>
+        <h1 className="text-4xl font-bold mb-8 pb-3 text-center">
+          Iniciar Sesión
+        </h1>
 
         <div className="bg-[#3B4252] rounded-xl p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
-              <label htmlFor="input" className="block text-sm font-medium text-gray-300 mb-1">
+              <label
+                htmlFor="input"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
                 Usuario o Correo
               </label>
               <input
@@ -134,7 +151,10 @@ const LoginPage = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
                 Contraseña
               </label>
               <div className="relative">
@@ -168,7 +188,10 @@ const LoginPage = () => {
           <div className="mt-6 text-center text-sm text-gray-400 space-y-2">
             <div>
               ¿No tienes una cuenta?{" "}
-              <Link to="/registro" className="text-[#ff9404] font-medium hover:underline">
+              <Link
+                to="/registro"
+                className="text-[#ff9404] font-medium hover:underline"
+              >
                 Regístrate aquí
               </Link>
             </div>

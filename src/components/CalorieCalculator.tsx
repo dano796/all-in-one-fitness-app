@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import axios from "axios";
-import { Calculator } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, Toaster } from "react-hot-toast";
-import GalaxyBackground from "./GalaxyBackground";
 
 // Estilos personalizados para scrollbar, dropdown y radio buttons
 const customStyles = `
@@ -72,7 +70,9 @@ const CalorieCalculator: React.FC = () => {
   const [height, setHeight] = useState<number | undefined>(180);
   const [weight, setWeight] = useState<number | undefined>(80);
   const [activityLevel, setActivityLevel] = useState<string>("moderate");
-  const [calories, setCalories] = useState<{ [key: string]: number } | null>(null);
+  const [calories, setCalories] = useState<{ [key: string]: number } | null>(
+    null
+  );
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -110,7 +110,10 @@ const CalorieCalculator: React.FC = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
         setError("Debes iniciar sesión para usar la calculadora.");
         navigate("/login");
@@ -170,16 +173,21 @@ const CalorieCalculator: React.FC = () => {
     setSelectedGoal(goal);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/set-calorie-goal", {
-        email: userEmail,
-        calorieGoal: calorieValue,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/set-calorie-goal",
+        {
+          email: userEmail,
+          calorieGoal: calorieValue,
+        }
+      );
 
       if (response.data.success) {
         toast.success("Calorie goal set successfully!");
         navigate("/dashboard");
       } else {
-        setError(response.data.error || "Error al establecer el límite de calorías.");
+        setError(
+          response.data.error || "Error al establecer el límite de calorías."
+        );
         toast.error(response.data.error || "Error setting calorie goal.");
       }
     } catch (err) {
@@ -191,8 +199,7 @@ const CalorieCalculator: React.FC = () => {
   const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value ? Number(e.target.value) : undefined;
     if (value !== undefined) {
-      const clampedValue = Math.max(15, Math.min(80, value));
-      setAge(clampedValue);
+      setAge(value);
     } else {
       setAge(undefined);
     }
@@ -227,9 +234,8 @@ const CalorieCalculator: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative w-full">
-      <GalaxyBackground /> {/* Partículas solo en esta página */}
       <style>{customStyles}</style>
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster position="top-center" reverseOrder={false} />
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -237,7 +243,6 @@ const CalorieCalculator: React.FC = () => {
         className="max-w-2xl w-full bg-[#3B4252] rounded-xl shadow-md p-8 relative z-10"
       >
         <h1 className="text-4xl font-bold text-center text-white mb-8 flex items-center justify-center gap-3">
-          <Calculator className="w-8 h-8 text-[#ff9404]" />
           Calorie Calculator
         </h1>
 
@@ -359,12 +364,22 @@ const CalorieCalculator: React.FC = () => {
               className="w-full px-4 py-3 bg-[#282c3c] border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-[#ff9404] focus:border-transparent transition-all duration-300 hover:bg-[#2f3447]"
             >
               <option value="basal">Basal Metabolic Rate (BMR)</option>
-              <option value="sedentary">Sedentary: little or no exercise</option>
+              <option value="sedentary">
+                Sedentary: little or no exercise
+              </option>
               <option value="light">Light: exercise 1-3 times/week</option>
-              <option value="moderate">Moderate: exercise 4-5 times/week</option>
-              <option value="active">Active: daily exercise or intense 3-4 times/week</option>
-              <option value="veryActive">Very Active: intense exercise 6-7 times/week</option>
-              <option value="extraActive">Extra Active: very intense daily or physical job</option>
+              <option value="moderate">
+                Moderate: exercise 4-5 times/week
+              </option>
+              <option value="active">
+                Active: daily exercise or intense 3-4 times/week
+              </option>
+              <option value="veryActive">
+                Very Active: intense exercise 6-7 times/week
+              </option>
+              <option value="extraActive">
+                Extra Active: very intense daily or physical job
+              </option>
             </select>
           </motion.div>
 
@@ -417,33 +432,42 @@ const CalorieCalculator: React.FC = () => {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-medium text-[#ff9404] mb-4 text-center">
+                  <h3 className="text-lg font-medium mb-4 text-center">
                     Weight Loss Estimates
                   </h3>
                   <div className="space-y-4">
-                    {["maintain", "mildLoss", "loss", "extremeLoss"].map((goal) => (
-                      <motion.div
-                        key={goal}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-[#2f3447] ${
-                          selectedGoal === goal ? "border-2 border-[#ff9404]" : "border border-gray-600"
-                        }`}
-                        onClick={() => handleGoalSelect(goal, calories[goal])}
-                      >
-                        <p className="font-medium text-[#ff9404]">{goalLabels[goal]}</p>
-                        <p className="text-lg text-gray-200">
-                          {calories[goal]} kcal/day (
-                          {Math.round((calories[goal] / calories.maintain) * 100)}%)
-                        </p>
-                      </motion.div>
-                    ))}
+                    {["maintain", "mildLoss", "loss", "extremeLoss"].map(
+                      (goal) => (
+                        <motion.div
+                          key={goal}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-[#2f3447] ${
+                            selectedGoal === goal
+                              ? "border-2 border-[#ff9404]"
+                              : "border border-gray-600"
+                          }`}
+                          onClick={() => handleGoalSelect(goal, calories[goal])}
+                        >
+                          <p className="font-medium text-[#ff9404]">
+                            {goalLabels[goal]}
+                          </p>
+                          <p className="text-lg text-gray-200">
+                            {calories[goal]} kcal/day (
+                            {Math.round(
+                              (calories[goal] / calories.maintain) * 100
+                            )}
+                            %)
+                          </p>
+                        </motion.div>
+                      )
+                    )}
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium text-[#ff9404] mb-4 text-center">
+                  <h3 className="text-lg font-medium mb-4 text-center">
                     Weight Gain Estimates
                   </h3>
                   <div className="space-y-4">
@@ -454,14 +478,21 @@ const CalorieCalculator: React.FC = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                         className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-[#2f3447] ${
-                          selectedGoal === goal ? "border-2 border-[#ff9404]" : "border border-gray-600"
+                          selectedGoal === goal
+                            ? "border-2 border-[#ff9404]"
+                            : "border border-gray-600"
                         }`}
                         onClick={() => handleGoalSelect(goal, calories[goal])}
                       >
-                        <p className="font-medium text-[#ff9404]">{goalLabels[goal]}</p>
+                        <p className="font-medium text-[#ff9404]">
+                          {goalLabels[goal]}
+                        </p>
                         <p className="text-lg text-gray-200">
                           {calories[goal]} kcal/day (
-                          {Math.round((calories[goal] / calories.maintain) * 100)}%)
+                          {Math.round(
+                            (calories[goal] / calories.maintain) * 100
+                          )}
+                          %)
                         </p>
                       </motion.div>
                     ))}

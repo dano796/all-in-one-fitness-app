@@ -27,7 +27,10 @@ const FoodSearch: React.FC = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
         setError("Debes iniciar sesión para buscar alimentos.");
       } else {
@@ -37,14 +40,21 @@ const FoodSearch: React.FC = () => {
     checkAuth();
   }, []);
 
-  const handleSearch = async (e: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLInputElement>) => {
+  const handleSearch = async (
+    e:
+      | React.MouseEvent<HTMLButtonElement>
+      | React.KeyboardEvent<HTMLInputElement>
+  ) => {
     e.preventDefault();
     if (!query.trim()) {
       setError("Por favor ingresa un término de búsqueda");
       return;
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       setError("Debes iniciar sesión para buscar alimentos.");
       return;
@@ -55,9 +65,12 @@ const FoodSearch: React.FC = () => {
     setHasSearched(true);
 
     try {
-      const response = await axios.get("http://localhost:5000/api/foods/search", {
-        params: { query, max_results: 10 },
-      });
+      const response = await axios.get(
+        "http://localhost:5000/api/foods/search",
+        {
+          params: { query, max_results: 10 },
+        }
+      );
       const foodResults = response.data.foods?.food || [];
       setFoods(Array.isArray(foodResults) ? foodResults : []);
       if (foodResults.length === 0) {
@@ -79,7 +92,9 @@ const FoodSearch: React.FC = () => {
       setError(axiosError.response?.data?.error || "Error al buscar alimentos");
       await Swal.fire({
         title: "¡Error!",
-        text: axiosError.response?.data?.error || "Ocurrió un error al buscar alimentos.",
+        text:
+          axiosError.response?.data?.error ||
+          "Ocurrió un error al buscar alimentos.",
         icon: "error",
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
@@ -105,18 +120,24 @@ const FoodSearch: React.FC = () => {
   };
 
   const handleAddFood = async (food: Food) => {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       setError("Debes iniciar sesión para agregar alimentos.");
       return;
     }
 
     if (!type) {
-      setError("No se especificó el tipo de comida (Desayuno, Almuerzo, etc.).");
+      setError(
+        "No se especificó el tipo de comida (Desayuno, Almuerzo, etc.)."
+      );
       return;
     }
 
-    const normalizedType = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+    const normalizedType =
+      type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
     const requestBody = {
       email: user.email,
@@ -127,7 +148,10 @@ const FoodSearch: React.FC = () => {
     };
 
     try {
-      const response = await axios.post("http://localhost:5000/api/foods/add", requestBody);
+      const response = await axios.post(
+        "http://localhost:5000/api/foods/add",
+        requestBody
+      );
 
       await Swal.fire({
         title: "¡Éxito!",
@@ -148,10 +172,13 @@ const FoodSearch: React.FC = () => {
       setQuery("");
       setError(null);
       setHasSearched(false);
-      navigate(`/dashboard?type=${normalizedType}`, { state: { fromAddButton: true } });
+      navigate(`/dashboard?type=${normalizedType}`, {
+        state: { fromAddButton: true },
+      });
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
-      const errorMessage = axiosError.response?.data?.error || "Error al agregar el alimento";
+      const errorMessage =
+        axiosError.response?.data?.error || "Error al agregar el alimento";
       setError(errorMessage);
       await Swal.fire({
         title: "¡Error!",
@@ -198,7 +225,9 @@ const FoodSearch: React.FC = () => {
           <button
             onClick={handleSearch}
             disabled={loading}
-            className={`flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             {loading ? "Buscando..." : "Buscar"}
           </button>
@@ -217,7 +246,9 @@ const FoodSearch: React.FC = () => {
                 >
                   <div className="flex-1">
                     <p className="text-sm font-medium">{food.food_name}</p>
-                    <p className="text-xs text-gray-300">{food.food_description}</p>
+                    <p className="text-xs text-gray-300">
+                      {food.food_description}
+                    </p>
                   </div>
                   <button
                     onClick={(e) => {
@@ -235,7 +266,9 @@ const FoodSearch: React.FC = () => {
           </div>
         )}
         {!loading && hasSearched && foods.length === 0 && !error && (
-          <p className="text-gray-300 text-center text-xs mt-2">No se encontraron resultados</p>
+          <p className="text-gray-300 text-center text-xs mt-2">
+            No se encontraron resultados
+          </p>
         )}
       </div>
     </div>

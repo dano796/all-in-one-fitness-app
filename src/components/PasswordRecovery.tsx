@@ -12,11 +12,14 @@ const PasswordRecovery = ({ onClose }: PasswordRecoveryProps) => {
 
   const handleRecovery = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/reset-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
+    const response = await fetch(
+      import.meta.env.VITE_BACKEND_URL + "/api/reset-password",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      }
+    );
     const result = await response.json();
 
     if (result.error) {
@@ -38,14 +41,22 @@ const PasswordRecovery = ({ onClose }: PasswordRecoveryProps) => {
         className="bg-[#282c3c] p-6 rounded-lg shadow-lg max-w-md w-full text-white"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-2xl font-bold mb-4 text-center">Recuperar Contraseña</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          Recuperar Contraseña
+        </h2>
 
         {mensaje && (
           <div className="mb-4 text-center">
             {tipoMensaje === "success" ? (
-              <CheckCircle className="w-12 h-12 mx-auto animate-bounce" style={{ color: "#FF9500" }} />
+              <CheckCircle
+                className="w-12 h-12 mx-auto animate-bounce"
+                style={{ color: "#FF9500" }}
+              />
             ) : (
-              <XCircle className="w-12 h-12 mx-auto animate-bounce" style={{ color: "#FF3B30" }} />
+              <XCircle
+                className="w-12 h-12 mx-auto animate-bounce"
+                style={{ color: "#FF3B30" }}
+              />
             )}
             <p className="mt-2 font-semibold">{mensaje}</p>
           </div>
@@ -53,7 +64,10 @@ const PasswordRecovery = ({ onClose }: PasswordRecoveryProps) => {
 
         <form onSubmit={handleRecovery} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
               Correo Electrónico
             </label>
             <input

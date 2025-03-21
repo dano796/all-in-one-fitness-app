@@ -10,7 +10,9 @@ const Footer = () => {
 
         <div className="flex items-center space-x-2">
           <Dumbbell className="h-6 w-6 text-[#ff9404]" />
-          <span className="text-lg font-semibold pr-2">All In One Fitness App</span>
+          <span className="text-lg font-semibold pr-2">
+            All In One Fitness App
+          </span>
         </div>
       </div>
     </footer>
