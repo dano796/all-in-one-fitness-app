@@ -24,6 +24,7 @@ import WaterTracker from "./components/WaterTracker";
 import ComidasRegistro from "./pages/RegisteredFoods";
 import CalorieCalculator from "./components/CalorieCalculator";
 import CalorieCalculatorLayout from "./layouts/CalorieCalculatorLayout";
+import FoodQuantityAdjust from "./components/FoodQuantityAdjust";
 
 // Componente de protección para rutas generales
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -97,12 +98,10 @@ const FoodSearchProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
     );
   }
 
-  // Verificar si el usuario está autenticado
   if (!user) {
     return <Navigate to="/login" />;
   }
 
-  // Verificar si la navegación proviene del botón + (mirando el estado)
   const fromAddButton = location.state?.fromAddButton || false;
   if (!fromAddButton) {
     return <Navigate to="/dashboard" />;
@@ -145,6 +144,14 @@ function App() {
                 <FoodSearch />
               </FoodSearchLayout>
             </FoodSearchProtectedRoute>
+          }
+        />
+        <Route
+          path="/food-quantity-adjust"
+          element={
+            <FoodSearchLayout>
+              <FoodQuantityAdjust />
+            </FoodSearchLayout>
           }
         />
         <Route

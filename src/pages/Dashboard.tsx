@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import axios, { AxiosError } from 'axios';
 import { supabase } from '../lib/supabaseClient';
+import Swal from 'sweetalert2';
 
 ChartJS.register(
   CategoryScale,
@@ -39,7 +40,7 @@ const getWeekNumber = (dateStr: string) => {
   return weekNumber;
 };
 
-// Interfaces para los datos de las comidas
+// Interfaces for food data
 interface RegisteredFood {
   id_comida: string;
   nombre_comida: string;
@@ -79,32 +80,47 @@ const Dashboard: React.FC = () => {
     isToday: false,
   });
   const [error, setError] = useState<string | null>(null);
+  const [totalCaloriesGoal, setTotalCaloriesGoal] = useState<number | null>(null);
+  const [customCalorieGoal, setCustomCalorieGoal] = useState<string>('');
+  const [calorieGoalError, setCalorieGoalError] = useState<string | null>(null);
 
-  // Verificar autenticación y obtener el email del usuario
+  // Check authentication and fetch user email
   useEffect(() => {
     const checkAuth = async () => {
       const {
         data: { user },
+        error: authError,
       } = await supabase.auth.getUser();
-      if (error || !user) {
+      if (authError || !user) {
         setError('Debes iniciar sesión para ver el dashboard.');
+        navigate('/login');
       } else {
-        setUserEmail(user.email || '');
+        const email = user.email || '';
+        setUserEmail(email);
+
+        // Fetch user's calorie goal
+        try {
+          const response = await axios.get('http://localhost:5000/api/get-calorie-goal', {
+            params: { email },
+          });
+          if (response.data.calorieGoal) {
+            setTotalCaloriesGoal(response.data.calorieGoal);
+          }
+        } catch (err) {
+          setError('Error al obtener el límite de calorías.');
+        }
       }
     };
     checkAuth();
-  }, []);
+  }, [navigate]);
 
-  // Consultar las comidas registradas
+  // Fetch registered foods
   const fetchFoods = async () => {
     if (!userEmail || !date) return;
     try {
-      const response = await axios.get<FoodsResponse>(
-        'http://localhost:5000/api/foods/user',
-        {
-          params: { email: userEmail, date: date },
-        }
-      );
+      const response = await axios.get<FoodsResponse>('http://localhost:5000/api/foods/user', {
+        params: { email: userEmail, date: date },
+      });
       setFoodsData(response.data);
       setError(null);
     } catch (err) {
@@ -119,7 +135,89 @@ const Dashboard: React.FC = () => {
     if (userEmail && date) fetchFoods();
   }, [userEmail, date]);
 
-  // Calcular calorías por tipo de comida
+  // Handle setting custom calorie goal
+  const handleSetCustomCalorieGoal = async () => {
+    const goal = parseInt(customCalorieGoal, 10);
+    if (isNaN(goal) || goal < 2000) {
+      setCalorieGoalError('El límite de calorías debe ser un número mayor o igual a 2000.');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/set-calorie-goal', {
+        email: userEmail,
+        calorieGoal: goal,
+      });
+
+      if (response.data.success) {
+        setTotalCaloriesGoal(goal);
+        setCustomCalorieGoal('');
+        setCalorieGoalError(null);
+      } else {
+        setCalorieGoalError(response.data.error || 'Error al establecer el límite de calorías.');
+      }
+    } catch (err) {
+      const axiosError = err as AxiosError<{ error?: string }>;
+      setCalorieGoalError(axiosError.response?.data?.error || 'Error al conectar con el servidor. Intenta de nuevo.');
+    }
+  };
+
+  // Handle removing calorie goal with scoped Swal styles
+  const handleRemoveCalorieGoal = async () => {
+    const result = await Swal.fire({
+      title: 'Seguro de que quiere eliminar su límite?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ff9404',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí',
+      cancelButtonText: 'No',
+      customClass: {
+        container: 'dashboard-swal-container', // Unique class for scoping
+        popup: 'dashboard-swal-popup',
+        icon: 'dashboard-swal-icon',
+        title: 'dashboard-swal-title',
+        htmlContainer: 'dashboard-swal-text',
+        confirmButton: 'dashboard-swal-confirm-button',
+        cancelButton: 'dashboard-swal-cancel-button',
+      },
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await axios.post('http://localhost:5000/api/set-calorie-goal', {
+          email: userEmail,
+          calorieGoal: 0,
+        });
+
+        if (response.data.success) {
+          setTotalCaloriesGoal(null);
+          setCalorieGoalError(null);
+          Swal.fire({
+            title: 'Límite eliminado',
+            text: 'El límite de calorías ha sido eliminado exitosamente.',
+            icon: 'success',
+            confirmButtonColor: '#ff9404',
+            customClass: {
+              container: 'dashboard-swal-container', // Unique class for scoping
+              popup: 'dashboard-swal-popup',
+              icon: 'dashboard-swal-icon',
+              title: 'dashboard-swal-title',
+              htmlContainer: 'dashboard-swal-text',
+              confirmButton: 'dashboard-swal-confirm-button',
+            },
+          });
+        } else {
+          setCalorieGoalError(response.data.error || 'Error al eliminar el límite de calorías.');
+        }
+      } catch (err) {
+        const axiosError = err as AxiosError<{ error?: string }>;
+        setCalorieGoalError(axiosError.response?.data?.error || 'Error al conectar con el servidor. Intenta de nuevo.');
+      }
+    }
+  };
+
+  // Calculate calories by meal type
   const calculateCaloriesByType = (type: keyof OrganizedFoods) => {
     const foods = foodsData.foods[type] || [];
     return foods.reduce((total, food) => {
@@ -128,7 +226,7 @@ const Dashboard: React.FC = () => {
     }, 0);
   };
 
-  // Calcular valores totales para progressData
+  // Calculate total nutrition values
   const calculateTotalNutrition = () => {
     const allFoods = [
       ...foodsData.foods.Desayuno,
@@ -159,24 +257,46 @@ const Dashboard: React.FC = () => {
 
     return {
       totalCalories,
-      totalCarbs: Math.floor(totalCarbs), // Redondeamos a entero
-      totalProtein: Math.floor(totalProtein), // Redondeamos a entero
-      totalFat: Math.floor(totalFat), // Redondeamos a entero
+      totalCarbs: Math.floor(totalCarbs),
+      totalProtein: Math.floor(totalProtein),
+      totalFat: Math.floor(totalFat),
     };
   };
 
-  // Valores calculados
-  const totalCaloriesGoal = 2381; // Este valor podría venir del backend o ser configurable
+  // Calculated values
   const { totalCalories, totalCarbs, totalProtein, totalFat } = calculateTotalNutrition();
   const consumedCalories = totalCalories;
-  const burnedCalories = 0; // Este valor podría venir del backend si se implementa
-  const remainingCalories = totalCaloriesGoal - consumedCalories;
+  const burnedCalories = 0;
+  const remainingCalories = totalCaloriesGoal ? totalCaloriesGoal - consumedCalories : 0;
 
-  // Datos para el gráfico de calorías
+  // Calculate meal calorie limits based on totalCaloriesGoal
+  const mealCalorieLimits = totalCaloriesGoal
+    ? {
+        Desayuno: Math.round(totalCaloriesGoal * 0.3),
+        Almuerzo: Math.round(totalCaloriesGoal * 0.4),
+        Merienda: Math.round(totalCaloriesGoal * 0.05),
+        Cena: Math.round(totalCaloriesGoal * 0.25),
+      }
+    : {
+        Desayuno: 0,
+        Almuerzo: 0,
+        Merienda: 0,
+        Cena: 0,
+      };
+
+  // Calculate macronutrient goals based on totalCaloriesGoal
+  const carbGoal = totalCaloriesGoal ? Math.round((totalCaloriesGoal * 0.4) / 4) : 0;
+  const proteinGoal = totalCaloriesGoal ? Math.round((totalCaloriesGoal * 0.3) / 4) : 0;
+  const fatGoal = totalCaloriesGoal ? Math.round((totalCaloriesGoal * 0.3) / 9) : 0;
+
+  // Data for calories chart (visually limited to 100%)
   const caloriesData = {
     datasets: [
       {
-        data: [consumedCalories, remainingCalories],
+        data: [
+          Math.min(consumedCalories, totalCaloriesGoal || consumedCalories),
+          remainingCalories > 0 ? remainingCalories : 0,
+        ],
         backgroundColor: ['#ff9404', '#4B5563'],
         borderWidth: 5,
         borderColor: '#3B4252',
@@ -186,20 +306,12 @@ const Dashboard: React.FC = () => {
     ],
   };
 
-  // Datos para las barras de progreso
+  // Data for progress bars (visually limited to 100%)
   const progressData = [
-    { name: 'Carbs', value: totalCarbs, max: 232 },
-    { name: 'Protein', value: totalProtein, max: 174 },
-    { name: 'Fat', value: totalFat, max: 77 },
+    { name: 'Carbs', value: totalCarbs, max: carbGoal },
+    { name: 'Protein', value: totalProtein, max: proteinGoal },
+    { name: 'Fat', value: totalFat, max: fatGoal },
   ];
-
-  // Calorías por tipo de comida con límites específicos
-  const mealCalorieLimits = {
-    Desayuno: 714,
-    Almuerzo: 953,
-    Merienda: 119,
-    Cena: 595,
-  };
 
   const meals = [
     {
@@ -237,7 +349,6 @@ const Dashboard: React.FC = () => {
   };
 
   const handleAddFoodClick = (type: string) => {
-    // Pasamos un estado adicional para indicar que la navegación proviene del botón +
     navigate(`/foodsearch?type=${type.toLowerCase()}&date=${date}`, {
       state: { fromAddButton: true },
     });
@@ -273,6 +384,7 @@ const Dashboard: React.FC = () => {
     <div className="p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-auto -mt-12">
       <style>
         {`
+          /* General styles remain unchanged */
           html, body {
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -369,6 +481,104 @@ const Dashboard: React.FC = () => {
             flex-direction: column;
             align-items: center;
           }
+          .calorie-goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+          }
+          .calorie-goal-input {
+            width: 60px;
+            padding: 4px 8px;
+            font-size: 0.875rem;
+            border: 1px solid #6B7280;
+            border-radius: 4px;
+            background: #282c3c;
+            color: white;
+            text-align: center;
+          }
+          .calorie-goal-button {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            background-color: #ff9404;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+          }
+          .calorie-goal-button:hover {
+            color: #1C1C1E;
+          }
+          .calorie-goal-text {
+            color: #ff9404;
+            cursor: pointer;
+            transition: text-decoration 0.3s ease;
+            font-size: 0.875rem;
+            margin-left: 8px;
+          }
+          .calorie-goal-text:hover {
+            text-decoration: underline;
+          }
+          .calorie-goal-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .remove-goal-text {
+            color: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: color 0.3s ease;
+          }
+          .remove-goal-text:hover {
+            color: #ff4444;
+          }
+
+          /* Scoped SweetAlert2 styles for Dashboard */
+          .dashboard-swal-container .dashboard-swal-popup {
+            background-color: #3B4252 !important;
+            color: #fff !important;
+          }
+          .dashboard-swal-container .dashboard-swal-icon {
+            color: #ff9404 !important;
+          }
+          .dashboard-swal-container .swal2-warning {
+            border-color: #ff9404 !important;
+            color: #ff9404 !important;
+          }
+          .dashboard-swal-container .swal2-success {
+            border-color: #ff9404 !important;
+          }
+          .dashboard-swal-container .swal2-success .swal2-success-ring {
+            border-color: #ff9404 !important;
+          }
+          .dashboard-swal-container .dashboard-swal-title {
+            color: #fff !important;
+            font-size: 1.5rem !important;
+          }
+          .dashboard-swal-container .dashboard-swal-text {
+            color: #fff !important;
+            font-size: 1rem !important;
+          }
+          .dashboard-swal-container .dashboard-swal-confirm-button {
+            background-color: #ff9404 !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 20px !important;
+            border-radius: 4px !important;
+            font-size: 0.875rem !important;
+          }
+          .dashboard-swal-container .dashboard-swal-cancel-button {
+            background-color: #d33 !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 20px !important;
+            border-radius: 4px !important;
+            font-size: 0.875rem !important;
+          }
+
+          /* Responsive adjustments */
           @media (max-width: 640px) {
             .date-button {
               font-size: 0.875rem;
@@ -403,6 +613,36 @@ const Dashboard: React.FC = () => {
             .progress-bar {
               height: 6px;
             }
+            .calorie-goal-input {
+              width: 50px;
+              font-size: 0.75rem;
+              padding: 3px 6px;
+            }
+            .calorie-goal-button {
+              padding: 3px 6px;
+              font-size: 0.625rem;
+            }
+            .calorie-goal-text {
+              font-size: 0.75rem;
+              margin-left: 4px;
+            }
+            .calorie-goal-actions {
+              gap: 4px;
+            }
+            .remove-goal-text {
+              font-size: 0.75rem;
+            }
+            .dashboard-swal-container .dashboard-swal-title {
+              font-size: 1.25rem !important;
+            }
+            .dashboard-swal-container .dashboard-swal-text {
+              font-size: 0.875rem !important;
+            }
+            .dashboard-swal-container .dashboard-swal-confirm-button,
+            .dashboard-swal-container .dashboard-swal-cancel-button {
+              padding: 8px 16px !important;
+              font-size: 0.75rem !important;
+            }
           }
           @media (min-width: 641px) {
             .date-button {
@@ -436,16 +676,48 @@ const Dashboard: React.FC = () => {
 
       {/* Summary Section */}
       <div className="summary-section">
-        <h2 className="text-sm font-semibold mb-4">Resumen</h2>
+        <div className="calorie-goal-header">
+          <h2 className="text-sm font-semibold">Resumen</h2>
+          {totalCaloriesGoal ? (
+            <p onClick={handleRemoveCalorieGoal} className="remove-goal-text">
+              Eliminar límite
+            </p>
+          ) : (
+            <div className="calorie-goal-actions">
+              <input
+                type="number"
+                id="customCalorieGoal"
+                value={customCalorieGoal}
+                onChange={(e) => setCustomCalorieGoal(e.target.value)}
+                className="calorie-goal-input"
+                placeholder="2000+"
+              />
+              <button onClick={handleSetCustomCalorieGoal} className="calorie-goal-button">
+                Agregar
+              </button>
+              <p className="text-sm text-gray-400">o</p>
+              <p
+                onClick={() => navigate('/calorie-calculator')}
+                className="calorie-goal-text"
+              >
+                Ir a la calculadora
+              </p>
+            </div>
+          )}
+        </div>
+        {error && <p className="text-red-400 mb-4 text-center">{error}</p>}
+        {calorieGoalError && (
+          <p className="text-red-400 mb-4 text-center text-xs">{calorieGoalError}</p>
+        )}
+
+        {/* Calories chart and progress bars */}
         <div className="relative flex justify-center mb-8 -mt-7">
           <div className="relative w-48 h-48 sm:w-56 sm:h-56">
             <Doughnut
               data={caloriesData}
               options={{
                 cutout: '85%',
-                plugins: {
-                  legend: { display: false },
-                },
+                plugins: { legend: { display: false } },
                 maintainAspectRatio: true,
               }}
             />
@@ -456,7 +728,9 @@ const Dashboard: React.FC = () => {
                   <div className="text-xs text-gray-400">Consumido</div>
                 </div>
                 <div className="remaining-label">
-                  <div className="text-2xl font-bold sm:text-3xl">{remainingCalories}</div>
+                  <div className="text-2xl font-bold sm:text-3xl">
+                    {remainingCalories > 0 ? remainingCalories : 0}
+                  </div>
                   <div className="text-xs text-gray-400">Restante</div>
                 </div>
                 <div className="burned-label">
@@ -472,7 +746,7 @@ const Dashboard: React.FC = () => {
             <div key={item.name} className="text-center">
               <div className="text-xs text-gray-400 mb-1">{item.name}</div>
               <Progress
-                value={(item.value / item.max) * 100}
+                value={item.max > 0 ? Math.min((item.value / item.max) * 100, 100) : 0}
                 className="w-full h-2 progress-bar"
               />
               <div className="text-xs text-gray-400 mt-1">
@@ -487,35 +761,39 @@ const Dashboard: React.FC = () => {
       <div className="nutrition-section mt-6">
         <h2 className="text-sm font-semibold mb-4">Nutrición</h2>
         <div className="space-y-2">
-          {meals.map((meal) => (
-            <div
-              key={meal.id}
-              className="meal-item flex items-center justify-between cursor-pointer hover:bg-[#4B5563] transition duration-200"
-              onClick={() => handleMealClick(meal.type)}
-            >
-              <div className="flex items-center space-x-3">
-                <span className="text-xl">{meal.icon}</span>
-                <div>
-                  <h3 className="text-sm font-semibold">{meal.type}</h3>
-                  <p className="text-xs text-gray-400">
-                    {meal.calories}/{meal.maxCalories} kcal
-                  </p>
+          {meals.map((meal) => {
+            const isMealLimitExceeded = totalCaloriesGoal ? meal.calories > meal.maxCalories : false;
+            const isTotalLimitExceeded = totalCaloriesGoal ? remainingCalories <= 0 : false;
+
+            return (
+              <div
+                key={meal.id}
+                className="meal-item flex items-center justify-between cursor-pointer hover:bg-[#4B5563] transition duration-200"
+                onClick={() => handleMealClick(meal.type)}
+              >
+                <div className="flex items-center space-x-3">
+                  <span className="text-xl">{meal.icon}</span>
+                  <div>
+                    <h3 className="text-sm font-semibold">{meal.type}</h3>
+                    <p className="text-xs text-gray-400">
+                      {meal.calories}/{meal.maxCalories} kcal
+                    </p>
+                  </div>
                 </div>
+                {foodsData.isToday && totalCaloriesGoal && !isMealLimitExceeded && !isTotalLimitExceeded && (
+                  <button
+                    className="add-food-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddFoodClick(meal.type);
+                    }}
+                  >
+                    <Plus className="h-4 w-4 text-white" />
+                  </button>
+                )}
               </div>
-              {/* Mostrar el botón de agregar solo si es "hoy" */}
-              {foodsData.isToday && (
-                <button
-                  className="add-food-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddFoodClick(meal.type);
-                  }}
-                >
-                  <Plus className="h-4 w-4 text-white" />
-                </button>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

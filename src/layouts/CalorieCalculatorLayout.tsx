@@ -1,5 +1,5 @@
 import React from "react";
-import Sidebar from "../components/CalorieCalculator"; // Asegúrate de que la ruta sea correcta
+import Sidebar from '../components/Sidebar';
 
 interface CalorieCalculatorLayoutProps {
   children: React.ReactNode;
@@ -19,3 +19,6 @@ const CalorieCalculatorLayout: React.FC<CalorieCalculatorLayoutProps> = ({
 };
 
 export default CalorieCalculatorLayout;
+
+
+

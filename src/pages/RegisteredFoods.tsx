@@ -1,3 +1,4 @@
+// RegisteredFoods.tsx
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
 import { supabase } from '../lib/supabaseClient';
@@ -7,6 +8,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 // Interfaces actualizadas
 interface RegisteredFood {
+  id_registro: string;
   id_comida: string;
   nombre_comida: string;
   descripcion: string;
@@ -39,7 +41,7 @@ const RegisteredFoods: React.FC = () => {
   });
   const [userEmail, setUserEmail] = useState<string>('');
   const [selectedFood, setSelectedFood] = useState<{
-    id_comida: string;
+    id_registro: string;
     index: number;
     type: keyof OrganizedFoods;
   } | null>(null);
@@ -49,7 +51,7 @@ const RegisteredFoods: React.FC = () => {
     ? (searchParams.get('type')!.charAt(0).toUpperCase() +
        searchParams.get('type')!.slice(1).toLowerCase()) as keyof OrganizedFoods
     : null;
-  const dateParam = searchParams.get('date') || date; // Use date from query param or current date
+  const dateParam = searchParams.get('date') || date;
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -86,7 +88,7 @@ const RegisteredFoods: React.FC = () => {
   };
 
   useEffect(() => {
-    setDate(dateParam); // Update local date state with query param or current date
+    setDate(dateParam);
     if (userEmail && dateParam) fetchFoods();
   }, [userEmail, dateParam]);
 
@@ -97,7 +99,7 @@ const RegisteredFoods: React.FC = () => {
     }
     try {
       const response = await axios.delete('http://localhost:5000/api/foods/delete', {
-        data: { email: userEmail, food_id: selectedFood.id_comida },
+        data: { email: userEmail, id_registro: selectedFood.id_registro },
       });
       await Swal.fire({
         title: '¡Éxito!',
@@ -145,7 +147,7 @@ const RegisteredFoods: React.FC = () => {
           <div className="space-y-4 max-h-[calc(5*5rem)] overflow-y-auto no-scrollbar">
             {foods.map((food, index) => (
               <div
-                key={`${food.id_comida}-${index}`}
+                key={`${food.id_registro}-${index}`}
                 className={`p-4 rounded-xl border border-gray-600 ${
                   selectedFood?.index === index && selectedFood.type === type
                     ? 'bg-[#4B5563]'
@@ -153,18 +155,15 @@ const RegisteredFoods: React.FC = () => {
                 } transition duration-200`}
               >
                 <div className="flex items-center space-x-4">
-                  {/* Mostrar el input de radio solo si es "hoy" */}
-                  {foodsData.isToday && (
-                    <input
-                      type="radio"
-                      name="registeredFoodSelection"
-                      checked={selectedFood?.index === index && selectedFood.type === type}
-                      onChange={() => {
-                        setSelectedFood({ id_comida: food.id_comida, index, type });
-                      }}
-                      className="w-5 h-5 text-[#FF6B35]"
-                    />
-                  )}
+                  <input
+                    type="radio"
+                    name="registeredFoodSelection"
+                    checked={selectedFood?.index === index && selectedFood.type === type}
+                    onChange={() => {
+                      setSelectedFood({ id_registro: food.id_registro, index, type });
+                    }}
+                    className="w-5 h-5 text-[#FF6B35]"
+                  />
                   <div className="flex-1">
                     <p className="text-md font-medium text-white">{food.nombre_comida}</p>
                     <p className="text-sm text-gray-300">{food.descripcion}</p>
@@ -229,7 +228,6 @@ const RegisteredFoods: React.FC = () => {
 
       {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
 
-      {/* Renderizar solo la sección seleccionada */}
       {typeParam && (
         <div className="w-full max-w-2xl">
           {renderFoodSection(typeParam, typeParam)}
@@ -239,8 +237,7 @@ const RegisteredFoods: React.FC = () => {
         <p className="text-gray-400 text-sm text-center">Por favor selecciona un tipo de comida desde el dashboard.</p>
       )}
 
-      {/* Botón Eliminar: Solo se muestra si es "hoy" y hay una comida seleccionada */}
-      {selectedFood && foodsData.isToday && (
+      {selectedFood && ( // Eliminada la restricción de isToday
         <div className="mt-6 text-right w-full max-w-2xl sticky bottom-0 z-10">
           <button
             onClick={handleDeleteFood}

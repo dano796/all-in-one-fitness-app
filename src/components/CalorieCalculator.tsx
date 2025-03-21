@@ -1,15 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabaseClient";
+import axios from "axios";
 import { Calculator } from "lucide-react";
 
 const CalorieCalculator: React.FC = () => {
+  const navigate = useNavigate();
   const [age, setAge] = useState<number | undefined>(18);
   const [gender, setGender] = useState<"male" | "female">("male");
   const [height, setHeight] = useState<number | undefined>(180);
   const [weight, setWeight] = useState<number | undefined>(80);
   const [activityLevel, setActivityLevel] = useState<string>("moderate");
-  const [calories, setCalories] = useState<{ [key: string]: number } | null>(
-    null
-  );
+  const [calories, setCalories] = useState<{ [key: string]: number } | null>(null);
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
 
   const activityMultipliers = {
     basal: 1.2,
@@ -30,6 +35,29 @@ const CalorieCalculator: React.FC = () => {
     gain: 1.19,
     fastGain: 1.38,
   };
+
+  const goalLabels: { [key: string]: string } = {
+    maintain: "Maintain Weight",
+    mildLoss: "Mild Weight Loss (0.25 kg/week)",
+    loss: "Weight Loss (0.5 kg/week)",
+    extremeLoss: "Extreme Weight Loss (1 kg/week)",
+    mildGain: "Mild Weight Gain (0.25 kg/week)",
+    gain: "Weight Gain (0.5 kg/week)",
+    fastGain: "Fast Weight Gain (1 kg/week)",
+  };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        setError("Debes iniciar sesión para usar la calculadora.");
+        navigate("/login");
+      } else {
+        setUserEmail(user.email || "");
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   const calculateCalories = () => {
     if (
@@ -62,6 +90,30 @@ const CalorieCalculator: React.FC = () => {
     }
 
     setCalories(goalCalories);
+  };
+
+  const handleGoalSelect = async (goal: string, calorieValue: number) => {
+    if (!userEmail) {
+      setError("Debes estar autenticado para seleccionar un objetivo.");
+      return;
+    }
+
+    setSelectedGoal(goal);
+
+    try {
+      const response = await axios.post("http://localhost:5000/api/set-calorie-goal", {
+        email: userEmail,
+        calorieGoal: calorieValue,
+      });
+
+      if (response.data.success) {
+        navigate("/dashboard");
+      } else {
+        setError(response.data.error || "Error al establecer el límite de calorías.");
+      }
+    } catch (err) {
+      setError("Error al conectar con el servidor. Intenta de nuevo.");
+    }
   };
 
   const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,6 +159,8 @@ const CalorieCalculator: React.FC = () => {
         <h1 className="text-5xl font-bold mb-12 text-center text-white flex items-center justify-center">
           Calorie Calculator
         </h1>
+
+        {error && <p className="text-red-400 mb-4 text-center">{error}</p>}
 
         <div className="bg-[#3B4252] rounded-xl p-6 shadow-md">
           <form
@@ -247,38 +301,23 @@ const CalorieCalculator: React.FC = () => {
                       Weight Loss Estimates
                     </h3>
                     <div className="space-y-4">
-                      <div className="bg-[#282c3c] p-4 rounded-lg">
-                        <p className="font-medium text-[#ff9404]">
-                          Maintain Weight
-                        </p>
-                        <p className="text-lg">
-                          {calories.maintain} kcal/day (100%)
-                        </p>
-                      </div>
-                      <div className="bg-[#282c3c] p-4 rounded-lg">
-                        <p className="font-medium text-[#ff9404]">
-                          Mild Weight Loss (0.25 kg/week)
-                        </p>
-                        <p className="text-lg">
-                          {calories.mildLoss} kcal/day (91%)
-                        </p>
-                      </div>
-                      <div className="bg-[#282c3c] p-4 rounded-lg">
-                        <p className="font-medium text-[#ff9404]">
-                          Weight Loss (0.5 kg/week)
-                        </p>
-                        <p className="text-lg">
-                          {calories.loss} kcal/day (81%)
-                        </p>
-                      </div>
-                      <div className="bg-[#282c3c] p-4 rounded-lg">
-                        <p className="font-medium text-[#ff9404]">
-                          Extreme Weight Loss (1 kg/week)
-                        </p>
-                        <p className="text-lg">
-                          {calories.extremeLoss} kcal/day (62%)
-                        </p>
-                      </div>
+                      {["maintain", "mildLoss", "loss", "extremeLoss"].map((goal) => (
+                        <div
+                          key={goal}
+                          className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition duration-200 ${
+                            selectedGoal === goal ? "border-2 border-[#ff9404]" : ""
+                          }`}
+                          onClick={() => handleGoalSelect(goal, calories[goal])}
+                        >
+                          <p className="font-medium text-[#ff9404]">
+                            {goalLabels[goal]}
+                          </p>
+                          <p className="text-lg">
+                            {calories[goal]} kcal/day (
+                            {Math.round((calories[goal] / calories.maintain) * 100)}%)
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -287,30 +326,23 @@ const CalorieCalculator: React.FC = () => {
                       Weight Gain Estimates
                     </h3>
                     <div className="space-y-4">
-                      <div className="bg-[#282c3c] p-4 rounded-lg">
-                        <p className="font-medium text-[#ff9404]">
-                          Mild Weight Gain (0.25 kg/week)
-                        </p>
-                        <p className="text-lg">
-                          {calories.mildGain} kcal/day (109%)
-                        </p>
-                      </div>
-                      <div className="bg-[#282c3c] p-4 rounded-lg">
-                        <p className="font-medium text-[#ff9404]">
-                          Weight Gain (0.5 kg/week)
-                        </p>
-                        <p className="text-lg">
-                          {calories.gain} kcal/day (119%)
-                        </p>
-                      </div>
-                      <div className="bg-[#282c3c] p-4 rounded-lg">
-                        <p className="font-medium text-[#ff9404]">
-                          Fast Weight Gain (1 kg/week)
-                        </p>
-                        <p className="text-lg">
-                          {calories.fastGain} kcal/day (138%)
-                        </p>
-                      </div>
+                      {["mildGain", "gain", "fastGain"].map((goal) => (
+                        <div
+                          key={goal}
+                          className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition duration-200 ${
+                            selectedGoal === goal ? "border-2 border-[#ff9404]" : ""
+                          }`}
+                          onClick={() => handleGoalSelect(goal, calories[goal])}
+                        >
+                          <p className="font-medium text-[#ff9404]">
+                            {goalLabels[goal]}
+                          </p>
+                          <p className="text-lg">
+                            {calories[goal]} kcal/day (
+                            {Math.round((calories[goal] / calories.maintain) * 100)}%)
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
