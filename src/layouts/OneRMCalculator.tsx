@@ -1,11 +1,11 @@
 import React from "react";
 import Sidebar from "../components/Sidebar";
 
-interface CalorieCalculatorLayoutProps {
+interface OneRMCalculatorLayoutProps {
   children: React.ReactNode;
 }
 
-const CalorieCalculatorLayout: React.FC<CalorieCalculatorLayoutProps> = ({
+const OneRMCalculatorLayout: React.FC<OneRMCalculatorLayoutProps> = ({
   children,
 }) => {
   return (
@@ -18,4 +18,4 @@ const CalorieCalculatorLayout: React.FC<CalorieCalculatorLayoutProps> = ({
   );
 };
 
-export default CalorieCalculatorLayout;
+export default OneRMCalculatorLayout;

@@ -25,6 +25,8 @@ import ComidasRegistro from "./pages/RegisteredFoods";
 import CalorieCalculator from "./components/CalorieCalculator";
 import CalorieCalculatorLayout from "./layouts/CalorieCalculatorLayout";
 import FoodQuantityAdjust from "./components/FoodQuantityAdjust";
+import OneRMCalculator from "./components/OneRepMaxCalculator";
+import OneRMCalculatorLayout from "./layouts/OneRMCalculator";
 
 // Componente de protección para rutas generales
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -181,6 +183,16 @@ function App() {
               <CalorieCalculatorLayout>
                 <CalorieCalculator />
               </CalorieCalculatorLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/onerm-calculator"
+          element={
+            <ProtectedRoute>
+              <OneRMCalculatorLayout>
+                <OneRMCalculator />
+              </OneRMCalculatorLayout>
             </ProtectedRoute>
           }
         />

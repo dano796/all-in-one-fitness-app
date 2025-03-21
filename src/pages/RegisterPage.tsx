@@ -35,7 +35,10 @@ const RegisterPage = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
         if (error) return;
         if (user) navigate("/Dashboard", { replace: true });
       } catch (err) {
@@ -57,7 +60,12 @@ const RegisterPage = () => {
       hasNumber,
       hasSpecialChar,
       isLongEnough,
-      isValid: hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar && isLongEnough,
+      isValid:
+        hasUpperCase &&
+        hasLowerCase &&
+        hasNumber &&
+        hasSpecialChar &&
+        isLongEnough,
     };
   };
 
@@ -95,11 +103,14 @@ const RegisterPage = () => {
       return;
     }
     try {
-      const response = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario, correo, contraseña }),
-      });
+      const response = await fetch(
+        import.meta.env.VITE_BACKEND_URL + "/api/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario, correo, contraseña }),
+        }
+      );
       const result = await response.json();
       if (result.error) {
         await Swal.fire({
@@ -156,7 +167,9 @@ const RegisterPage = () => {
     setShowPassword(!showPassword);
   };
 
-  const toggleConfirmPasswordVisibility = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const toggleConfirmPasswordVisibility = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault();
     setShowConfirmPassword(!showConfirmPassword);
   };
@@ -169,7 +182,12 @@ const RegisterPage = () => {
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
-    if (passwordContainerRef.current && e.relatedTarget instanceof Node && passwordContainerRef.current.contains(e.relatedTarget)) return;
+    if (
+      passwordContainerRef.current &&
+      e.relatedTarget instanceof Node &&
+      passwordContainerRef.current.contains(e.relatedTarget)
+    )
+      return;
     setIsPasswordFocused(false);
   };
 
@@ -183,7 +201,9 @@ const RegisterPage = () => {
   return (
     <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
       <div className="max-w-md mx-auto">
-        <h1 className="text-4xl font-bold mb-8 pb-3 text-center">Crear Cuenta</h1>
+        <h1 className="text-4xl font-bold mb-8 pb-3 text-center">
+          Crear Cuenta
+        </h1>
         <div className="bg-[#3B4252] rounded-xl p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleRegister}>
             <div>
@@ -207,7 +227,13 @@ const RegisterPage = () => {
               />
             </div>
             <div>
-              <div className="relative" ref={passwordContainerRef} onFocus={handleFocus} onBlur={handleBlur} tabIndex={-1}>
+              <div
+                className="relative"
+                ref={passwordContainerRef}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                tabIndex={-1}
+              >
                 <input
                   type={showPassword ? "text" : "password"}
                   value={contraseña}
@@ -222,63 +248,135 @@ const RegisterPage = () => {
                   className="absolute inset-y-0 right-0 flex items-center pr-3"
                   style={{ top: "50%", transform: "translateY(-50%)" }}
                 >
-                  {showPassword ? <EyeOff size={20} className="text-gray-400 hover:text-[#ff9400]" /> : <Eye size={20} className="text-gray-400 hover:text-[#ff9400]" />}
+                  {showPassword ? (
+                    <EyeOff
+                      size={20}
+                      className="text-gray-400 hover:text-[#ff9400]"
+                    />
+                  ) : (
+                    <Eye
+                      size={20}
+                      className="text-gray-400 hover:text-[#ff9400]"
+                    />
+                  )}
                 </button>
                 <div
                   className={`absolute top-full left-0 mt-2 text-sm w-full transition-all duration-300 ease-in-out z-10 ${
-                    isPasswordFocused ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
+                    isPasswordFocused
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 -translate-y-2 pointer-events-none"
                   }`}
                 >
                   <ul className="list-none pl-2 space-y-1 bg-[#3B4252] p-4 rounded-lg shadow-md">
                     <li className="flex items-center">
                       <span
                         className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border border-gray-500 ${
-                          validatePassword(contraseña).hasUpperCase ? "bg-gray-300 border-gray-300" : "bg-transparent"
+                          validatePassword(contraseña).hasUpperCase
+                            ? "bg-gray-300 border-gray-300"
+                            : "bg-transparent"
                         }`}
                       >
-                        {validatePassword(contraseña).hasUpperCase && <FaCheck className="text-black text-[8px]" />}
+                        {validatePassword(contraseña).hasUpperCase && (
+                          <FaCheck className="text-black text-[8px]" />
+                        )}
                       </span>
-                      <span className={validatePassword(contraseña).hasUpperCase ? "text-gray-300" : "text-gray-400"}>Letra Mayúscula</span>
+                      <span
+                        className={
+                          validatePassword(contraseña).hasUpperCase
+                            ? "text-gray-300"
+                            : "text-gray-400"
+                        }
+                      >
+                        Letra Mayúscula
+                      </span>
                     </li>
                     <li className="flex items-center">
                       <span
                         className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border border-gray-500 ${
-                          validatePassword(contraseña).hasLowerCase ? "bg-gray-300 border-gray-300" : "bg-transparent"
+                          validatePassword(contraseña).hasLowerCase
+                            ? "bg-gray-300 border-gray-300"
+                            : "bg-transparent"
                         }`}
                       >
-                        {validatePassword(contraseña).hasLowerCase && <FaCheck className="text-black text-[8px]" />}
+                        {validatePassword(contraseña).hasLowerCase && (
+                          <FaCheck className="text-black text-[8px]" />
+                        )}
                       </span>
-                      <span className={validatePassword(contraseña).hasLowerCase ? "text-gray-300" : "text-gray-400"}>Letra Minúscula</span>
+                      <span
+                        className={
+                          validatePassword(contraseña).hasLowerCase
+                            ? "text-gray-300"
+                            : "text-gray-400"
+                        }
+                      >
+                        Letra Minúscula
+                      </span>
                     </li>
                     <li className="flex items-center">
                       <span
                         className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border border-gray-500 ${
-                          validatePassword(contraseña).hasNumber ? "bg-gray-300 border-gray-300" : "bg-transparent"
+                          validatePassword(contraseña).hasNumber
+                            ? "bg-gray-300 border-gray-300"
+                            : "bg-transparent"
                         }`}
                       >
-                        {validatePassword(contraseña).hasNumber && <FaCheck className="text-black text-[8px]" />}
+                        {validatePassword(contraseña).hasNumber && (
+                          <FaCheck className="text-black text-[8px]" />
+                        )}
                       </span>
-                      <span className={validatePassword(contraseña).hasNumber ? "text-gray-300" : "text-gray-400"}>Número</span>
+                      <span
+                        className={
+                          validatePassword(contraseña).hasNumber
+                            ? "text-gray-300"
+                            : "text-gray-400"
+                        }
+                      >
+                        Número
+                      </span>
                     </li>
                     <li className="flex items-center">
                       <span
                         className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border border-gray-500 ${
-                          validatePassword(contraseña).hasSpecialChar ? "bg-gray-300 border-gray-300" : "bg-transparent"
+                          validatePassword(contraseña).hasSpecialChar
+                            ? "bg-gray-300 border-gray-300"
+                            : "bg-transparent"
                         }`}
                       >
-                        {validatePassword(contraseña).hasSpecialChar && <FaCheck className="text-black text-[8px]" />}
+                        {validatePassword(contraseña).hasSpecialChar && (
+                          <FaCheck className="text-black text-[8px]" />
+                        )}
                       </span>
-                      <span className={validatePassword(contraseña).hasSpecialChar ? "text-gray-300" : "text-gray-400"}>Carácter Especial (e.g. !@#$%)</span>
+                      <span
+                        className={
+                          validatePassword(contraseña).hasSpecialChar
+                            ? "text-gray-300"
+                            : "text-gray-400"
+                        }
+                      >
+                        Carácter Especial (e.g. !@#$%)
+                      </span>
                     </li>
                     <li className="flex items-center">
                       <span
                         className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border border-gray-500 ${
-                          validatePassword(contraseña).isLongEnough ? "bg-gray-300 border-gray-300" : "bg-transparent"
+                          validatePassword(contraseña).isLongEnough
+                            ? "bg-gray-300 border-gray-300"
+                            : "bg-transparent"
                         }`}
                       >
-                        {validatePassword(contraseña).isLongEnough && <FaCheck className="text-black text-[8px]" />}
+                        {validatePassword(contraseña).isLongEnough && (
+                          <FaCheck className="text-black text-[8px]" />
+                        )}
                       </span>
-                      <span className={validatePassword(contraseña).isLongEnough ? "text-gray-300" : "text-gray-400"}>8 Caracteres o Más</span>
+                      <span
+                        className={
+                          validatePassword(contraseña).isLongEnough
+                            ? "text-gray-300"
+                            : "text-gray-400"
+                        }
+                      >
+                        8 Caracteres o Más
+                      </span>
                     </li>
                   </ul>
                 </div>
@@ -299,7 +397,17 @@ const RegisterPage = () => {
                 className="absolute inset-y-0 right-0 flex items-center pr-3"
                 style={{ top: "50%", transform: "translateY(-50%)" }}
               >
-                {showConfirmPassword ? <EyeOff size={20} className="text-gray-400 hover:text-[#ff9400]" /> : <Eye size={20} className="text-gray-400 hover:text-[#ff9400]" />}
+                {showConfirmPassword ? (
+                  <EyeOff
+                    size={20}
+                    className="text-gray-400 hover:text-[#ff9400]"
+                  />
+                ) : (
+                  <Eye
+                    size={20}
+                    className="text-gray-400 hover:text-[#ff9400]"
+                  />
+                )}
               </button>
             </div>
             <div className="flex items-center text-sm">
@@ -313,27 +421,46 @@ const RegisterPage = () => {
                 }}
                 className="hidden"
               />
-              <label htmlFor="terms" className="flex items-center cursor-pointer">
+              <label
+                htmlFor="terms"
+                className="flex items-center cursor-pointer"
+              >
                 <span
                   className={`w-4 h-4 mr-2 rounded border border-gray-500 flex items-center justify-center transition-all duration-200 ${
-                    acceptedTerms ? "bg-[#ff9400] border-[#ff9400]" : "bg-[#282c3c]"
+                    acceptedTerms
+                      ? "bg-[#ff9400] border-[#ff9400]"
+                      : "bg-[#282c3c]"
                   }`}
                 >
-                  {acceptedTerms && <FaCheck className="text-[#282c3c] text-[10px]" />}
+                  {acceptedTerms && (
+                    <FaCheck className="text-[#282c3c] text-[10px]" />
+                  )}
                 </span>
                 <span
-                  className={`${highlightTerms ? "text-[#ff9400]" : acceptedTerms ? "text-gray-300" : "text-gray-400"} hover:text-[#ff9400] transition-colors duration-200`}
+                  className={`${
+                    highlightTerms
+                      ? "text-[#ff9400]"
+                      : acceptedTerms
+                      ? "text-gray-300"
+                      : "text-gray-400"
+                  } hover:text-[#ff9400] transition-colors duration-200`}
                 >
                   Aceptar términos y condiciones
                 </span>
               </label>
             </div>
-            <button type="submit" className="w-full py-2 bg-[#ff9400] text-white font-semibold rounded-lg hover:bg-[#ff9400]">
+            <button
+              type="submit"
+              className="w-full py-2 bg-[#ff9400] text-white font-semibold rounded-lg hover:bg-[#ff9400]"
+            >
               Crear Cuenta
             </button>
           </form>
           <p className="mt-4 text-center text-gray-400">
-            ¿Ya tienes una cuenta? <Link to="/login" className="text-[#ff9400] hover:underline">Inicia sesión aquí</Link>
+            ¿Ya tienes una cuenta?{" "}
+            <Link to="/login" className="text-[#ff9400] hover:underline">
+              Inicia sesión aquí
+            </Link>
           </p>
         </div>
       </div>

@@ -37,19 +37,19 @@ const WaterTracker: React.FC = () => {
       });
 
       return (
-        <div key={index} className="relative w-20 h-40">
+        <div key={index} className="relative w-16 h-32">
           {/* Botella vacía */}
           <animated.img
             src={EmptyBottle}
             alt="Empty Bottle"
-            className="absolute w-20 h-40 object-contain"
+            className="absolute w-16 h-32 object-contain"
             style={{ opacity: emptySpring.opacity }}
           />
           {/* Botella llena */}
           <animated.img
             src={FilledBottle}
             alt="Filled Bottle"
-            className="absolute w-20 h-40 object-contain"
+            className="absolute w-16 h-32 object-contain"
             style={{ opacity: filledSpring.opacity }}
           />
         </div>
@@ -57,44 +57,47 @@ const WaterTracker: React.FC = () => {
     });
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#282c3c]">
-      <div className="bg-[#3B4252] rounded-lg p-8 shadow-lg text-center">
-        <h2 className="text-2xl font-semibold text-white mb-6">
-          Control de Consumo de Agua
-        </h2>
-        <p className="text-base text-gray-300 mb-8">
-          Botellas consumidas: {filledBottles}/{totalBottles}
-        </p>
+    <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white min-h-screen">
+      <div className="max-w-2xl mx-auto w-full">
+        <h1 className="text-5xl font-bold mb-12 text-center text-white">
+          Water Tracker
+        </h1>
 
-        {/* Visualización de botellas */}
-        <div className="flex flex-wrap justify-center gap-6 mb-10">
-          {bottles}
-        </div>
+        <div className="bg-[#3B4252] rounded-xl p-6 shadow-md">
+          <p className="text-sm font-medium text-white mb-4 text-center">
+            Botellas consumidas: {filledBottles}/{totalBottles}
+          </p>
 
-        {/* Botones */}
-        <div className="flex justify-center space-x-6">
-          <button
-            onClick={handleRemoveBottle}
-            disabled={filledBottles === 0}
-            className={`px-6 py-3 bg-[#ff9404] text-white font-semibold rounded-lg text-xl ${
-              filledBottles === 0
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:text-[#1C1C1E]"
-            } transition duration-300`}
-          >
-            -
-          </button>
-          <button
-            onClick={handleAddBottle}
-            disabled={filledBottles === totalBottles}
-            className={`px-6 py-3 bg-[#ff9404] text-white font-semibold rounded-lg text-xl ${
-              filledBottles === totalBottles
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:text-[#1C1C1E]"
-            } transition duration-300`}
-          >
-            +
-          </button>
+          {/* Visualización de botellas */}
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            {bottles}
+          </div>
+
+          {/* Botones */}
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={handleRemoveBottle}
+              disabled={filledBottles === 0}
+              className={`w-12 h-12 bg-[#ff9404] text-white font-extrabold rounded-lg flex items-center justify-center ${
+                filledBottles === 0
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:text-[#1C1C1E]"
+              } transition duration-300`}
+            >
+              -
+            </button>
+            <button
+              onClick={handleAddBottle}
+              disabled={filledBottles === totalBottles}
+              className={`w-12 h-12 bg-[#ff9404] text-white font-bold rounded-lg flex items-center justify-center ${
+                filledBottles === totalBottles
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:text-[#1C1C1E]"
+              } transition duration-300`}
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
     </div>

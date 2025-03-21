@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import axios from "axios";
-import { Calculator } from "lucide-react";
 
 const CalorieCalculator: React.FC = () => {
   const navigate = useNavigate();
@@ -11,7 +10,9 @@ const CalorieCalculator: React.FC = () => {
   const [height, setHeight] = useState<number | undefined>(180);
   const [weight, setWeight] = useState<number | undefined>(80);
   const [activityLevel, setActivityLevel] = useState<string>("moderate");
-  const [calories, setCalories] = useState<{ [key: string]: number } | null>(null);
+  const [calories, setCalories] = useState<{ [key: string]: number } | null>(
+    null
+  );
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +49,10 @@ const CalorieCalculator: React.FC = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
         setError("Debes iniciar sesión para usar la calculadora.");
         navigate("/login");
@@ -101,15 +105,20 @@ const CalorieCalculator: React.FC = () => {
     setSelectedGoal(goal);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/set-calorie-goal", {
-        email: userEmail,
-        calorieGoal: calorieValue,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/set-calorie-goal",
+        {
+          email: userEmail,
+          calorieGoal: calorieValue,
+        }
+      );
 
       if (response.data.success) {
         navigate("/dashboard");
       } else {
-        setError(response.data.error || "Error al establecer el límite de calorías.");
+        setError(
+          response.data.error || "Error al establecer el límite de calorías."
+        );
       }
     } catch (err) {
       setError("Error al conectar con el servidor. Intenta de nuevo.");
@@ -301,23 +310,32 @@ const CalorieCalculator: React.FC = () => {
                       Weight Loss Estimates
                     </h3>
                     <div className="space-y-4">
-                      {["maintain", "mildLoss", "loss", "extremeLoss"].map((goal) => (
-                        <div
-                          key={goal}
-                          className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition duration-200 ${
-                            selectedGoal === goal ? "border-2 border-[#ff9404]" : ""
-                          }`}
-                          onClick={() => handleGoalSelect(goal, calories[goal])}
-                        >
-                          <p className="font-medium text-[#ff9404]">
-                            {goalLabels[goal]}
-                          </p>
-                          <p className="text-lg">
-                            {calories[goal]} kcal/day (
-                            {Math.round((calories[goal] / calories.maintain) * 100)}%)
-                          </p>
-                        </div>
-                      ))}
+                      {["maintain", "mildLoss", "loss", "extremeLoss"].map(
+                        (goal) => (
+                          <div
+                            key={goal}
+                            className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition duration-200 ${
+                              selectedGoal === goal
+                                ? "border-2 border-[#ff9404]"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              handleGoalSelect(goal, calories[goal])
+                            }
+                          >
+                            <p className="font-medium text-[#ff9404]">
+                              {goalLabels[goal]}
+                            </p>
+                            <p className="text-lg">
+                              {calories[goal]} kcal/day (
+                              {Math.round(
+                                (calories[goal] / calories.maintain) * 100
+                              )}
+                              %)
+                            </p>
+                          </div>
+                        )
+                      )}
                     </div>
                   </div>
 
@@ -330,7 +348,9 @@ const CalorieCalculator: React.FC = () => {
                         <div
                           key={goal}
                           className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition duration-200 ${
-                            selectedGoal === goal ? "border-2 border-[#ff9404]" : ""
+                            selectedGoal === goal
+                              ? "border-2 border-[#ff9404]"
+                              : ""
                           }`}
                           onClick={() => handleGoalSelect(goal, calories[goal])}
                         >
@@ -339,7 +359,10 @@ const CalorieCalculator: React.FC = () => {
                           </p>
                           <p className="text-lg">
                             {calories[goal]} kcal/day (
-                            {Math.round((calories[goal] / calories.maintain) * 100)}%)
+                            {Math.round(
+                              (calories[goal] / calories.maintain) * 100
+                            )}
+                            %)
                           </p>
                         </div>
                       ))}

@@ -8,7 +8,12 @@ interface ModuleCardProps {
   features: string[];
 }
 
-const ModuleCard: React.FC<ModuleCardProps> = ({ icon, title, description, features }) => {
+const ModuleCard: React.FC<ModuleCardProps> = ({
+  icon,
+  title,
+  description,
+  features,
+}) => {
   return (
     <div className="bg-[#3B4252] rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
       <div className="border rounded-lg w-16 h-16 flex items-center justify-center mb-4">

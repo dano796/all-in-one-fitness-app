@@ -1,12 +1,14 @@
-import React from 'react';
-import { Mail, MapPin, Phone } from 'lucide-react';
+import React from "react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 const ContactPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-5xl font-bold mb-8 pb-5 text-center text-white">Contacto</h1>
-        
+        <h1 className="text-5xl font-bold mb-8 pb-5 text-center text-white">
+          Contacto
+        </h1>
+
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           <div className="text-center">
             <div className="w-12 h-12 bg-[#ff9404] rounded-full flex items-center justify-center mx-auto mb-4">
@@ -34,11 +36,16 @@ const ContactPage: React.FC = () => {
         </div>
 
         <div className="bg-[#3B4252] rounded-xl p-8 shadow-md">
-          <h2 className="text-2xl font-semibold mb-6 text-white">Envíanos un mensaje</h2>
-          
+          <h2 className="text-2xl font-semibold mb-6 text-white">
+            Envíanos un mensaje
+          </h2>
+
           <form className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-white mb-1">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-white mb-1"
+              >
                 Nombre
               </label>
               <input
@@ -50,7 +57,10 @@ const ContactPage: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-white mb-1"
+              >
                 Email
               </label>
               <input
@@ -62,7 +72,10 @@ const ContactPage: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="message" className="block text-sm font-medium text-white mb-1">
+              <label
+                htmlFor="message"
+                className="block text-sm font-medium text-white mb-1"
+              >
                 Mensaje
               </label>
               <textarea

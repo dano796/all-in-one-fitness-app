@@ -32,20 +32,25 @@ const FoodQuantityAdjust: React.FC = () => {
   const [displayQuantity, setDisplayQuantity] = useState<string>("100"); // Cantidad mostrada en el input
   const [fixedUnit, setFixedUnit] = useState<string>("g");
   const [unitLabel, setUnitLabel] = useState<string>("g");
-  const [nutritionalValues, setNutritionalValues] = useState<NutritionalValues>({
-    calories: null,
-    fat: null,
-    carbs: null,
-    protein: null,
-    perg: null,
-    peroz: null,
-    percup: null,
-    peru: null,
-  });
+  const [nutritionalValues, setNutritionalValues] = useState<NutritionalValues>(
+    {
+      calories: null,
+      fat: null,
+      carbs: null,
+      protein: null,
+      perg: null,
+      peroz: null,
+      percup: null,
+      peru: null,
+    }
+  );
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
         setError("Debes iniciar sesión para ajustar alimentos.");
         navigate("/login");
@@ -69,12 +74,16 @@ const FoodQuantityAdjust: React.FC = () => {
         setFixedUnit("oz");
         setUnitLabel("fl oz");
         setQuantity(parsedValues.peroz.toString());
-        setDisplayQuantity(evaluateFraction(parsedValues.peroz.toString()).toString());
+        setDisplayQuantity(
+          evaluateFraction(parsedValues.peroz.toString()).toString()
+        );
       } else if (parsedValues.percup) {
         setFixedUnit("cup");
         setUnitLabel("cup");
         setQuantity(parsedValues.percup.toString());
-        setDisplayQuantity(evaluateFraction(parsedValues.percup.toString()).toString());
+        setDisplayQuantity(
+          evaluateFraction(parsedValues.percup.toString()).toString()
+        );
       } else if (parsedValues.peru) {
         setFixedUnit("unit");
         const perMatchUnit = food.food_description.match(/Per\s+\d+\s*(\w+)/i);
@@ -111,9 +120,9 @@ const FoodQuantityAdjust: React.FC = () => {
     if (perMatchG) {
       result.perg = parseInt(perMatchG[1], 10);
     } else if (perMatchOz) {
-      result.peroz = parseFraction(perMatchOz[1]);
+      result.peroz = evaluateFraction(perMatchOz[1]);
     } else if (perMatchCup) {
-      result.percup = parseFraction(perMatchCup[1]);
+      result.percup = evaluateFraction(perMatchCup[1]);
     } else if (perMatchUnit) {
       result.peru = parseInt(perMatchUnit[1], 10);
     }
@@ -155,7 +164,9 @@ const FoodQuantityAdjust: React.FC = () => {
     const fractionMatch = value.match(/^(\d+)(?:\/(\d+))?$/);
     if (fractionMatch) {
       const whole = parseInt(fractionMatch[1], 10);
-      const numerator = fractionMatch[2] ? parseInt(fractionMatch[2], 10) : null;
+      const numerator = fractionMatch[2]
+        ? parseInt(fractionMatch[2], 10)
+        : null;
       if (numerator) {
         return whole / numerator; // Convertir a decimal para cálculos
       }
@@ -164,7 +175,10 @@ const FoodQuantityAdjust: React.FC = () => {
     return parseFloat(value) || 0;
   };
 
-  const convertToFraction = (value: number, forceFractions: boolean = false): string => {
+  const convertToFraction = (
+    value: number,
+    forceFractions: boolean = false
+  ): string => {
     // Convertir decimales a fracciones comunes
     const fractions: { [key: number]: string } = {
       0.25: "1/4",
@@ -213,9 +227,13 @@ const FoodQuantityAdjust: React.FC = () => {
     if (fixedUnit === "g") {
       baseQuantity = originalValues.perg || 100;
     } else if (fixedUnit === "oz") {
-      baseQuantity = evaluateFraction(originalValues.peroz.toString()) || 1;
+      baseQuantity = originalValues.peroz
+        ? evaluateFraction(originalValues.peroz.toString())
+        : 1;
     } else if (fixedUnit === "cup") {
-      baseQuantity = evaluateFraction(originalValues.percup.toString()) || 1;
+      baseQuantity = originalValues.percup
+        ? evaluateFraction(originalValues.percup.toString())
+        : 1;
     } else if (fixedUnit === "unit") {
       baseQuantity = originalValues.peru || 1;
     }
@@ -226,14 +244,29 @@ const FoodQuantityAdjust: React.FC = () => {
     // Ajustar los valores nutricionales
     setNutritionalValues({
       ...originalValues,
-      calories: originalValues.calories ? Math.round(originalValues.calories * factor) : null,
-      fat: originalValues.fat ? Number((originalValues.fat * factor).toFixed(2)) : null,
-      carbs: originalValues.carbs ? Number((originalValues.carbs * factor).toFixed(2)) : null,
-      protein: originalValues.protein ? Number((originalValues.protein * factor).toFixed(2)) : null,
+      calories: originalValues.calories
+        ? Math.round(originalValues.calories * factor)
+        : null,
+      fat: originalValues.fat
+        ? Number((originalValues.fat * factor).toFixed(2))
+        : null,
+      carbs: originalValues.carbs
+        ? Number((originalValues.carbs * factor).toFixed(2))
+        : null,
+      protein: originalValues.protein
+        ? Number((originalValues.protein * factor).toFixed(2))
+        : null,
       perg: fixedUnit === "g" ? parseInt(newQuantity, 10) : originalValues.perg,
-      peroz: fixedUnit === "oz" ? newQuantity : originalValues.peroz,
-      percup: fixedUnit === "cup" ? newQuantity : originalValues.percup,
-      peru: fixedUnit === "unit" ? parseInt(newQuantity, 10) : originalValues.peru,
+      peroz:
+        fixedUnit === "oz"
+          ? evaluateFraction(newQuantity)
+          : originalValues.peroz,
+      percup:
+        fixedUnit === "cup"
+          ? evaluateFraction(newQuantity)
+          : originalValues.percup,
+      peru:
+        fixedUnit === "unit" ? parseInt(newQuantity, 10) : originalValues.peru,
     });
   };
 
@@ -267,7 +300,8 @@ const FoodQuantityAdjust: React.FC = () => {
       return;
     }
 
-    const normalizedType = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+    const normalizedType =
+      type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
     // Formatear los valores nutricionales con dos decimales
     const formattedCalories = nutritionalValues.calories || 0;
@@ -302,7 +336,10 @@ const FoodQuantityAdjust: React.FC = () => {
     };
 
     try {
-      const response = await axios.post("http://localhost:5000/api/foods/add", requestBody);
+      const response = await axios.post(
+        "http://localhost:5000/api/foods/add",
+        requestBody
+      );
 
       await Swal.fire({
         title: "¡Éxito!",
@@ -318,10 +355,13 @@ const FoodQuantityAdjust: React.FC = () => {
         },
       });
 
-      navigate(`/dashboard?type=${normalizedType}`, { state: { fromAddButton: true } });
+      navigate(`/dashboard?type=${normalizedType}`, {
+        state: { fromAddButton: true },
+      });
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
-      const errorMessage = axiosError.response?.data?.error || "Error al agregar el alimento";
+      const errorMessage =
+        axiosError.response?.data?.error || "Error al agregar el alimento";
       setError(errorMessage);
       await Swal.fire({
         title: "¡Error!",
@@ -346,7 +386,11 @@ const FoodQuantityAdjust: React.FC = () => {
   return (
     <div className="mt-0">
       <div className="ml-0 mr-2 mt-0">
-        <Link to={`/foodsearch?type=${type}`} state={{ fromAddButton: true }} className="inline-block">
+        <Link
+          to={`/foodsearch?type=${type}`}
+          state={{ fromAddButton: true }}
+          className="inline-block"
+        >
           <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10">
             <FaArrowLeft className="mr-1 text-base" />
             Volver
@@ -355,7 +399,9 @@ const FoodQuantityAdjust: React.FC = () => {
       </div>
 
       <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-9">
-        <h2 className="text-sm font-semibold mb-2">Ajustar Cantidad - {food.food_name}</h2>
+        <h2 className="text-sm font-semibold mb-2">
+          Ajustar Cantidad - {food.food_name}
+        </h2>
         {error && <p className="text-red-400 mt-2 text-xs">{error}</p>}
 
         <div className="mt-4">
@@ -374,13 +420,21 @@ const FoodQuantityAdjust: React.FC = () => {
           </div>
 
           <div className="mt-4">
-            <h3 className="text-sm font-semibold mb-2">Valores Nutricionales Ajustados</h3>
+            <h3 className="text-sm font-semibold mb-2">
+              Valores Nutricionales Ajustados
+            </h3>
             <p className="text-xs text-gray-300">
               Per{" "}
-              {(fixedUnit === "oz" || fixedUnit === "cup")
-                ? convertToFraction(evaluateFraction(quantity), fixedUnit === "cup")
+              {fixedUnit === "oz" || fixedUnit === "cup"
+                ? convertToFraction(
+                    evaluateFraction(quantity),
+                    fixedUnit === "cup"
+                  )
                 : quantity}{" "}
-              {unitLabel} - Calories: {nutritionalValues.calories || 0}kcal | Fat: {(nutritionalValues.fat || 0).toFixed(2)}g | Carbs: {(nutritionalValues.carbs || 0).toFixed(2)}g | Protein: {(nutritionalValues.protein || 0).toFixed(2)}g
+              {unitLabel} - Calories: {nutritionalValues.calories || 0}kcal |
+              Fat: {(nutritionalValues.fat || 0).toFixed(2)}g | Carbs:{" "}
+              {(nutritionalValues.carbs || 0).toFixed(2)}g | Protein:{" "}
+              {(nutritionalValues.protein || 0).toFixed(2)}g
             </p>
           </div>
 

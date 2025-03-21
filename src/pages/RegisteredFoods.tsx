@@ -1,10 +1,10 @@
 // RegisteredFoods.tsx
-import React, { useState, useEffect } from 'react';
-import axios, { AxiosError } from 'axios';
-import { supabase } from '../lib/supabaseClient';
-import Swal from 'sweetalert2';
-import { FaArrowLeft, FaTrash } from 'react-icons/fa';
-import { Link, useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import axios, { AxiosError } from "axios";
+import { supabase } from "../lib/supabaseClient";
+import Swal from "sweetalert2";
+import { FaArrowLeft, FaTrash } from "react-icons/fa";
+import { Link, useSearchParams } from "react-router-dom";
 
 // Interfaces actualizadas
 interface RegisteredFood {
@@ -30,16 +30,16 @@ interface FoodsResponse {
 }
 
 const RegisteredFoods: React.FC = () => {
-  const TIMEZONE = 'America/Bogota';
+  const TIMEZONE = "America/Bogota";
   const [date, setDate] = useState<string>(
-    new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE })
+    new Date().toLocaleDateString("en-CA", { timeZone: TIMEZONE })
   );
   const [foodsData, setFoodsData] = useState<FoodsResponse>({
     foods: { Desayuno: [], Almuerzo: [], Merienda: [], Cena: [] },
     currentFoodType: null,
     isToday: false,
   });
-  const [userEmail, setUserEmail] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>("");
   const [selectedFood, setSelectedFood] = useState<{
     id_registro: string;
     index: number;
@@ -47,11 +47,14 @@ const RegisteredFoods: React.FC = () => {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
-  const typeParam = searchParams.get('type')
-    ? (searchParams.get('type')!.charAt(0).toUpperCase() +
-       searchParams.get('type')!.slice(1).toLowerCase()) as keyof OrganizedFoods
+  const typeParam = searchParams.get("type")
+    ? ((searchParams.get("type")!.charAt(0).toUpperCase() +
+        searchParams
+          .get("type")!
+          .slice(1)
+          .toLowerCase()) as keyof OrganizedFoods)
     : null;
-  const dateParam = searchParams.get('date') || date;
+  const dateParam = searchParams.get("date") || date;
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -60,9 +63,9 @@ const RegisteredFoods: React.FC = () => {
         error,
       } = await supabase.auth.getUser();
       if (error || !user) {
-        setError('Debes iniciar sesión para ver las comidas registradas.');
+        setError("Debes iniciar sesión para ver las comidas registradas.");
       } else {
-        setUserEmail(user.email || '');
+        setUserEmail(user.email || "");
       }
     };
     checkAuth();
@@ -72,7 +75,7 @@ const RegisteredFoods: React.FC = () => {
     if (!userEmail || !dateParam) return;
     try {
       const response = await axios.get<FoodsResponse>(
-        'http://localhost:5000/api/foods/user',
+        "http://localhost:5000/api/foods/user",
         {
           params: { email: userEmail, date: dateParam },
         }
@@ -82,7 +85,8 @@ const RegisteredFoods: React.FC = () => {
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
       setError(
-        axiosError.response?.data?.error || 'Error al consultar las comidas registradas'
+        axiosError.response?.data?.error ||
+          "Error al consultar las comidas registradas"
       );
     }
   };
@@ -94,42 +98,46 @@ const RegisteredFoods: React.FC = () => {
 
   const handleDeleteFood = async () => {
     if (!selectedFood) {
-      setError('Por favor selecciona una comida para eliminar.');
+      setError("Por favor selecciona una comida para eliminar.");
       return;
     }
     try {
-      const response = await axios.delete('http://localhost:5000/api/foods/delete', {
-        data: { email: userEmail, id_registro: selectedFood.id_registro },
-      });
+      const response = await axios.delete(
+        "http://localhost:5000/api/foods/delete",
+        {
+          data: { email: userEmail, id_registro: selectedFood.id_registro },
+        }
+      );
       await Swal.fire({
-        title: '¡Éxito!',
+        title: "¡Éxito!",
         text: response.data.message,
-        icon: 'success',
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#ff9404',
+        icon: "success",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#ff9404",
         customClass: {
-          popup: 'custom-swal-background',
-          icon: 'custom-swal-icon',
-          title: 'custom-swal-title',
-          htmlContainer: 'custom-swal-text',
+          popup: "custom-swal-background",
+          icon: "custom-swal-icon",
+          title: "custom-swal-title",
+          htmlContainer: "custom-swal-text",
         },
       });
       setSelectedFood(null);
       fetchFoods();
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
-      const errorMessage = axiosError.response?.data?.error || 'Error al eliminar la comida';
+      const errorMessage =
+        axiosError.response?.data?.error || "Error al eliminar la comida";
       setError(errorMessage);
       await Swal.fire({
-        title: '¡Error!',
+        title: "¡Error!",
         text: errorMessage,
-        icon: 'error',
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#ff9400',
+        icon: "error",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#ff9400",
         customClass: {
-          popup: 'custom-swal-background',
-          title: 'custom-swal-title',
-          htmlContainer: 'custom-swal-text',
+          popup: "custom-swal-background",
+          title: "custom-swal-title",
+          htmlContainer: "custom-swal-text",
         },
       });
     }
@@ -142,7 +150,9 @@ const RegisteredFoods: React.FC = () => {
 
     return (
       <div className="bg-[#2E3440] rounded-xl p-6 shadow-lg max-w-2xl mx-auto w-full">
-        <h3 className="text-lg font-semibold mb-4 text-center text-white">{label}</h3>
+        <h3 className="text-lg font-semibold mb-4 text-center text-white">
+          {label}
+        </h3>
         {foods.length > 0 ? (
           <div className="space-y-4 max-h-[calc(5*5rem)] overflow-y-auto no-scrollbar">
             {foods.map((food, index) => (
@@ -150,22 +160,31 @@ const RegisteredFoods: React.FC = () => {
                 key={`${food.id_registro}-${index}`}
                 className={`p-4 rounded-xl border border-gray-600 ${
                   selectedFood?.index === index && selectedFood.type === type
-                    ? 'bg-[#4B5563]'
-                    : 'hover:bg-[#4B5563]'
+                    ? "bg-[#4B5563]"
+                    : "hover:bg-[#4B5563]"
                 } transition duration-200`}
               >
                 <div className="flex items-center space-x-4">
                   <input
                     type="radio"
                     name="registeredFoodSelection"
-                    checked={selectedFood?.index === index && selectedFood.type === type}
+                    checked={
+                      selectedFood?.index === index &&
+                      selectedFood.type === type
+                    }
                     onChange={() => {
-                      setSelectedFood({ id_registro: food.id_registro, index, type });
+                      setSelectedFood({
+                        id_registro: food.id_registro,
+                        index,
+                        type,
+                      });
                     }}
                     className="w-5 h-5 text-[#FF6B35]"
                   />
                   <div className="flex-1">
-                    <p className="text-md font-medium text-white">{food.nombre_comida}</p>
+                    <p className="text-md font-medium text-white">
+                      {food.nombre_comida}
+                    </p>
                     <p className="text-sm text-gray-300">{food.descripcion}</p>
                   </div>
                 </div>
@@ -173,7 +192,9 @@ const RegisteredFoods: React.FC = () => {
             ))}
           </div>
         ) : (
-          <p className="text-gray-400 text-center text-sm">No hay {label.toLowerCase()} registrados.</p>
+          <p className="text-gray-400 text-center text-sm">
+            No hay {label.toLowerCase()} registrados.
+          </p>
         )}
       </div>
     );
@@ -216,17 +237,19 @@ const RegisteredFoods: React.FC = () => {
 
       <div className="mb-6 w-full max-w-2xl">
         <h2 className="text-md font-semibold text-white text-center">
-          Comidas Registradas -{' '}
-          {new Date(date + 'T00:00:00').toLocaleDateString('es-ES', {
+          Comidas Registradas -{" "}
+          {new Date(date + "T00:00:00").toLocaleDateString("es-ES", {
             timeZone: TIMEZONE,
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
           })}
         </h2>
       </div>
 
-      {error && <p className="text-red-400 text-sm mb-4 text-center">{error}</p>}
+      {error && (
+        <p className="text-red-400 text-sm mb-4 text-center">{error}</p>
+      )}
 
       {typeParam && (
         <div className="w-full max-w-2xl">
@@ -234,7 +257,9 @@ const RegisteredFoods: React.FC = () => {
         </div>
       )}
       {!typeParam && (
-        <p className="text-gray-400 text-sm text-center">Por favor selecciona un tipo de comida desde el dashboard.</p>
+        <p className="text-gray-400 text-sm text-center">
+          Por favor selecciona un tipo de comida desde el dashboard.
+        </p>
       )}
 
       {selectedFood && ( // Eliminada la restricción de isToday

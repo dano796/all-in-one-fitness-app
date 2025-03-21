@@ -1,15 +1,18 @@
-import React from 'react';
-import { Users, Target, Award } from 'lucide-react';
+import React from "react";
+import { Users, Target, Award } from "lucide-react";
 
 const AboutPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-5xl font-bold mb-8 pb-5 text-center text-white">¿Quiénes somos?</h1>
-        
+        <h1 className="text-5xl font-bold mb-8 pb-5 text-center text-white">
+          ¿Quiénes somos?
+        </h1>
+
         <p className="text-xl text-gray-300 mb-12 text-center">
-          Somos un equipo apasionado por la salud y el bienestar, dedicados a crear
-          la mejor herramienta para ayudarte a alcanzar tus objetivos fitness.
+          Somos un equipo apasionado por la salud y el bienestar, dedicados a
+          crear la mejor herramienta para ayudarte a alcanzar tus objetivos
+          fitness.
         </p>
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -19,7 +22,8 @@ const AboutPage: React.FC = () => {
             </div>
             <h3 className="text-xl font-bold mb-2">Nuestra Misión</h3>
             <p className="text-gray-400">
-              Facilitar el seguimiento de hábitos saludables con tecnología intuitiva.
+              Facilitar el seguimiento de hábitos saludables con tecnología
+              intuitiva.
             </p>
           </div>
 
@@ -29,7 +33,8 @@ const AboutPage: React.FC = () => {
             </div>
             <h3 className="text-xl font-bold mb-2">Nuestros Valores</h3>
             <p className="text-gray-400">
-              Compromiso con la calidad, innovación y bienestar de nuestros usuarios.
+              Compromiso con la calidad, innovación y bienestar de nuestros
+              usuarios.
             </p>
           </div>
 
