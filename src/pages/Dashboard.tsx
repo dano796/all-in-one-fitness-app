@@ -118,6 +118,7 @@ const Dashboard: React.FC = () => {
             setTotalCaloriesGoal(response.data.calorieGoal);
           }
         } catch (err) {
+          console.log(err);
           setError("Error al obtener el límite de calorías.");
         }
       }
@@ -355,9 +356,9 @@ const Dashboard: React.FC = () => {
 
   // Data for progress bars (visually limited to 100%)
   const progressData = [
-    { name: "Carbs", value: totalCarbs, max: carbGoal },
-    { name: "Protein", value: totalProtein, max: proteinGoal },
-    { name: "Fat", value: totalFat, max: fatGoal },
+    { name: "Carbohidratos", value: totalCarbs, max: carbGoal },
+    { name: "Proteínas", value: totalProtein, max: proteinGoal },
+    { name: "Grasas", value: totalFat, max: fatGoal },
   ];
 
   const meals = [

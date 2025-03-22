@@ -145,18 +145,18 @@ const OneRepMaxCalculator: React.FC = () => {
   const [unit, setUnit] = useState<"kg" | "lb">("kg");
   const [reps, setReps] = useState<number | undefined>(undefined);
   const [rpe, setRpe] = useState<number | undefined>(undefined);
-  const [exercise, setExercise] = useState<string>("Deadlift");
+  const [exercise, setExercise] = useState<string>("Peso Muerto");
   const [oneRepMax, setOneRepMax] = useState<number | null>(null);
 
   // List of exercises (compound vs. isolation for formula selection)
   const exercises = [
-    "Deadlift",
-    "Squat",
-    "Bench Press",
-    "Overhead Press",
-    "Bicep Curl",
-    "Tricep Extension",
-    "Shoulder Press",
+    "Peso Muerto",
+    "Sentadilla",
+    "Press de Banca",
+    "Press Militar",
+    "Curl de Bíceps",
+    "Extensión de Tríceps",
+    "Press de Hombros",
   ];
 
   // Convert weight between kg and lb
@@ -224,10 +224,10 @@ const OneRepMaxCalculator: React.FC = () => {
 
     // Select formula based on exercise type
     const isCompound = [
-      "Deadlift",
-      "Squat",
-      "Bench Press",
-      "Overhead Press",
+      "Peso Muerto",
+      "Sentadilla",
+      "Press de Banca",
+      "Press Militar",
     ].includes(exercise);
     let oneRm: number;
 
@@ -268,7 +268,7 @@ const OneRepMaxCalculator: React.FC = () => {
       <style>{customStyles}</style>
       <div className="max-w-2xl mx-auto w-full">
         <h1 className="text-5xl font-bold mb-12 text-center text-white flex items-center justify-center">
-          1RM Calculator
+          Calculadora Repetición Máxima (1RM)
         </h1>
 
         <div className="bg-[#3B4252] rounded-xl p-6 shadow-md">
@@ -285,7 +285,7 @@ const OneRepMaxCalculator: React.FC = () => {
                 htmlFor="weight"
                 className="block text-sm font-medium text-white mb-1"
               >
-                Weight
+                Peso
               </label>
               <div className="relative">
                 <input
@@ -294,7 +294,7 @@ const OneRepMaxCalculator: React.FC = () => {
                   value={weight ?? ""}
                   onChange={handleWeightChange}
                   className="calorie-goal-input calorie-goal-input-with-unit"
-                  placeholder="Enter weight"
+                  placeholder="Ingresa el peso"
                 />
                 <button
                   type="button"
@@ -312,7 +312,7 @@ const OneRepMaxCalculator: React.FC = () => {
                 htmlFor="reps"
                 className="block text-sm font-medium text-white mb-1"
               >
-                Repetitions (1-30)
+                Repeticiones (1-30)
               </label>
               <input
                 type="number"
@@ -320,7 +320,7 @@ const OneRepMaxCalculator: React.FC = () => {
                 value={reps ?? ""}
                 onChange={handleRepsChange}
                 className="calorie-goal-input"
-                placeholder="Enter number of reps"
+                placeholder="Ingresa el número de reps"
               />
             </div>
 
@@ -338,7 +338,7 @@ const OneRepMaxCalculator: React.FC = () => {
                 value={rpe ?? ""}
                 onChange={handleRpeChange}
                 className="calorie-goal-input"
-                placeholder="Enter RPE (1-10)"
+                placeholder="Ingresa RPE (1-10)"
               />
             </div>
 
@@ -348,7 +348,7 @@ const OneRepMaxCalculator: React.FC = () => {
                 htmlFor="exercise"
                 className="block text-sm font-medium text-white mb-1"
               >
-                Exercise
+                Ejercicio
               </label>
               <select
                 id="exercise"
@@ -370,18 +370,18 @@ const OneRepMaxCalculator: React.FC = () => {
               className="calculate-button"
               disabled={isButtonDisabled}
             >
-              Calculate 1RM
+              Calcular 1RM (Repetición Máxima)
             </button>
 
             {/* Results */}
             {oneRepMax && (
               <div className="mt-6 space-y-4">
                 <h2 className="text-4xl font-bold text-center text-white">
-                  Your 1RM is {oneRepMax} {unit}
+                  Tú 1RM es {oneRepMax} {unit}
                 </h2>
                 <div className="mt-8">
                   <h3 className="text-lg font-medium text-white mb-4 text-center">
-                    Estimated Rep Maxes
+                    Máximo de Repeticiones Estimado
                   </h3>
                   <div className="space-y-4">
                     <div className="bg-[#282c3c] p-4 rounded-lg flex justify-between">
