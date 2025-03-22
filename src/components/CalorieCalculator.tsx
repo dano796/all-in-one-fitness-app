@@ -241,7 +241,7 @@ const CalorieCalculator: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/set-calorie-goal",
+        `${import.meta.env.VITE_BACKEND_URL}/api/set-calorie-goal`,
         {
           email: userEmail,
           calorieGoal: calorieValue,
@@ -258,6 +258,7 @@ const CalorieCalculator: React.FC = () => {
         toast.error(response.data.error || "Error setting calorie goal.");
       }
     } catch (err) {
+      console.log(err);
       setError("Error al conectar con el servidor. Intenta de nuevo.");
       toast.error("Server error. Please try again.");
     }
@@ -310,7 +311,7 @@ const CalorieCalculator: React.FC = () => {
         className="max-w-2xl w-full bg-[#3B4252] rounded-xl shadow-md p-8 relative z-10"
       >
         <h1 className="text-4xl font-bold text-center text-white mb-8 flex items-center justify-center gap-3">
-          Calorie Calculator
+          Calculadora de Calorías
         </h1>
 
         {error && (
@@ -336,7 +337,7 @@ const CalorieCalculator: React.FC = () => {
             transition={{ delay: 0.2 }}
           >
             <label className="block text-sm font-medium text-gray-400 mb-1">
-              Age (15-80)
+              Edad (15-80)
             </label>
             <input
               type="number"
@@ -354,7 +355,7 @@ const CalorieCalculator: React.FC = () => {
             transition={{ delay: 0.3 }}
           >
             <label className="block text-sm font-medium text-gray-400 mb-1">
-              Gender
+              Género
             </label>
             <div className="flex space-x-6">
               <label className="flex items-center text-gray-200">
@@ -365,7 +366,7 @@ const CalorieCalculator: React.FC = () => {
                   onChange={() => setGender("male")}
                   className="mr-2"
                 />
-                Male
+                Masculino
               </label>
               <label className="flex items-center text-gray-200">
                 <input
@@ -375,7 +376,7 @@ const CalorieCalculator: React.FC = () => {
                   onChange={() => setGender("female")}
                   className="mr-2"
                 />
-                Female
+                Femenino
               </label>
             </div>
           </motion.div>
@@ -386,7 +387,7 @@ const CalorieCalculator: React.FC = () => {
             transition={{ delay: 0.4 }}
           >
             <label className="block text-sm font-medium text-gray-400 mb-1">
-              Height (cm)
+              Altura (cm)
             </label>
             <input
               type="number"
@@ -404,7 +405,7 @@ const CalorieCalculator: React.FC = () => {
             transition={{ delay: 0.5 }}
           >
             <label className="block text-sm font-medium text-gray-400 mb-1">
-              Weight (kg)
+              Peso (kg)
             </label>
             <input
               type="number"
@@ -422,7 +423,7 @@ const CalorieCalculator: React.FC = () => {
             transition={{ delay: 0.6 }}
           >
             <label className="block text-sm font-medium text-gray-400 mb-1">
-              Activity Level
+              Nivel de Actividad
             </label>
             <select
               id="activity"
@@ -430,22 +431,22 @@ const CalorieCalculator: React.FC = () => {
               onChange={(e) => setActivityLevel(e.target.value)}
               className="calorie-goal-select"
             >
-              <option value="basal">Basal Metabolic Rate (BMR)</option>
+              <option value="basal">Tasa Metabólica Basal (BMR)</option>
               <option value="sedentary">
-                Sedentary: little or no exercise
+                Sedentario: sin ejercicio o actividad física ligera
               </option>
               <option value="light">Light: exercise 1-3 times/week</option>
               <option value="moderate">
-                Moderate: exercise 4-5 times/week
+                Moderado: ejercicio 1-3 veces/semana
               </option>
               <option value="active">
-                Active: daily exercise or intense 3-4 times/week
+                Activo: ejercicio 3-5 veces/semana
               </option>
               <option value="veryActive">
-                Very Active: intense exercise 6-7 times/week
+                Muy Activo: ejercicio intenso diario o trabajo físico
               </option>
               <option value="extraActive">
-                Extra Active: very intense daily or physical job
+                Extra Activo: ejercicio intenso 2 veces al día
               </option>
             </select>
           </motion.div>
@@ -495,12 +496,12 @@ const CalorieCalculator: React.FC = () => {
               className="mt-8"
             >
               <h2 className="text-2xl font-semibold text-center text-white mb-6">
-                Estimated Daily Calorie Needs
+                Calorías Diarias Estimadas
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-lg font-medium mb-4 text-center">
-                    Weight Loss Estimates
+                    Perdida de Peso Estimada
                   </h3>
                   <div className="space-y-4">
                     {["maintain", "mildLoss", "loss", "extremeLoss"].map(
@@ -535,7 +536,7 @@ const CalorieCalculator: React.FC = () => {
 
                 <div>
                   <h3 className="text-lg font-medium mb-4 text-center">
-                    Weight Gain Estimates
+                    Ganancia de Peso Estimada
                   </h3>
                   <div className="space-y-4">
                     {["mildGain", "gain", "fastGain"].map((goal) => (

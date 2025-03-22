@@ -75,7 +75,7 @@ const RegisteredFoods: React.FC = () => {
     if (!userEmail || !dateParam) return;
     try {
       const response = await axios.get<FoodsResponse>(
-        "http://localhost:5000/api/foods/user",
+        `${import.meta.env.VITE_BACKEND_URL}/api/foods/user`,
         {
           params: { email: userEmail, date: dateParam },
         }
@@ -103,7 +103,7 @@ const RegisteredFoods: React.FC = () => {
     }
     try {
       const response = await axios.delete(
-        "http://localhost:5000/api/foods/delete",
+        `${import.meta.env.VITE_BACKEND_URL}/api/foods/delete`,
         {
           data: { email: userEmail, id_registro: selectedFood.id_registro },
         }

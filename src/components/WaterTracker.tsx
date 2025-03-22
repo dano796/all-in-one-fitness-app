@@ -54,7 +54,7 @@ const WaterTracker: React.FC = () => {
   const fetchWaterData = async () => {
     if (!userEmail || !date) return;
     try {
-      const response = await axios.get("http://localhost:5000/api/water/user", {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/water/user`, {
         params: { email: userEmail, date: date },
       });
       const aguasllenadas = response.data.aguasllenadas || 0; // Updated to match backend response
@@ -97,7 +97,7 @@ const WaterTracker: React.FC = () => {
   // Save water data to the database
   const saveWaterData = async (aguasllenadas: number) => {
     try {
-      await axios.post("http://localhost:5000/api/water/update", {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/water/update`, {
         email: userEmail,
         date: date,
         aguasllenadas, // Updated to match backend expectation

@@ -109,7 +109,7 @@ const Dashboard: React.FC = () => {
         // Fetch user's calorie goal
         try {
           const response = await axios.get(
-            "http://localhost:5000/api/get-calorie-goal",
+            `${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`,
             {
               params: { email },
             }
@@ -118,6 +118,7 @@ const Dashboard: React.FC = () => {
             setTotalCaloriesGoal(response.data.calorieGoal);
           }
         } catch (err) {
+          console.log(err);
           setError("Error al obtener el límite de calorías.");
         }
       }
@@ -130,7 +131,7 @@ const Dashboard: React.FC = () => {
     if (!userEmail || !date) return;
     try {
       const response = await axios.get<FoodsResponse>(
-        "http://localhost:5000/api/foods/user",
+        `${import.meta.env.VITE_BACKEND_URL}/api/foods/user`,
         {
           params: { email: userEmail, date: date },
         }
@@ -164,7 +165,7 @@ const Dashboard: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/set-calorie-goal",
+        `${import.meta.env.VITE_BACKEND_URL}/api/set-calorie-goal`,
         {
           email: userEmail,
           calorieGoal: goal,
@@ -216,7 +217,7 @@ const Dashboard: React.FC = () => {
     if (result.isConfirmed) {
       try {
         const response = await axios.post(
-          "http://localhost:5000/api/set-calorie-goal",
+          `${import.meta.env.VITE_BACKEND_URL}/api/set-calorie-goal`,
           {
             email: userEmail,
             calorieGoal: 0,
@@ -355,9 +356,9 @@ const Dashboard: React.FC = () => {
 
   // Data for progress bars (visually limited to 100%)
   const progressData = [
-    { name: "Carbs", value: totalCarbs, max: carbGoal },
-    { name: "Protein", value: totalProtein, max: proteinGoal },
-    { name: "Fat", value: totalFat, max: fatGoal },
+    { name: "Carbohidratos", value: totalCarbs, max: carbGoal },
+    { name: "Proteínas", value: totalProtein, max: proteinGoal },
+    { name: "Grasas", value: totalFat, max: fatGoal },
   ];
 
   const meals = [

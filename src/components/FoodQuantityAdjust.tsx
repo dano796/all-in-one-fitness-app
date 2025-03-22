@@ -430,7 +430,7 @@ const FoodQuantityAdjust: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/foods/add",
+        `${import.meta.env.VITE_BACKEND_URL}/api/foods/add`,
         requestBody
       );
 
