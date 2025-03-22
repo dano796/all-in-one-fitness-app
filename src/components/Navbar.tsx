@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Dumbbell, UserCircle, LogOut, Menu, X } from "lucide-react";

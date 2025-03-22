@@ -28,6 +28,7 @@ import FoodQuantityAdjust from "./components/FoodQuantityAdjust";
 import Loader from "./components/Loader";
 import OneRMCalculator from "./components/OneRepMaxCalculator";
 import OneRMCalculatorLayout from "./layouts/OneRMCalculatorLayout";
+import ExerciseList from "./components/ExerciseList";
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{
@@ -98,6 +99,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/ejercicios" element={<ExerciseList />} />
       </Route>
 
       {/* Protected routes */}
