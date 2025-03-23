@@ -75,10 +75,10 @@ const HeroSection: React.FC = () => {
   }, []);
 
   return (
-    <section className="container mx-auto px-16 pt-0 md:pt-0 pb-16 md:pb-24 bg-[#282c3c]">
-      <div className="grid md:grid-cols-2 gap-12 items-start">
+    <section className="container mx-auto px-8 mb-12 lg:px-16 lg:mb-0 bg-[#282c3c] text-left">
+      <div className="lg:grid lg:grid-cols-2 gap-12 items-start">
         <div className="flex flex-col justify-center h-full">
-          <h1 className="text-7xl font-bold mb-6 text-white">
+          <h1 className="text-6xl xl:text-7xl font-bold mt-10 lg:mt-10 xl:mt-12 mb-8 text-white">
             All In One
             <br />
             Fitness App
@@ -94,7 +94,7 @@ const HeroSection: React.FC = () => {
             {user ? "Ir al Dashboard" : "Comienza Ahora"}
           </Link>
         </div>
-        <div className="hidden md:block bg-[#282c3c] rounded-xl aspect-square overflow-hidden relative">
+        <div className="hidden lg:block rounded-xl aspect-square overflow-hidden relative">
           <div className="w-full h-full grid grid-cols-2 gap-4 p-6">
             {/* Carrusel Izquierdo (arriba -> abajo -> arriba) */}
             <motion.div

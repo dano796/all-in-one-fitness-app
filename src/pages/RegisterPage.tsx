@@ -199,9 +199,9 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
+    <div className="container mx-auto px-8 py-16 bg-[#282c3c] text-white">
       <div className="max-w-md mx-auto">
-        <h1 className="text-4xl font-bold mb-8 pb-3 text-center">
+        <h1 className="text-5xl font-bold mb-8 pb-3 text-center">
           Crear Cuenta
         </h1>
         <div className="bg-[#3B4252] rounded-xl p-8 shadow-sm">
@@ -212,7 +212,8 @@ const RegisterPage = () => {
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
                 placeholder="NombreUsuario"
-                className="w-full px-4 py-2 bg-[#282c3c] text-white border border-gray-600 rounded-lg focus:outline-none"
+                className="w-full px-4 py-2 bg-[#282c3c] text-white border border-gray-600 rounded-lg
+                focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0"
                 required
               />
             </div>
@@ -222,7 +223,8 @@ const RegisterPage = () => {
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
                 placeholder="example@email.com"
-                className="w-full px-4 py-2 bg-[#282c3c] text-white border border-gray-600 rounded-lg focus:outline-none"
+                className="w-full px-4 py-2 bg-[#282c3c] text-white border border-gray-600 rounded-lg
+                focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0"
                 required
               />
             </div>
@@ -239,7 +241,8 @@ const RegisterPage = () => {
                   value={contraseña}
                   onChange={handlePasswordChange} // Cambiamos el manejador aquí
                   placeholder="••••••••"
-                  className="w-full px-4 py-2 bg-[#282c3c] text-white border border-gray-600 rounded-lg focus:outline-none pr-10"
+                  className="w-full px-4 py-2 bg-[#282c3c] text-white border border-gray-600 rounded-lg pr-10
+                  focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0"
                   required
                 />
                 <button
@@ -388,7 +391,8 @@ const RegisterPage = () => {
                 value={confirmarContraseña}
                 onChange={(e) => setConfirmarContraseña(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-2 bg-[#282c3c] text-white border border-gray-600 rounded-lg focus:outline-none pr-10"
+                className="w-full px-4 py-2 bg-[#282c3c] text-white border border-gray-600 rounded-lg pr-10
+                focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0"
                 required
               />
               <button

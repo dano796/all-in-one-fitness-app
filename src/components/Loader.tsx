@@ -34,7 +34,7 @@ const Loader: React.FC = () => {
         {word.map((letter, index) => (
           <motion.span
             key={index}
-            className="text-5xl md:text-7xl font-medium Oswald text-[#ff9404]"
+            className="text-5xl md:text-7xl font-semibold text-[#ff9404]"
             custom={index}
             initial="hidden"
             animate="visible"
