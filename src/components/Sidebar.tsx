@@ -71,7 +71,7 @@ const Sidebar: React.FC = () => {
               }
             />
             <DashboardNavItem
-              to="/foodsearch"
+              to="/routines"
               icon={
                 <Utensils className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }

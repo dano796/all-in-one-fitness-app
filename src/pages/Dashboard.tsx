@@ -321,7 +321,8 @@ const Dashboard: React.FC = () => {
 
   const handleDatePicker = () => {
     if (dateInputRef.current) {
-      dateInputRef.current.showPicker();
+      dateInputRef.current.focus(); // Ensure focus for mobile
+      dateInputRef.current.showPicker(); // Trigger native picker
     }
   };
 
@@ -340,13 +341,25 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-auto -mt-12">
+    <div className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-hidden -mt-12">
       <GalaxyBackground />
       <style>{`
-        html, body { -ms-overflow-style: none; scrollbar-width: none; overflow-y: auto; }
-        html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Ensure scrollbar is hidden across all browsers */
+        html, body {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+          overflow-y: auto; /* Allow scrolling */
+        }
+        html::-webkit-scrollbar, body::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, and Opera */
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
         .summary-section { max-width: 700px; margin: 0 auto; background: #3B4252; border-radius: 8px; padding: 20px; }
         .nutrition-section { max-width: 700px; margin: 0 auto; }
         .meal-item { max-width: 100%; background: #3B4252; border-radius: 8px; padding: 10px; }
@@ -363,7 +376,7 @@ const Dashboard: React.FC = () => {
         .date-button { min-width: 120px; padding: 0.75rem 1.5rem; background: linear-gradient(45deg, #2D3242, #3B4252); color: #E5E7EB; font-weight: 600; border-radius: 8px; border: 1px solid #ff9404; box-shadow: 0 0 10px rgba(255, 148, 4, 0.3); transition: all 0.3s ease; }
         .date-button:hover { background: linear-gradient(45deg, #3B4252, #4B5563); box-shadow: 0 0 15px rgba(255, 148, 4, 0.5); transform: scale(1.05); }
         .date-button:active { transform: scale(0.95); }
-        .hidden-date-input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .hidden-date-input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
         .calorie-goal-actions { display: flex; align-items: center; gap: 8px; }
         .calorie-goal-input { width: 70px; padding: 6px 10px; font-size: 0.875rem; border: 1px solid #6B7280; border-radius: 6px; background: #2D3242; color: #E5E7EB; text-align: center; transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease; }
         .calorie-goal-input::-webkit-outer-spin-button, .calorie-goal-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -431,7 +444,14 @@ const Dashboard: React.FC = () => {
         </motion.div>
         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.6, duration: 0.8 }}>
           <button onClick={handleDatePicker} className="date-button">{getDateLabel()}</button>
-          <input type="date" ref={dateInputRef} value={date} onChange={handleDateChange} max={todayStr} className="hidden-date-input" />
+          <input
+            type="date"
+            ref={dateInputRef}
+            value={date}
+            onChange={handleDateChange}
+            max={todayStr}
+            className="hidden-date-input"
+          />
         </motion.div>
       </motion.div>
 

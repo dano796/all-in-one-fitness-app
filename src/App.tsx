@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { supabase } from "./lib/supabaseClient";
 import Loader from "./components/Loader";
-import { User } from "@supabase/supabase-js"; // Importamos el tipo User de Supabase
+import { User } from "@supabase/supabase-js";
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -25,6 +25,7 @@ const ComidasRegistro = lazy(() => import("./pages/RegisteredFoods"));
 const CalorieCalculator = lazy(() => import("./components/CalorieCalculator"));
 const FoodQuantityAdjust = lazy(() => import("./components/FoodQuantityAdjust"));
 const OneRMCalculator = lazy(() => import("./components/OneRepMaxCalculator"));
+const Routines = lazy(() => import("./pages/Routines")); // Add the Routines page
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -86,10 +87,15 @@ const protectedRoutes = [
     layout: OneRMCalculatorLayout,
     component: OneRMCalculator,
   },
+  {
+    path: "/routines", // Add the routines route
+    layout: DashboardLayout,
+    component: Routines,
+  },
 ];
 
 function App() {
-  const [user, setUser] = useState<User | null>(null); // Tipamos explícitamente el estado como User | null
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -100,7 +106,7 @@ function App() {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       if (mounted) {
-        setUser(user); // Ahora TypeScript sabe que setUser acepta User | null
+        setUser(user);
         setIsLoading(false);
       }
     };
