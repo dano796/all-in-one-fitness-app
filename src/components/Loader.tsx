@@ -5,15 +5,16 @@ const Loader: React.FC = () => {
   const word = "ALL    IN    ONE".split("");
 
   const letterVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, x: -20 },
     visible: (i: number) => ({
       opacity: 1,
-      y: 0,
+      x: 0,
       transition: {
         delay: i * 0.1,
         duration: 0.5,
         repeat: Infinity,
-        repeatType: "reverse" as const,
+        repeatType: "loop" as const,
+        repeatDelay: 1,
       },
     }),
   };
@@ -30,15 +31,16 @@ const Loader: React.FC = () => {
       animate="visible"
       variants={containerVariants}
     >
-      <div className="flex space-x-1">
+      <div className="flex space-x-1 md:space-x-2">
         {word.map((letter, index) => (
           <motion.span
             key={index}
-            className="text-5xl md:text-7xl font-semibold text-[#ff9404]"
+            className="text-6xl sm:text-8xl md:text-9xl lg:text-[10rem] font-bold text-[#ff9404] font-sans"
             custom={index}
             initial="hidden"
             animate="visible"
             variants={letterVariants}
+            style={{ fontFamily: "'Montserrat', 'Poppins', sans-serif" }}
           >
             {letter}
           </motion.span>
