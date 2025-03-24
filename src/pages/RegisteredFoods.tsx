@@ -152,15 +152,15 @@ const RegisteredFoods: React.FC = () => {
           {label}
         </h3>
         {foods.length > 0 ? (
-          <div className="space-y-4 max-h-[calc(5*5rem)] overflow-y-auto no-scrollbar">
+          <div className="space-y-4 max-h-[20rem] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {foods.map((food, index) => (
               <div
                 key={`${food.id_registro}-${index}`}
-                className={`p-4 rounded-xl border border-gray-600 ${
+                className={`p-4 rounded-xl border border-gray-600 transition duration-200 ${
                   selectedFood?.index === index && selectedFood.type === type
                     ? "bg-[#4B5563]"
                     : "hover:bg-[#4B5563]"
-                } transition duration-200`}
+                }`}
               >
                 <div className="flex items-center space-x-4">
                   <input
@@ -176,7 +176,7 @@ const RegisteredFoods: React.FC = () => {
                         type,
                       });
                     }}
-                    className="w-5 h-5 text-[#FF6B35]"
+                    className="w-5 h-5 text-[#FF6B35] focus:ring-[#FF6B35]"
                   />
                   <div className="flex-1">
                     <p className="text-md font-medium text-white">
@@ -198,33 +198,10 @@ const RegisteredFoods: React.FC = () => {
   };
 
   return (
-    <div className="registered-foods-container min-h-screen bg-[#282c3c] p-6 flex flex-col items-center justify-start">
-      <style>
-        {`
-          html, body {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            overflow-y: auto;
-          }
-          html::-webkit-scrollbar, body::-webkit-scrollbar {
-            display: none;
-          }
-          .no-scrollbar::-webkit-scrollbar {
-            display: none;
-          }
-          .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-          .registered-foods-container {
-            overflow-y: auto;
-          }
-        `}
-      </style>
-
+    <div className="min-h-screen bg-[#282c3c] p-6 flex flex-col items-center justify-start [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <div className="mb-6 w-full max-w-2xl">
         <Link to="/dashboard" className="inline-block">
-          <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10">
+          <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10">
             <FaArrowLeft className="mr-1 text-base" />
             Volver
           </button>
@@ -262,7 +239,7 @@ const RegisteredFoods: React.FC = () => {
         <div className="mt-6 text-right w-full max-w-2xl sticky bottom-0 z-10">
           <button
             onClick={handleDeleteFood}
-            className="ml-auto flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10"
+            className="ml-auto flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10"
           >
             <FaTrash className="mr-1 text-base" />
             Eliminar

@@ -23,96 +23,6 @@ interface NutritionalValues {
   peru: number | null;
 }
 
-const customStyles = `
-  /* Estilo para Inputs Numéricos */
-  .calorie-goal-input {
-    width: 100%;
-    padding: 6px 10px;
-    font-size: 0.875rem;
-    border: 1px solid #6B7280;
-    border-radius: 6px;
-    background: #2D3242;
-    color: #E5E7EB;
-    text-align: center;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-  }
-  .calorie-goal-input::-webkit-outer-spin-button,
-  .calorie-goal-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  .calorie-goal-input[type="number"] {
-    -moz-appearance: textfield;
-  }
-  .calorie-goal-input:focus {
-    outline: none;
-    border-color: #ff9404;
-    box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
-    background: #2D3242;
-    transform: scale(1.02);
-  }
-  .calorie-goal-input::placeholder {
-    color: #6B7280;
-    opacity: 1;
-  }
-  .calorie-goal-input.error {
-    border-color: #ff4444;
-  }
-
-  /* Scoped SweetAlert2 styles */
-  .custom-swal-background {
-    background-color: #3B4252 !important;
-    color: #fff !important;
-  }
-  .custom-swal-icon {
-    color: #ff9404 !important;
-  }
-  .swal2-success .swal2-success-ring {
-    border-color: #ff9404 !important;
-  }
-  .custom-swal-title {
-    color: #fff !important;
-    font-size: 1.5rem !important;
-  }
-  .custom-swal-text {
-    color: #fff !important;
-    font-size: 1rem !important;
-  }
-  .swal2-confirm {
-    background: linear-gradient(45deg, #ff9404, #e08503) !important;
-    color: white !important;
-    border: none !important;
-    padding: 10px 20px !important;
-    border-radius: 4px !important;
-    font-size: 0.875rem !important;
-    box-shadow: 0 0 10px rgba(255, 148, 4, 0.3) !important;
-    transition: all 0.3s ease !important;
-  }
-  .swal2-confirm:hover {
-    background: linear-gradient(45deg, #e08503, #ff9404) !important;
-    box-shadow: 0 0 15px rgba(255, 148, 4, 0.5) !important;
-  }
-
-  /* Responsive Adjustments */
-  @media (max-width: 640px) {
-    .calorie-goal-input {
-      width: 100%;
-      font-size: 0.75rem;
-      padding: 4px 8px;
-    }
-    .custom-swal-title {
-      font-size: 1.25rem !important;
-    }
-    .custom-swal-text {
-      font-size: 0.875rem !important;
-    }
-    .swal2-confirm {
-      padding: 8px 16px !important;
-      font-size: 0.75rem !important;
-    }
-  }
-`;
-
 const NutritionalDisplay: React.FC<{
   quantity: string;
   fixedUnit: string;
@@ -129,7 +39,7 @@ const NutritionalDisplay: React.FC<{
   evaluateFraction,
 }) => (
   <div className="mt-4">
-    <h3 className="text-sm font-semibold mb-2">
+    <h3 className="text-sm font-semibold mb-2 text-white">
       Valores Nutricionales Ajustados
     </h3>
     <p className="text-xs text-gray-300">
@@ -285,7 +195,7 @@ const FoodQuantityAdjust: React.FC = () => {
     return value;
   };
 
-  const evaluateFraction = (value: string): number => {
+  const evaluateFraction = useCallback((value: string): number => {
     const fractionMatch = value.match(/^(\d+)(?:\/(\d+))?$/);
     if (fractionMatch) {
       const whole = parseInt(fractionMatch[1], 10);
@@ -298,9 +208,9 @@ const FoodQuantityAdjust: React.FC = () => {
       return whole;
     }
     return parseFloat(value) || 0;
-  };
+  }, []);
 
-  const convertToFraction = (
+  const convertToFraction = useCallback((
     value: number,
     forceFractions: boolean = false
   ): string => {
@@ -338,7 +248,7 @@ const FoodQuantityAdjust: React.FC = () => {
         Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
       );
     return fractions[closestFraction] || value.toString();
-  };
+  }, []);
 
   const recalculateNutritionalValues = useCallback(
     (newQuantity: string) => {
@@ -558,14 +468,13 @@ const FoodQuantityAdjust: React.FC = () => {
 
   return (
     <div className="mt-0">
-      <style>{customStyles}</style>
       <div className="ml-0 mr-2 mt-0">
         <Link
           to={`/foodsearch?type=${type}`}
           state={{ fromAddButton: true }}
           className="inline-block"
         >
-          <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10">
+          <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10">
             <FaArrowLeft className="mr-1 text-base" />
             Volver
           </button>
@@ -573,7 +482,7 @@ const FoodQuantityAdjust: React.FC = () => {
       </div>
 
       <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-9">
-        <h2 className="text-sm font-semibold mb-2">
+        <h2 className="text-sm font-semibold mb-2 text-white">
           Ajustar Cantidad - {food.food_name}
         </h2>
         {error && <p className="text-red-400 mt-2 text-xs">{error}</p>}
@@ -587,7 +496,7 @@ const FoodQuantityAdjust: React.FC = () => {
               type="number"
               value={displayQuantity}
               onChange={handleQuantityChange}
-              className="calorie-goal-input mt-2"
+              className="w-full border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none mt-2 sm:text-sm sm:px-2.5 sm:py-1.5 text-xs px-2 py-1"
               min={fixedUnit === "g" || fixedUnit === "unit" ? "0" : "0"}
               step={fixedUnit === "g" || fixedUnit === "unit" ? "1" : "0.25"}
             />
@@ -605,7 +514,7 @@ const FoodQuantityAdjust: React.FC = () => {
           <div className="mt-4 text-right">
             <button
               onClick={handleSaveFood}
-              className="py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10"
+              className="py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10"
             >
               Agregar Alimento
             </button>

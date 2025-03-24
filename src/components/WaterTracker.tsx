@@ -19,96 +19,6 @@ preloadImages.forEach((src) => {
 const TIMEZONE = "America/Bogota";
 const TOTAL_WATER_UNITS = 8;
 
-const customStyles = `
-  html, body {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    overflow-y: auto;
-  }
-  html::-webkit-scrollbar, body::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .water-tracker-section {
-    max-width: 800px;
-    margin: 0 auto;
-    background: #3B4252;
-    border-radius: 12px;
-    padding: 30px;
-  }
-  .action-button {
-    padding: 8px 16px;
-    font-size: 1rem;
-    background: linear-gradient(45deg, #ff9404, #e08503);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 0 10px rgba(255, 148, 4, 0.3);
-    transition: all 0.3s ease;
-  }
-  .action-button:hover {
-    background: linear-gradient(45deg, #e08503, #ff9404);
-    box-shadow: 0 0 15px rgba(255, 148, 4, 0.5);
-    transform: scale(1.1);
-  }
-  .action-button:active {
-    transform: scale(0.95);
-  }
-  .action-button:disabled {
-    background: #4B5563;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-  }
-  .date-button {
-    min-width: 120px;
-    padding: 0.75rem 1.5rem;
-    background: linear-gradient(45deg, #2D3242, #3B4252);
-    color: #E5E7EB;
-    font-weight: 600;
-    border-radius: 8px;
-    border: 1px solid #ff9404;
-    box-shadow: 0 0 10px rgba(255, 148, 4, 0.3);
-    transition: all 0.3s ease;
-  }
-  .date-button:hover {
-    background: linear-gradient(45deg, #3B4252, #4B5563);
-    box-shadow: 0 0 15px rgba(255, 148, 4, 0.5);
-    transform: scale(1.05);
-  }
-  .date-button:active {
-    transform: scale(0.95);
-  }
-  .hidden-date-input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  @media (max-width: 640px) {
-    .water-tracker-section {
-      max-width: 100%;
-      padding: 20px;
-    }
-    .action-button {
-      padding: 6px 12px;
-      font-size: 0.875rem;
-    }
-    .date-button {
-      font-size: 0.875rem;
-      padding: 0.5rem 1rem;
-      min-width: 100px;
-    }
-  }
-`;
-
 const WaterUnit: React.FC<{ stage: number }> = ({ stage }) => {
   const fillSpring = useSpring({
     stage,
@@ -156,7 +66,7 @@ const WaterUnit: React.FC<{ stage: number }> = ({ stage }) => {
         className="absolute w-full h-full object-contain"
         style={{
           opacity: opacity75.opacity,
-          display: fillSpring.stage.to((s) => (s >= 2 ? " привлечениеnone" : "block")),
+          display: fillSpring.stage.to((s) => (s >= 2 ? "block" : "none")), // Fixed typo "привлечениеnone" -> "block"
         }}
       />
       <animated.img
@@ -207,6 +117,7 @@ const WaterTracker: React.FC = () => {
       setFilledWaterUnits(aguasllenadas);
       setError(null);
     } catch (err) {
+      console.log(err);
       setError("Error al consultar los datos de agua.");
     }
   }, [userEmail, date]);
@@ -219,6 +130,7 @@ const WaterTracker: React.FC = () => {
         aguasllenadas,
       });
     } catch (err) {
+      console.log(err);
       setError("Error al guardar los datos de agua.");
     }
   }, [userEmail, date]);
@@ -298,9 +210,8 @@ const WaterTracker: React.FC = () => {
   ));
 
   return (
-    <div className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-auto -mt-12">
+    <div className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-auto -mt-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <GalaxyBackground />
-      <style>{customStyles}</style>
 
       <motion.div
         initial={{ opacity: 0, y: -50 }}
@@ -321,7 +232,10 @@ const WaterTracker: React.FC = () => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.8 }}
         >
-          <button onClick={handleDatePicker} className="date-button">
+          <button 
+            onClick={handleDatePicker} 
+            className="min-w-[120px] px-6 py-3 bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#3B4252] hover:to-[#4B5563] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 sm:text-base text-sm sm:px-6 sm:py-3 sm:min-w-[120px]"
+          >
             {getDateLabel()}
           </button>
           <input
@@ -330,12 +244,12 @@ const WaterTracker: React.FC = () => {
             value={date}
             onChange={handleDateChange}
             max={todayStr}
-            className="hidden-date-input"
+            className="absolute opacity-0 w-0 h-0"
           />
         </motion.div>
       </motion.div>
 
-      <div className="water-tracker-section relative z-10">
+      <div className="max-w-[800px] mx-auto bg-[#3B4252] rounded-xl sm:p-7 p-5 relative z-10">
         {error && (
           <motion.p
             initial={{ opacity: 0 }}
@@ -350,7 +264,7 @@ const WaterTracker: React.FC = () => {
           Control de Agua
         </h2>
 
-        <div className="bg-[#4B5563] bg-opacity-50 rounded-lg p-6 mb-8">
+        <div className="bg-[#4B5563]/50 rounded-lg p-6 mb-8">
           <p className="text-xl font-semibold text-white">
             Consumido: <span className="text-[#ff9404]">{waterConsumed} ml</span>
           </p>
@@ -367,14 +281,14 @@ const WaterTracker: React.FC = () => {
           <button
             onClick={handleRemoveWaterUnit}
             disabled={filledWaterUnits === 0 || !isToday}
-            className="action-button"
+            className="px-4 py-2 text-base bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white border-none rounded-lg shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 disabled:bg-[#4B5563] disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none sm:text-base sm:px-4 sm:py-2 "
           >
             -
           </button>
           <button
             onClick={handleAddWaterUnit}
             disabled={filledWaterUnits === TOTAL_WATER_UNITS || !isToday}
-            className="action-button"
+            className="px-4 py-2 text-base bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white border-none rounded-lg shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 disabled:bg-[#4B5563] disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none sm:text-base sm:px-4 sm:py-2"
           >
             +
           </button>

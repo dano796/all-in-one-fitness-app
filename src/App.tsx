@@ -50,17 +50,7 @@ const FoodSearchProtectedRoute = ({ children, user }: { children: React.ReactNod
   return children;
 };
 
-// Route configurations
-const publicRoutes = [
-  { path: "/", component: LandingPage },
-  { path: "/nosotros", component: AboutPage },
-  { path: "/modulos", component: ModulesPage },
-  { path: "/contacto", component: ContactPage },
-  { path: "/login", component: LoginPage },
-  { path: "/registro", component: RegisterPage },
-  { path: "/reset-password", component: ResetPassword },
-];
-
+// Protected Routes
 const protectedRoutes = [
   {
     path: "/dashboard",
@@ -88,9 +78,14 @@ const protectedRoutes = [
     component: OneRMCalculator,
   },
   {
-    path: "/routines", // Add the routines route
+    path: "/routines",
     layout: DashboardLayout,
     component: Routines,
+  },
+  {
+    path: "/ejercicios",
+    layout: DashboardLayout,
+    component: ExerciseList,
   },
 ];
 
@@ -125,6 +120,7 @@ function App() {
 
   const renderRoutes = () => (
     <Routes>
+
       {/* Public Routes */}
       <Route element={<AuthLayout />}>
         <Route path="/" element={<LandingPage />} />
@@ -134,7 +130,6 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/ejercicios" element={<ExerciseList />} />
       </Route>
 
       {/* Protected Routes */}

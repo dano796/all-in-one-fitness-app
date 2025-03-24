@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from "react-router-dom";
 import { Dumbbell, UserCircle, LogOut, Menu, X } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
-import { User as SupabaseUser } from "@supabase/supabase-js"; // Usamos el tipo User de Supabase
+import { User as SupabaseUser } from "@supabase/supabase-js"; 
 
-// Usamos el tipo de Supabase en lugar de definir uno propio
 type User = SupabaseUser;
 
 const DesktopMenu: React.FC<{

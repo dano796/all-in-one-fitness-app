@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
@@ -14,61 +14,6 @@ interface Exercise {
   instructions: string[];
 }
 
-const customStyles = `
-  /* Estilo para Inputs y Selects */
-  .calorie-goal-input {
-    width: 100%;
-    padding: 6px 10px;
-    font-size: 0.875rem;
-    border: 1px solid #6B7280;
-    border-radius: 6px;
-    background: #2D3242;
-    color: #E5E7EB;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-  }
-  .calorie-goal-input:focus {
-    outline: none;
-    border-color: #ff9404;
-    box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
-    background: #2D3242;
-    transform: scale(1.02);
-  }
-  .calorie-goal-input::placeholder {
-    color: #6B7280;
-    opacity: 1;
-  }
-  .calorie-goal-input.error {
-    border-color: #ff4444;
-  }
-  .calorie-goal-input:disabled {
-    background: #3B4252;
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
-
-  /* Estilo para el Scrollbar */
-  .scrollbar-hide::-webkit-scrollbar {
-    width: 8px;
-  }
-  .scrollbar-hide::-webkit-scrollbar-track {
-    background: #3B4252;
-  }
-  .scrollbar-hide::-webkit-scrollbar-thumb {
-    background: #6B7280;
-    border-radius: 4px;
-  }
-  .scrollbar-hide::-webkit-scrollbar-thumb:hover {
-    background: #9CA3AF;
-  }
-
-  /* Responsive Adjustments */
-  @media (max-width: 640px) {
-    .calorie-goal-input {
-      font-size: 0.75rem;
-      padding: 4px 8px;
-    }
-  }
-`;
 
 const ExerciseList: React.FC = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -92,43 +37,42 @@ const ExerciseList: React.FC = () => {
     { value: 'waist', label: 'Cintura' },
   ];
 
-  useEffect(() => {
+  const fetchExercises = useCallback(async () => {
     if (!selectedBodyPart) {
       setExercises([]);
       setSelectedExercise(null);
       return;
     }
 
-    const fetchExercises = async () => {
-      setLoading(true);
-      setError(null);
-      setExercises([]);
-      setSelectedExercise(null);
-      try {
-        const response = await axios.get<Exercise[]>(`${backendUrl}/api/exercises`, {
-          params: { 
-            bodyPart: selectedBodyPart,
-            t: Date.now(),
-          },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        setExercises(response.data);
-        if (response.data.length > 0) {
-            setSelectedExercise(response.data[0]);
-          }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (err: any) {
-        console.error('Error en fetchExercises:', err.response?.data || err.message);
-        setError('Error al consultar los ejercicios');
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
+    setError(null);
+    setExercises([]);
+    setSelectedExercise(null);
 
-    fetchExercises();
+    try {
+      const response = await axios.get<Exercise[]>(`${backendUrl}/api/exercises`, {
+        params: { bodyPart: selectedBodyPart, t: Date.now() },
+        headers: { 'Content-Type': 'application/json' },
+      });
+      setExercises(response.data);
+      if (response.data.length > 0) {
+        setSelectedExercise(response.data[0]);
+      }
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        console.error('Error en fetchExercises:', err.response?.data || err.message);
+      } else {
+        console.error('Error en fetchExercises:', err);
+      }
+      setError('Error al consultar los ejercicios');
+    } finally {
+      setLoading(false);
+    }
   }, [backendUrl, selectedBodyPart]);
+
+  useEffect(() => {
+    fetchExercises();
+  }, [fetchExercises]);
 
   const handleBodyPartChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedBodyPart(e.target.value);
@@ -139,33 +83,32 @@ const ExerciseList: React.FC = () => {
   };
 
   return (
-    <div className="mt-0">
-      <style>{customStyles}</style>
-      <div className="ml-0 mr-2 mt-0">
-        <Link to="/dashboard" className="inline-block">
-          <button className="bg-[#FF9500] font-semibold text-white py-2 px-4 rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition">
+    <div className="mt-5 ml-10">
+      <div className="ml-10 mr-2 mt-0">
+        <Link to="/routines" className="inline-block">
+          <button className="bg-[#FF9500] font-medium w-30 text-white py-2 px-4 rounded-lg hover:bg-[#FF9500] hover:text-[#1C1C1E] transition flex items-center justify-center"> 
             <FaArrowLeft className="mr-1 text-base" />
             Volver
           </button>
         </Link>
       </div>
 
-      <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-9">
-        <h2 className="text-sm font-semibold mb-2 text-white">Lista de Ejercicios</h2>
+      <div className="ml-10 bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-9">
+        <h2 className="text-base font-medium mb-2 text-[#ff9404]">Lista de Ejercicios</h2>
 
         {/* Selector de parte del cuerpo */}
         <div className="mb-6">
-          <label htmlFor="bodyPart" className="block text-gray-300 font-semibold mb-2 text-sm">
+          <label htmlFor="bodyPart" className="block text-white font-semibold mb-2 text-sm">
             Selecciona una parte del cuerpo:
           </label>
           <select
             id="bodyPart"
             value={selectedBodyPart}
             onChange={handleBodyPartChange}
-            className="calorie-goal-input max-w-xs"
+            className="calorie-goal-input max-w-xs text-black w-40 p-2 rounded-lg bg-white text-sm"
             disabled={loading}
           >
-            <option value="">-- Selecciona --</option>
+            <option value=""> Selecciona </option>
             {bodyParts.map((part) => (
               <option key={part.value} value={part.value}>
                 {part.label}

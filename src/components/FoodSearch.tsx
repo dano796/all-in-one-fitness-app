@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useCallback } from "react";
 import axios, { AxiosError } from "axios";
 import { supabase } from "../lib/supabaseClient";
@@ -11,106 +12,6 @@ interface Food {
   food_description: string;
 }
 
-const customStyles = `
-  /* Estilo para Inputs de Texto */
-  .calorie-goal-input {
-    width: 100%;
-    padding: 6px 10px;
-    font-size: 0.875rem;
-    border: 1px solid #6B7280;
-    border-radius: 6px;
-    background: #2D3242;
-    color: #E5E7EB;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-  }
-  .calorie-goal-input:focus {
-    outline: none;
-    border-color: #ff9404;
-    box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
-    background: #2D3242;
-    transform: scale(1.02);
-  }
-  .calorie-goal-input::placeholder {
-    color: #6B7280;
-    opacity: 1;
-  }
-  .calorie-goal-input.error {
-    border-color: #ff4444;
-  }
-  .calorie-goal-input:disabled {
-    background: #3B4252;
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
-
-  /* Estilo para el Scrollbar */
-  .scrollbar-hide::-webkit-scrollbar {
-    width: 8px;
-  }
-  .scrollbar-hide::-webkit-scrollbar-track {
-    background: #3B4252;
-  }
-  .scrollbar-hide::-webkit-scrollbar-thumb {
-    background: #6B7280;
-    border-radius: 4px;
-  }
-  .scrollbar-hide::-webkit-scrollbar-thumb:hover {
-    background: #9CA3AF;
-  }
-
-  /* Scoped SweetAlert2 styles */
-  .custom-swal-background {
-    background-color: #3B4252 !important;
-    color: #fff !important;
-  }
-  .custom-swal-icon {
-    color: #ff9404 !important;
-  }
-  .swal2-success .swal2-success-ring {
-    border-color: #ff9404 !important;
-  }
-  .custom-swal-title {
-    color: #fff !important;
-    font-size: 1.5rem !important;
-  }
-  .custom-swal-text {
-    color: #fff !important;
-    font-size: 1rem !important;
-  }
-  .swal2-confirm {
-    background: linear-gradient(45deg, #ff9404, #e08503) !important;
-    color: white !important;
-    border: none !important;
-    padding: 10px 20px !important;
-    border-radius: 4px !important;
-    font-size: 0.875rem !important;
-    box-shadow: 0 0 10px rgba(255, 148, 4, 0.3) !important;
-    transition: all 0.3s ease !important;
-  }
-  .swal2-confirm:hover {
-    background: linear-gradient(45deg, #e08503, #ff9404) !important;
-    box-shadow: 0 0 15px rgba(255, 148, 4, 0.5) !important;
-  }
-
-  /* Responsive Adjustments */
-  @media (max-width: 640px) {
-    .calorie-goal-input {
-      font-size: 0.75rem;
-      padding: 4px 8px;
-    }
-    .custom-swal-title {
-      font-size: 1.25rem !important;
-    }
-    .custom-swal-text {
-      font-size: 0.875rem !important;
-    }
-    .swal2-confirm {
-      padding: 8px 16px !important;
-      font-size: 0.75rem !important;
-    }
-  }
-`;
-
 const FoodItem: React.FC<{
   food: Food;
   onSelect: (food: Food) => void;
@@ -122,7 +23,7 @@ const FoodItem: React.FC<{
     onClick={() => onNavigate(food)}
   >
     <div className="flex-1">
-      <p className="text-sm font-medium">{food.food_name}</p>
+      <p className="text-sm font-medium text-white">{food.food_name}</p>
       <p className="text-xs text-gray-300">{food.food_description}</p>
     </div>
     <button
@@ -341,10 +242,9 @@ const FoodSearch: React.FC = () => {
 
   return (
     <div className="mt-0">
-      <style>{customStyles}</style>
       <div className="ml-0 mr-2 mt-0">
         <Link to="/dashboard" className="inline-block">
-          <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10">
+          <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10">
             <FaArrowLeft className="mr-1 text-base" />
             Volver
           </button>
@@ -352,7 +252,7 @@ const FoodSearch: React.FC = () => {
       </div>
 
       <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-9">
-        <h2 className="text-sm font-semibold mb-2">Buscar Alimentos</h2>
+        <h2 className="text-sm font-semibold mb-2 text-white">Buscar Alimentos</h2>
         <div className="flex items-center space-x-4">
           <input
             type="text"
@@ -361,14 +261,12 @@ const FoodSearch: React.FC = () => {
             onKeyDown={handleKeyDown}
             placeholder="Ingresa un alimento (ejemplo: manzana)"
             disabled={loading}
-            className="calorie-goal-input"
+            className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 transition-all duration-300 focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 placeholder:text-gray-500 [.error&]:border-[#ff4444] disabled:bg-[#3B4252] disabled:cursor-not-allowed disabled:opacity-70 sm:text-sm sm:px-2.5 sm:py-1.5 text-xs px-2 py-1"
           />
           <button
             onClick={handleSearch}
             disabled={loading}
-            className={`flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10 ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Buscando..." : "Buscar"}
           </button>
@@ -377,8 +275,8 @@ const FoodSearch: React.FC = () => {
 
         {foods.length > 0 && (
           <div className="mt-4">
-            <h3 className="text-sm font-semibold mb-2">Resultados</h3>
-            <div className="space-y-3 max-h-[calc(8*4.5rem)] overflow-y-auto scrollbar-hide">
+            <h3 className="text-sm font-semibold mb-2 text-white">Resultados</h3>
+            <div className="space-y-3 max-h-[18rem] overflow-y-auto [scrollbar-width:thin] scrollbar-thin scrollbar-track-[#3B4252] scrollbar-thumb-[#6B7280] hover:scrollbar-thumb-[#9CA3AF]">
               {foods.map((food) => (
                 <FoodItem
                   key={food.food_id}

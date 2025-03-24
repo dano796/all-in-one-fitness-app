@@ -1,145 +1,5 @@
 import React, { useState } from "react";
 
-const customStyles = `
-  /* Estilo para Inputs Numéricos */
-  .calorie-goal-input {
-    width: 100%;
-    padding: 6px 10px;
-    font-size: 0.875rem;
-    border: 1px solid #6B7280;
-    border-radius: 6px;
-    background: #2D3242;
-    color: #E5E7EB;
-    text-align: center;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-  }
-  .calorie-goal-input::-webkit-outer-spin-button,
-  .calorie-goal-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  .calorie-goal-input[type="number"] {
-    -moz-appearance: textfield;
-  }
-  .calorie-goal-input:focus {
-    outline: none;
-    border-color: #ff9404;
-    box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
-    background: #2D3242;
-    transform: scale(1.02);
-  }
-  .calorie-goal-input::placeholder {
-    color: #6B7280;
-    opacity: 1;
-    text-align: center;
-  }
-  .calorie-goal-input.error {
-    border-color: #ff4444;
-  }
-
-  /* Estilo para Input con Botón de Unidad */
-  .calorie-goal-input-with-unit {
-    padding-right: 48px;
-  }
-
-  /* Estilo para Select (Dropdown) */
-  .calorie-goal-select {
-    width: 100%;
-    padding: 6px 30px 6px 10px;
-    font-size: 0.875rem;
-    border: 1px solid #6B7280;
-    border-radius: 6px;
-    background: #2D3242;
-    color: #E5E7EB;
-    text-align: center;
-    text-align-last: center;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 1.5em;
-  }
-  .calorie-goal-select:focus {
-    outline: none;
-    border-color: #ff9404;
-    box-shadow: 0 0 0 3px rgba(255, 148, 4, 0.2);
-    background: #2D3242;
-    transform: scale(1.02);
-  }
-  .calorie-goal-select option {
-    text-align: center;
-  }
-
-  /* Estilo para el Botón de Unidad */
-  .unit-toggle-button {
-    padding: 2px 6px;
-    font-size: 0.65rem;
-    background: linear-gradient(45deg, #ff9404, #e08503);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    box-shadow: 0 0 5px rgba(255, 148, 4, 0.3);
-    transition: all 0.3s ease;
-    line-height: 1;
-  }
-  .unit-toggle-button:hover {
-    background: linear-gradient(45deg, #e08503, #ff9404);
-    box-shadow: 0 0 10px rgba(255, 148, 4, 0.5);
-    transform: scale(1.05);
-  }
-  .unit-toggle-button:active {
-    transform: scale(0.95);
-  }
-
-  /* Estilo para el Botón de Calcular */
-  .calculate-button {
-    width: 100%;
-    padding: 8px 16px;
-    font-size: 0.875rem;
-    background: linear-gradient(45deg, #ff9404, #e08503);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  .calculate-button:hover {
-    background: linear-gradient(45deg, #e08503, #ff9404);
-    box-shadow: 0 0 10px rgba(255, 148, 4, 0.5);
-    transform: scale(1.02);
-  }
-  .calculate-button:disabled {
-    background: #6B7280;
-    cursor: not-allowed;
-  }
-
-  /* Responsive Adjustments */
-  @media (max-width: 640px) {
-    .calorie-goal-input {
-      width: 100%;
-      font-size: 0.75rem;
-      padding: 4px 8px;
-    }
-    .calorie-goal-input-with-unit {
-      padding-right: 40px;
-    }
-    .calorie-goal-select {
-      font-size: 0.75rem;
-      padding: 4px 24px 4px 8px;
-    }
-    .unit-toggle-button {
-      padding: 2px 4px;
-      font-size: 0.6rem;
-    }
-    .calculate-button {
-      font-size: 0.75rem;
-      padding: 6px 12px;
-    }
-  }
-`;
-
 const exercises = [
   "Peso Muerto",
   "Sentadilla",
@@ -232,7 +92,6 @@ const OneRepMaxCalculator: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white min-h-screen">
-      <style>{customStyles}</style>
       <div className="max-w-2xl mx-auto w-full">
         <h1 className="text-5xl font-bold mb-12 text-center text-white flex items-center justify-center">
           Calculadora Repetición Máxima (1RM)
@@ -259,13 +118,13 @@ const OneRepMaxCalculator: React.FC = () => {
                   id="weight"
                   value={weight ?? ""}
                   onChange={handleWeightChange}
-                  className="calorie-goal-input calorie-goal-input-with-unit"
+                  className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 placeholder:text-center [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none pr-12 sm:text-sm sm:px-2.5 sm:py-1.5"
                   placeholder="Ingresa el peso"
                 />
                 <button
                   type="button"
                   onClick={handleUnitChange}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 unit-toggle-button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white border-none rounded-sm shadow-[0_0_5px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 leading-none sm:text-[0.65rem] sm:px-1.5 sm:py-0.5 text-[0.6rem] px-1 py-0.5"
                 >
                   {unit}
                 </button>
@@ -284,7 +143,7 @@ const OneRepMaxCalculator: React.FC = () => {
                 id="reps"
                 value={reps ?? ""}
                 onChange={handleRepsChange}
-                className="calorie-goal-input"
+                className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 placeholder:text-center [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5"
                 placeholder="Ingresa el número de reps"
               />
             </div>
@@ -301,7 +160,7 @@ const OneRepMaxCalculator: React.FC = () => {
                 id="rpe"
                 value={rpe ?? ""}
                 onChange={handleRpeChange}
-                className="calorie-goal-input"
+                className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 placeholder:text-center [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5"
                 placeholder="Ingresa RPE (1-10)"
               />
             </div>
@@ -317,10 +176,13 @@ const OneRepMaxCalculator: React.FC = () => {
                 id="exercise"
                 value={exercise}
                 onChange={(e) => setExercise(e.target.value)}
-                className="calorie-goal-select"
+                className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 appearance-none 
+                  [background-image:url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] 
+                  bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.5em_1.5em] 
+                  sm:text-sm sm:px-2.5 sm:py-1.5 sm:pr-7 pr-6"
               >
                 {exercises.map((ex) => (
-                  <option key={ex} value={ex}>
+                  <option key={ex} value={ex} className="bg-[#2D3242] text-gray-200">
                     {ex}
                   </option>
                 ))}
@@ -329,7 +191,7 @@ const OneRepMaxCalculator: React.FC = () => {
 
             <button
               type="submit"
-              className="calculate-button"
+              className="w-full px-4 py-2 text-sm bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white border-none rounded-md hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.5)] hover:scale-102 transition-all duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed sm:text-sm sm:px-4 sm:py-2 "
               disabled={isButtonDisabled}
             >
               Calcular 1RM (Repetición Máxima)
