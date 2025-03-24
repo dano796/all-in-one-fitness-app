@@ -33,6 +33,7 @@ import FoodSearchLayout from "./layouts/FoodSearchLayout";
 import WaterLayout from "./layouts/WaterLayout";
 import CalorieCalculatorLayout from "./layouts/CalorieCalculatorLayout";
 import OneRMCalculatorLayout from "./layouts/OneRMCalculatorLayout";
+import ExerciseList from "./components/ExerciseList";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, user }: { children: React.ReactNode; user: User | null }) =>
@@ -120,9 +121,14 @@ function App() {
     <Routes>
       {/* Public Routes */}
       <Route element={<AuthLayout />}>
-        {publicRoutes.map(({ path, component: Component }) => (
-          <Route key={path} path={path} element={<Component />} />
-        ))}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/nosotros" element={<AboutPage />} />
+        <Route path="/modulos" element={<ModulesPage />} />
+        <Route path="/contacto" element={<ContactPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/registro" element={<RegisterPage />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/ejercicios" element={<ExerciseList />} />
       </Route>
 
       {/* Protected Routes */}

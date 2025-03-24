@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link } from "react-router-dom";
 import { Dumbbell, UserCircle, LogOut, Menu, X } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
