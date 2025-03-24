@@ -1,4 +1,3 @@
-// RegisteredFoods.tsx
 import React, { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import { supabase } from "../lib/supabaseClient";
@@ -6,7 +5,6 @@ import Swal from "sweetalert2";
 import { FaArrowLeft, FaTrash } from "react-icons/fa";
 import { Link, useSearchParams } from "react-router-dom";
 
-// Interfaces actualizadas
 interface RegisteredFood {
   id_registro: string;
   id_comida: string;
@@ -169,8 +167,7 @@ const RegisteredFoods: React.FC = () => {
                     type="radio"
                     name="registeredFoodSelection"
                     checked={
-                      selectedFood?.index === index &&
-                      selectedFood.type === type
+                      selectedFood?.index === index && selectedFood.type === type
                     }
                     onChange={() => {
                       setSelectedFood({
@@ -225,7 +222,6 @@ const RegisteredFoods: React.FC = () => {
         `}
       </style>
 
-      {/* Botón Volver */}
       <div className="mb-6 w-full max-w-2xl">
         <Link to="/dashboard" className="inline-block">
           <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 transform hover:-translate-y-1 z-10">
@@ -262,7 +258,7 @@ const RegisteredFoods: React.FC = () => {
         </p>
       )}
 
-      {selectedFood && ( // Eliminada la restricción de isToday
+      {selectedFood && (
         <div className="mt-6 text-right w-full max-w-2xl sticky bottom-0 z-10">
           <button
             onClick={handleDeleteFood}
@@ -277,4 +273,4 @@ const RegisteredFoods: React.FC = () => {
   );
 };
 
-export default RegisteredFoods;
+export default React.memo(RegisteredFoods);

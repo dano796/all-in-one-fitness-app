@@ -4,13 +4,13 @@ const customStyles = `
   /* Estilo para Inputs Numéricos */
   .calorie-goal-input {
     width: 100%;
-    padding: 6px 10px; /* Padding simétrico */
+    padding: 6px 10px;
     font-size: 0.875rem;
     border: 1px solid #6B7280;
     border-radius: 6px;
     background: #2D3242;
     color: #E5E7EB;
-    text-align: center; /* Centrado del texto */
+    text-align: center;
     transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
   }
   .calorie-goal-input::-webkit-outer-spin-button,
@@ -31,7 +31,7 @@ const customStyles = `
   .calorie-goal-input::placeholder {
     color: #6B7280;
     opacity: 1;
-    text-align: center; /* Centrado del placeholder */
+    text-align: center;
   }
   .calorie-goal-input.error {
     border-color: #ff4444;
@@ -39,20 +39,20 @@ const customStyles = `
 
   /* Estilo para Input con Botón de Unidad */
   .calorie-goal-input-with-unit {
-    padding-right: 48px; /* Espacio para el botón */
+    padding-right: 48px;
   }
 
   /* Estilo para Select (Dropdown) */
   .calorie-goal-select {
     width: 100%;
-    padding: 6px 30px 6px 10px; /* Ajustamos el padding para centrar el texto */
+    padding: 6px 30px 6px 10px;
     font-size: 0.875rem;
     border: 1px solid #6B7280;
     border-radius: 6px;
     background: #2D3242;
     color: #E5E7EB;
-    text-align: center; /* Centrado del texto */
-    text-align-last: center; /* Centrado en algunos navegadores */
+    text-align: center;
+    text-align-last: center;
     transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
@@ -68,7 +68,7 @@ const customStyles = `
     transform: scale(1.02);
   }
   .calorie-goal-select option {
-    text-align: center; /* Intentamos centrar las opciones (puede no funcionar en todos los navegadores) */
+    text-align: center;
   }
 
   /* Estilo para el Botón de Unidad */
@@ -127,7 +127,7 @@ const customStyles = `
     }
     .calorie-goal-select {
       font-size: 0.75rem;
-      padding: 4px 24px 4px 8px; /* Ajustamos el padding para pantallas pequeñas */
+      padding: 4px 24px 4px 8px;
     }
     .unit-toggle-button {
       padding: 2px 4px;
@@ -140,6 +140,16 @@ const customStyles = `
   }
 `;
 
+const exercises = [
+  "Peso Muerto",
+  "Sentadilla",
+  "Press de Banca",
+  "Press Militar",
+  "Curl de Bíceps",
+  "Extensión de Tríceps",
+  "Press de Hombros",
+];
+
 const OneRepMaxCalculator: React.FC = () => {
   const [weight, setWeight] = useState<number | undefined>(undefined);
   const [unit, setUnit] = useState<"kg" | "lb">("kg");
@@ -148,61 +158,37 @@ const OneRepMaxCalculator: React.FC = () => {
   const [exercise, setExercise] = useState<string>("Peso Muerto");
   const [oneRepMax, setOneRepMax] = useState<number | null>(null);
 
-  // List of exercises (compound vs. isolation for formula selection)
-  const exercises = [
-    "Peso Muerto",
-    "Sentadilla",
-    "Press de Banca",
-    "Press Militar",
-    "Curl de Bíceps",
-    "Extensión de Tríceps",
-    "Press de Hombros",
-  ];
-
-  // Convert weight between kg and lb
   const convertWeight = (value: number, toUnit: "kg" | "lb"): number => {
-    if (toUnit === "kg") {
-      return Math.round(value * 0.453592); // lb to kg
-    }
-    return Math.round(value / 0.453592); // kg to lb
+    return toUnit === "kg"
+      ? Math.round(value * 0.453592)
+      : Math.round(value / 0.453592);
   };
 
   const handleUnitChange = () => {
-    if (weight !== undefined) {
-      const newUnit = unit === "kg" ? "lb" : "kg";
-      const convertedWeight = convertWeight(weight, newUnit);
-      setWeight(convertedWeight);
-      setUnit(newUnit);
-    } else {
-      setUnit(unit === "kg" ? "lb" : "kg");
-    }
+    setUnit((prevUnit) => {
+      const newUnit = prevUnit === "kg" ? "lb" : "kg";
+      if (weight !== undefined) {
+        setWeight(convertWeight(weight, newUnit));
+      }
+      return newUnit;
+    });
   };
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value ? Number(e.target.value) : undefined;
-    if (value !== undefined && value > 0) {
-      setWeight(value);
-    } else {
-      setWeight(undefined);
-    }
+    setWeight(value !== undefined && value > 0 ? value : undefined);
   };
 
   const handleRepsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value ? Number(e.target.value) : undefined;
-    if (value !== undefined && value > 0 && value <= 30) {
-      setReps(value);
-    } else {
-      setReps(undefined);
-    }
+    setReps(
+      value !== undefined && value > 0 && value <= 30 ? value : undefined
+    );
   };
 
   const handleRpeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value ? Number(e.target.value) : undefined;
-    if (value !== undefined && value >= 1 && value <= 10) {
-      setRpe(value);
-    } else {
-      setRpe(undefined);
-    }
+    setRpe(value !== undefined && value >= 1 && value <= 10 ? value : undefined);
   };
 
   const calculateOneRepMax = () => {
@@ -219,39 +205,20 @@ const OneRepMaxCalculator: React.FC = () => {
       return;
     }
 
-    // Convert weight to kg if in lb for calculation
     const weightInKg = unit === "lb" ? convertWeight(weight, "kg") : weight;
-
-    // Select formula based on exercise type
     const isCompound = [
       "Peso Muerto",
       "Sentadilla",
       "Press de Banca",
       "Press Militar",
     ].includes(exercise);
-    let oneRm: number;
+    const oneRm = isCompound
+      ? weightInKg * (1 + reps / 30) // Epley
+      : weightInKg * (36 / (37 - reps)); // Brzycki
 
-    if (isCompound) {
-      // Epley Formula for compound lifts
-      oneRm = weightInKg * (1 + reps / 30);
-    } else {
-      // Brzycki Formula for isolation lifts
-      oneRm = weightInKg * (36 / (37 - reps));
-    }
-
-    // Adjust for RPE (if RPE < 10, user could have done more reps)
-    const rpeAdjustment = 1 + (10 - rpe) * 0.033; // Approximate adjustment
-    oneRm = oneRm * rpeAdjustment;
-
-    // Round to nearest integer
-    oneRm = Math.round(oneRm);
-
-    // Convert back to lb if the unit is lb
-    if (unit === "lb") {
-      oneRm = convertWeight(oneRm, "lb");
-    }
-
-    setOneRepMax(oneRm);
+    const rpeAdjustment = 1 + (10 - rpe) * 0.033;
+    const adjustedOneRm = Math.round(oneRm * rpeAdjustment);
+    setOneRepMax(unit === "lb" ? convertWeight(adjustedOneRm, "lb") : adjustedOneRm);
   };
 
   const isButtonDisabled =
@@ -279,7 +246,6 @@ const OneRepMaxCalculator: React.FC = () => {
             }}
             className="space-y-6"
           >
-            {/* Weight Input with Unit Toggle Inside */}
             <div>
               <label
                 htmlFor="weight"
@@ -306,7 +272,6 @@ const OneRepMaxCalculator: React.FC = () => {
               </div>
             </div>
 
-            {/* Repetitions Input */}
             <div>
               <label
                 htmlFor="reps"
@@ -324,7 +289,6 @@ const OneRepMaxCalculator: React.FC = () => {
               />
             </div>
 
-            {/* RPE Input */}
             <div>
               <label
                 htmlFor="rpe"
@@ -342,7 +306,6 @@ const OneRepMaxCalculator: React.FC = () => {
               />
             </div>
 
-            {/* Exercise Dropdown */}
             <div>
               <label
                 htmlFor="exercise"
@@ -364,7 +327,6 @@ const OneRepMaxCalculator: React.FC = () => {
               </select>
             </div>
 
-            {/* Calculate Button */}
             <button
               type="submit"
               className="calculate-button"
@@ -373,7 +335,6 @@ const OneRepMaxCalculator: React.FC = () => {
               Calcular 1RM (Repetición Máxima)
             </button>
 
-            {/* Results */}
             {oneRepMax && (
               <div className="mt-6 space-y-4">
                 <h2 className="text-4xl font-bold text-center text-white">
@@ -413,4 +374,4 @@ const OneRepMaxCalculator: React.FC = () => {
   );
 };
 
-export default OneRepMaxCalculator;
+export default React.memo(OneRepMaxCalculator);

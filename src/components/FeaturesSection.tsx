@@ -28,6 +28,20 @@ const features = [
   },
 ];
 
+const FeatureCard: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}> = ({ icon, title, description }) => (
+  <div className="bg-[#3B4252] text-white rounded-xl p-6 shadow-lg">
+    <div className="border rounded-lg w-16 h-16 flex items-center justify-center mb-4">
+      {icon}
+    </div>
+    <h3 className="text-xl font-semibold mb-2">{title}</h3>
+    <p className="text-gray-300">{description}</p>
+  </div>
+);
+
 const FeaturesSection: React.FC = () => {
   return (
     <section className="bg-[#282c3c] pt-8 pb-16 px-8 md:px-16 border-t border-[#3B4252]">
@@ -38,16 +52,12 @@ const FeaturesSection: React.FC = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <div
+            <FeatureCard
               key={index}
-              className="bg-[#3B4252] text-white rounded-xl p-6 shadow-lg"
-            >
-              <div className="border rounded-lg w-16 h-16 flex items-center justify-center mb-4">
-                {feature.icon}
-              </div>
-              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-gray-300">{feature.description}</p>
-            </div>
+              icon={feature.icon}
+              title={feature.title}
+              description={feature.description}
+            />
           ))}
         </div>
       </div>
@@ -55,4 +65,4 @@ const FeaturesSection: React.FC = () => {
   );
 };
 
-export default FeaturesSection;
+export default React.memo(FeaturesSection);

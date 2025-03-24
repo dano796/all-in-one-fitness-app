@@ -87,4 +87,4 @@ const ModulesPage: React.FC = () => {
   );
 };
 
-export default ModulesPage;
+export default React.memo(ModulesPage);

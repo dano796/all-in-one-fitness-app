@@ -16,4 +16,4 @@ const FoodSearchLayout: React.FC<FoodSearchLayoutProps> = ({ children }) => {
   );
 };
 
-export default FoodSearchLayout;
+export default React.memo(FoodSearchLayout);

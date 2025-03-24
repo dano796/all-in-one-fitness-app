@@ -88,7 +88,6 @@ const RegisterPage = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Resetear errores
     setErrors({
       usuario: "",
       correo: "",
@@ -99,7 +98,6 @@ const RegisterPage = () => {
 
     let hasError = false;
     
-    // Validaciones
     if (!usuario) {
       setErrors(prev => ({ ...prev, usuario: "required" }));
       hasError = true;
@@ -144,7 +142,6 @@ const RegisterPage = () => {
       );
       const result = await response.json();
       if (result.error) {
-        // Determinar si el error es por usuario o correo
         if (result.error.toLowerCase().includes("usuario")) {
           setErrors(prev => ({ ...prev, usuario: result.error }));
         } else if (result.error.toLowerCase().includes("correo")) {
@@ -153,7 +150,6 @@ const RegisterPage = () => {
           setErrors(prev => ({ ...prev, correo: result.error }));
         }
       } else {
-        // Mostrar SweetAlert para registro exitoso
         await Swal.fire({
           title: "¡Éxito!",
           text: result.success || "Registro exitoso.",
@@ -169,8 +165,7 @@ const RegisterPage = () => {
         });
         setContador(60);
         setPuedeReenviar(false);
-        resetForm(); // Limpiar el formulario después de un registro exitoso
-        // Redirigir a /login después de hacer clic en "Aceptar"
+        resetForm();
         navigate("/login", { replace: true });
       }
     } catch (err) {
@@ -374,4 +369,4 @@ const RegisterPage = () => {
   );
 };
 
-export default RegisterPage;
+export default React.memo(RegisterPage);
