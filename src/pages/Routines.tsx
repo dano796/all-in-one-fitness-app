@@ -1,90 +1,106 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import GalaxyBackground from "../components/GalaxyBackground";
+import styles from "../pages/Routines.module.css"; // Importamos los estilos
 
 interface Routine {
+  id: string;
   day: string;
   name: string;
+  exercises: any[];
+}
+
+interface Exercise {
+  id: string;
+  name: string;
+  bodyPart: string;
+  equipment: string;
+  gifUrl: string;
+  target: string;
+  secondaryMuscles: string[];
+  instructions: string[];
+  sets?: { kg: string; reps: string }[];
+  restTimer?: string;
+  note?: string;
 }
 
 const Routines: React.FC = () => {
   const navigate = useNavigate();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userEmail, setUserEmail] = useState<string>("");
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-      if (authError || !user) {
-        setError("Debes iniciar sesión para ver tus rutinas.");
-        navigate("/login");
-      } else {
-        const email = user.email || "";
-        setUserEmail(email);
-        fetchRoutines(email);
-      }
-    };
-    checkAuth();
+  const checkAuth = useCallback(async () => {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      setError("Debes iniciar sesión para ver tus rutinas.");
+      navigate("/login");
+    } else {
+      const email = user.email || "";
+      setUserEmail(email);
+    }
   }, [navigate]);
 
-  const fetchRoutines = useCallback(async (email: string) => {
+  const fetchRoutines = useCallback(async () => {
+    if (!userEmail) return;
+    setLoading(true);
     try {
       const response = await axios.get<{ routines: Routine[] }>(
         `${import.meta.env.VITE_BACKEND_URL}/api/routines/user`,
-        { params: { email } }
+        { params: { email: userEmail } }
       );
       setRoutines(response.data.routines);
       setError(null);
     } catch (err) {
-      const axiosError = err as AxiosError<{ error?: string }>;
-      setError(
-        axiosError.response?.data?.error || "Error al consultar las rutinas."
-      );
+      setError("Error al consultar las rutinas.");
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [userEmail]);
 
   const handleAddRoutineClick = useCallback(() => {
     navigate("/ejercicios");
   }, [navigate]);
 
-  const handleRoutineClick = useCallback((routineName: string) => {
-    navigate(`/routine-details?name=${routineName}`);
+  const handleRoutineClick = useCallback((routineId: string) => {
+    navigate(`/routine-details?id=${routineId}`);
   }, [navigate]);
 
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  useEffect(() => {
+    if (userEmail) fetchRoutines();
+  }, [userEmail, fetchRoutines]);
+
   return (
-    <div className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-hidden -mt-12">
+    <div className={styles.container}>
       <GalaxyBackground />
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="mb-6 text-center"
+        className={styles.header}
       >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
         >
-          <h1 className="text-xl font-bold text-white">All In One Fitness App</h1>
+          <h1 className={styles.title}>All In One Fitness App</h1>
         </motion.div>
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.8 }}
         >
-          <button
-            onClick={handleAddRoutineClick}
-            className="mt-4 py-3 px-6 bg-gradient-to-r from-[#ff9404] to-[#e08503] text-white font-semibold rounded-lg shadow-md hover:shadow-lg hover:from-[#e08503] hover:to-[#ff9404] transition-all duration-300 hover:scale-105 active:scale-95"
-          >
+          <button onClick={handleAddRoutineClick} className={styles.addButton}>
             Nueva rutina
           </button>
         </motion.div>
@@ -94,13 +110,13 @@ const Routines: React.FC = () => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="max-w-[700px] mx-auto bg-[#3B4252] rounded-lg p-5 relative z-10 sm:p-4"
+        className={styles.listContainer}
       >
         <motion.h2
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          className="text-sm font-semibold text-white mb-4"
+          className={styles.listTitle}
         >
           Mis rutinas
         </motion.h2>
@@ -109,45 +125,54 @@ const Routines: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="text-red-400 mb-4 text-center text-sm"
+            className={styles.error}
           >
             {error}
           </motion.p>
         )}
-        <div className="space-y-2">
-          {routines.length > 0 ? (
-            routines.map((routine, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 + index * 0.3, duration: 1.0 }}
-                className="max-w-full bg-white rounded-lg p-2.5 mb-2.5 flex items-center justify-between cursor-pointer hover:bg-gray-200 transition-colors duration-200 sm:p-2"
-                onClick={() => handleRoutineClick(routine.name)}
-              >
-                <div className="flex items-center space-x-3 flex-1">
-                  <div>
-                    <h3 className="text-sm font-semibold text-black">{routine.day}: {routine.name}</h3>
-                  </div>
-                </div>
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.0 + index * 0.3, duration: 0.8 }}
-                  className="p-0.5 transition-transform duration-200 hover:scale-120 active:scale-90 bg-transparent"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddRoutineClick();
-                  }}
+        {loading ? (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-gray-400 text-center"
+          >
+            Cargando...
+          </motion.p>
+        ) : (
+          <div className={styles.list}>
+            {routines.length > 0 ? (
+              routines.map((routine, index) => (
+                <motion.div
+                  key={routine.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.6 + index * 0.3, duration: 1.0 }}
+                  className={styles.item}
+                  onClick={() => handleRoutineClick(routine.id)}
                 >
-                  <Plus className="h-4 w-4 text-black transition-colors duration-300 hover:text-[#ff9404]" />
-                </motion.button>
-              </motion.div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-center text-sm">No hay rutinas registradas.</p>
-          )}
-        </div>
+                  <div className={styles.itemContent}>
+                    <div>
+                      <h3 className={styles.itemText}>
+                        {routine.day}: {routine.name}
+                      </h3>
+                    </div>
+                  </div>
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1.0 + index * 0.3, duration: 0.8 }}
+                    className={styles.itemButton}
+                  >
+                    <MoreHorizontal className={styles.itemIcon} />
+                  </motion.button>
+                </motion.div>
+              ))
+            ) : (
+              <p className={styles.empty}>No hay rutinas registradas.</p>
+            )}
+          </div>
+        )}
       </motion.div>
     </div>
   );

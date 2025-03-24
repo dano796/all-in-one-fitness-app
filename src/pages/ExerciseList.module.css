@@ -1,0 +1,679 @@
+/* General container styling */
+.container {
+    position: relative;
+    padding: clamp(0.75rem, 2vw, 2rem);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 2vw, 2rem);
+    background-color: #282c3c;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* Header styling */
+  .header {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: clamp(1rem, 2vw, 1.5rem);
+  }
+  
+  .backButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: clamp(0.5rem, 1.5vw, 1rem) clamp(0.75rem, 2vw, 1rem);
+    background: linear-gradient(to right, #ff9404, #e08503);
+    color: white;
+    font-weight: 600;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    border-radius: 0.5rem;
+    box-shadow: 0 0 10px rgba(255, 148, 4, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .backButton:hover {
+    background: linear-gradient(to right, #e08503, #ff9404);
+    box-shadow: 0 0 15px rgba(255, 148, 4, 0.5);
+    transform: scale(1.05);
+  }
+  
+  .backButton:active {
+    transform: scale(0.95);
+  }
+  
+  .backIcon {
+    width: clamp(0.75rem, 2vw, 1rem);
+    height: clamp(0.75rem, 2vw, 1rem);
+  }
+  
+  /* Content styling */
+  .content {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+  }
+  
+  /* Form styling */
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 1.5vw, 1rem);
+    margin-bottom: clamp(1.5rem, 2vw, 2rem);
+    background-color: #3b4252;
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+    border-radius: 0.75rem;
+    height: auto;
+    min-height: clamp(120px, 20vh, 150px);
+  }
+  
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .label {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    font-weight: 500;
+    color: white;
+ 
+    text-align: left; /* Alinear el texto a la izquierda */
+  }
+  
+  .input {
+    width: 100%;
+    padding: clamp(0.6rem, 1.5vw, 0.75rem);
+    border-radius: 0.5rem;
+    border: 1px solid #4b5563;
+    background-color: #2d3242;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: white;
+    transition: all 0.3s ease;
+  }
+  .noteLabel {
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    font-weight: 500;
+    color: white;
+    margin-left: 1rem; /* Move a bit to the right */
+    margin-bottom: 0.0rem; /* Espacio debajo del texto */
+}
+  .select {
+    width: 100%;
+    padding: clamp(0.6rem, 1.5vw, 0.75rem);
+    border-radius: 0.5rem;
+    border: 1px solid #4b5563;
+    background-color: #2d3242;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: white;
+    transition: all 0.3s ease;
+  }
+  
+  /* Estilo específico para el input de "Nota" */
+  .noteInput {
+    width: 100%;
+    max-width: 300px; /* Ancho máximo para el input de "Nota" */
+    padding: clamp(0.6rem, 1.5vw, 0.75rem);
+    border-radius: 0.5rem;
+    border: 1px solid #4b5563;
+    background-color: #2d3242;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    margin-left: 1rem; /* Move a bit to the right */
+    color: white;
+    transition: all 0.3s ease;
+  }
+  
+  /* Estilo específico para el select de "Temporizador de descanso" */
+  .restTimerSelect {
+    width: 100%;
+    max-width: 200px; /* Ancho máximo más pequeño que el de "Nota" */
+    padding: clamp(0.6rem, 1.5vw, 0.75rem);
+    border-radius: 0.5rem;
+    border: 1px solid #4b5563;
+    background-color: #2d3242;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    margin-left: 1rem; /* Move a bit to the right */
+    color: white;
+    transition: all 0.3s ease;
+  }
+  
+  .input::placeholder,
+  .select::placeholder,
+  .noteInput::placeholder,
+  .restTimerSelect::placeholder {
+    color: #9ca3af;
+  }
+  
+  .input:focus,
+  .select:focus,
+  .noteInput:focus,
+  .restTimerSelect:focus {
+    outline: none;
+    border-color: #ff9404;
+    box-shadow: 0 0 8px rgba(255, 148, 4, 0.2);
+    background-color: #2d3242;
+    transform: scale(1.02);
+  }
+  
+  /* Exercise container styling */
+  .exerciseContainer {
+    display: flex;
+    flex-direction: row;
+    gap: clamp(1rem, 2vw, 1.5rem);
+    margin-bottom: clamp(1.5rem, 2vw, 2rem);
+  }
+  
+  .exerciseList {
+    flex: 1;
+    background-color: #3b4252;
+    border-radius: 0.75rem;
+    padding: clamp(1rem, 2vw, 1.5rem);
+    height: clamp(350px, 60vh, 600px);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .title {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    font-weight: 600;
+    color: white;
+    margin-bottom: clamp(1rem, 2vw, 1.5rem);
+  }
+  
+  .subtitle {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    font-weight: 600;
+    color: white;
+    margin-bottom: clamp(0.75rem, 1.5vw, 1rem);
+  }
+  
+  .selectContainer {
+    margin-bottom: clamp(1rem, 2vw, 1.5rem);
+  }
+  
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .listItem {
+    padding: clamp(0.75rem, 1.5vw, 1rem);
+    border-radius: 0.5rem;
+    background-color: #2d3242;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .listItem:hover {
+    background-color: #4b5563;
+  }
+  
+  .listItem.selected {
+    background-color: #ff9404;
+  }
+  
+  .listItemImage {
+    width: clamp(2.5rem, 5vw, 3rem);
+    height: clamp(2.5rem, 5vw, 3rem);
+    object-fit: contain;
+    border-radius: 0.5rem;
+  }
+  
+  .listItemText {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    font-weight: 500;
+    color: white;
+  }
+  
+  .exerciseDetails {
+    flex: 2;
+    background-color: #3b4252;
+    border-radius: 0.75rem;
+    padding: clamp(1rem, 2vw, 1.5rem);
+    height: clamp(350px, 60vh, 600px);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .detailTitle {
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+    font-weight: 600;
+    color: white;
+    margin-bottom: clamp(1rem, 2vw, 1.5rem);
+  }
+  
+  .detailContent {
+    display: flex;
+    gap: clamp(1rem, 2vw, 1.5rem);
+    margin-bottom: clamp(1rem, 2vw, 1.5rem);
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .detailImageContainer {
+    position: relative;
+    flex: 1;
+  }
+  
+  .detailImage {
+    width: 100%;
+    height: clamp(12rem, 40vh, 20rem);
+    object-fit: contain;
+    border-radius: 0.5rem;
+  }
+  
+  .exerciseDbLogo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+  }
+  
+  .detailInfo {
+    flex: 1;
+    color: white;
+  }
+  
+  .detailInfo p {
+    margin-bottom: 0.75rem;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+  }
+  
+  .detailInfo strong {
+    color: #ff9404;
+  }
+  
+  .instructions {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+  }
+  
+  .instructions li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .addButton {
+    width: 100%;
+    padding: clamp(0.5rem, 1.5vw, 0.75rem);
+    background: linear-gradient(to right, #ff9404, #e08503);
+    border-radius: 0.5rem;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    font-weight: 500;
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 148, 4, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .addButton:hover {
+    background: linear-gradient(to right, #e08503, #ff9404);
+    box-shadow: 0 0 15px rgba(255, 148, 4, 0.5);
+    transform: scale(1.05);
+  }
+  
+  .addButton:active {
+    transform: scale(0.95);
+  }
+  
+  .routineExercises {
+    background-color: #3b4252;
+    border-radius: 0.75rem;
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+    min-height: clamp(150px, 30vh, 250px);
+    max-height: clamp(350px, 60vh, 600px);
+    overflow-y: auto;
+  }
+  
+  .routineItem {
+    max-width: 100%;
+    background-color: #2d3242;
+    border-radius: 0.5rem;
+    padding: clamp(0.75rem, 1.5vw, 1rem);
+    margin-bottom: 1.5rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .routineItem:hover {
+    background-color: #4b5563;
+  }
+  
+  .routineItemHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  
+  .routineItemContent {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .routineItemActions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .toggleButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: transform 0.2s ease;
+  }
+  
+  .toggleButton:hover {
+    transform: scale(1.2);
+  }
+  
+  .toggleButton:active {
+    transform: scale(0.9);
+  }
+  
+  .toggleIcon {
+    width: clamp(1rem, 2vw, 1.25rem);
+    height: clamp(1rem, 2vw, 1.25rem);
+    color: #ff9404;
+    transition: color 0.3s ease;
+  }
+  
+  .toggleIcon:hover {
+    color: #e08503;
+  }
+  
+  .routineItemImage {
+    width: clamp(2.5rem, 5vw, 3rem);
+    height: clamp(2.5rem, 5vw, 3rem);
+    object-fit: contain;
+    border-radius: 0.5rem;
+  }
+  
+  .routineItemTitle {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    font-weight: 600;
+    color: white;
+  }
+  
+  .routineItemRemove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: transform 0.2s ease;
+  }
+  
+  .routineItemRemove:hover {
+    transform: scale(1.2);
+  }
+  
+  .routineItemRemove:active {
+    transform: scale(0.9);
+  }
+  
+  .routineItemRemoveIcon {
+    width: clamp(1rem, 2vw, 1.25rem);
+    height: clamp(1rem, 2vw, 1.25rem);
+    color: #ef4444;
+    transition: color 0.3s ease;
+  }
+  
+  .routineItemRemoveIcon:hover {
+    color: #dc2626;
+  }
+  
+  .routineItemDetailsWrapper {
+    overflow: hidden;
+  }
+  
+  .routineItemDetails {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column; /* Apilar los elementos verticalmente */
+    gap: 0.5rem; /* Espacio entre label e input/select */
+  }
+  
+  .setsHeader {
+    display: grid;
+    grid-template-columns: 1fr 2fr 2fr; /* Solo 3 columnas: SET, KG, REPS */
+    align-items: center;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    font-weight: 500;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  
+  .set {
+    display: grid;
+    grid-template-columns: 1fr 2fr 2fr; /* Solo 3 columnas: SET, KG, REPS */
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  
+  .setNumber {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    text-align: center;
+    color: white;
+  }
+  
+  .setField {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .setInput {
+    width: 100%;
+    padding: clamp(0.5rem, 1vw, 0.75rem);
+    border-radius: 0.5rem;
+    border: 1px solid #4b5563;
+    background-color: #2d3242;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    color: white;
+    transition: all 0.3s ease;
+  }
+  
+  .setInput::placeholder {
+    color: #9ca3af;
+  }
+  
+  .setInput:focus {
+    outline: none;
+    border-color: #ff9404;
+    box-shadow: 0 0 8px rgba(255, 148, 4, 0.2);
+    background-color: #2d3242;
+    transform: scale(1.02);
+  }
+  
+  /* Contenedor para los botones "Agregar serie" y "Eliminar serie" */
+  .setActions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    align-items: center; /* Alinear verticalmente los botones */
+}
+
+.removeSetButton {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    cursor: pointer;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem; /* Ajusta este valor para bajar más el botón */
+}
+
+.removeSetButton:hover {
+    color: #dc2626;
+}
+
+.addSetButton {
+    margin-top: 0.75rem;
+    color: #ff9404;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.addSetButton:hover {
+    color: #e08503;
+}
+
+.addSetIcon, .removeSetIcon {
+    width: clamp(1rem, 2vw, 1.25rem);
+    height: clamp(1rem, 2vw, 1.25rem);
+}
+  
+  .saveButton {
+    margin-top: clamp(1.5rem, 2vw, 2rem);
+    width: 100%;
+    padding: clamp(0.75rem, 2vw, 1rem);
+    background: linear-gradient(to right, #ff9404, #e08503);
+    color: white;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: clamp(0.875rem, 2.5vw, 1.25rem);
+    box-shadow: 0 0 10px rgba(255, 148, 4, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .saveButton:hover {
+    background: linear-gradient(to right, #e08503, #ff9404);
+    box-shadow: 0 0 15px rgba(255, 148, 4, 0.5);
+    transform: scale(1.05);
+  }
+  
+  .saveButton:active {
+    transform: scale(0.95);
+  }
+  
+  .loading,
+  .error,
+  .empty {
+    text-align: center;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    color: #9ca3af;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .error {
+    color: #ef4444;
+  }
+  
+  /* Scrollbar styling for WebKit (Chrome, Safari) */
+  .list::-webkit-scrollbar,
+  .detailContent::-webkit-scrollbar,
+  .routineExercises::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .list::-webkit-scrollbar-track,
+  .detailContent::-webkit-scrollbar-track,
+  .routineExercises::-webkit-scrollbar-track {
+    background: #3b4252;
+    border-radius: 4px;
+  }
+  
+  .list::-webkit-scrollbar-thumb,
+  .detailContent::-webkit-scrollbar-thumb,
+  .routineExercises::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 4px;
+  }
+  
+  .list::-webkit-scrollbar-thumb:hover,
+  .detailContent::-webkit-scrollbar-thumb:hover,
+  .routineExercises::-webkit-scrollbar-thumb:hover {
+    background: #b0b7c3;
+  }
+  
+  /* Scrollbar styling for Firefox */
+  .list,
+  .detailContent,
+  .routineExercises {
+    scrollbar-width: thin;
+    scrollbar-color: #9ca3af #3b4252;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 1024px) {
+    .exerciseContainer {
+      flex-direction: column;
+    }
+  
+    .exerciseList,
+    .exerciseDetails {
+      flex: none;
+      width: 100%;
+    }
+  
+    .setsHeader,
+    .set {
+      grid-template-columns: 1fr 2fr 2fr; /* Ajustado para 3 columnas */
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .setsHeader,
+    .set {
+      grid-template-columns: 1fr 1fr 1fr; /* Ajustado para 3 columnas */
+    }
+  
+    .setInput {
+      padding: clamp(0.4rem, 1vw, 0.6rem);
+      font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+    }
+  
+    .noteInput {
+      max-width: 250px; /* Reducir aún más en pantallas más pequeñas */
+    }
+  
+    .restTimerSelect {
+      max-width: 150px; /* Reducir aún más en pantallas más pequeñas */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .setsHeader,
+    .set {
+      grid-template-columns: 1fr 1fr 1fr; /* Ajustado para 3 columnas */
+    }
+  
+    .setInput {
+      padding: clamp(0.3rem, 1vw, 0.5rem);
+      font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+    }
+  
+    .noteInput {
+      max-width: 200px; /* Reducir aún más en pantallas muy pequeñas */
+    }
+  
+    .restTimerSelect {
+      max-width: 120px; /* Reducir aún más en pantallas muy pequeñas */
+    }
+  }
