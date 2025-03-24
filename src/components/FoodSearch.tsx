@@ -166,7 +166,7 @@ const FoodSearch: React.FC = () => {
 
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/foods/search",
+        `${import.meta.env.VITE_BACKEND_URL}/api/foods/search`,
         {
           params: { query, max_results: 10 },
         }
@@ -249,7 +249,7 @@ const FoodSearch: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/foods/add",
+        `${import.meta.env.VITE_BACKEND_URL}/api/foods/add`,
         requestBody
       );
 

@@ -241,7 +241,7 @@ const CalorieCalculator: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/set-calorie-goal",
+        `${import.meta.env.VITE_BACKEND_URL}/api/set-calorie-goal`,
         {
           email: userEmail,
           calorieGoal: calorieValue,
