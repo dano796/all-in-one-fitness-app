@@ -3,7 +3,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 
 const ContactPage: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
+    <div className="container mx-auto px-8 py-16 bg-[#282c3c] text-white">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-5xl font-bold mb-8 pb-5 text-center text-white">
           Contacto
@@ -51,7 +51,8 @@ const ContactPage: React.FC = () => {
               <input
                 type="text"
                 id="name"
-                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white 
+                focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0"
                 placeholder="Tu nombre"
               />
             </div>
@@ -66,7 +67,8 @@ const ContactPage: React.FC = () => {
               <input
                 type="email"
                 id="email"
-                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white 
+                focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0"
                 placeholder="tu@email.com"
               />
             </div>
@@ -81,7 +83,8 @@ const ContactPage: React.FC = () => {
               <textarea
                 id="message"
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-500 rounded-lg bg-[#282c3c] text-white 
+                focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0"
                 placeholder="¿En qué podemos ayudarte?"
               />
             </div>

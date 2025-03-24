@@ -56,12 +56,12 @@ const Navbar: React.FC = () => {
 
   return (
     <header className="px-4 bg-[#282c3c] border-b border-[#3B4252]">
-      <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <nav className="container mx-auto my-2 px-4 h-16 flex items-center justify-between md:my-4 lg:my-2">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <Dumbbell className="w-6 h-6 text-[#ff9404]" />
           <Link to="/" className="text-xl font-semibold text-white">
-            All In One Fitness
+            All In One Fitness App
           </Link>
         </div>
 
@@ -184,25 +184,31 @@ const Navbar: React.FC = () => {
 
       {/* Menú para móviles */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[secondary] border-t border-gray-700 p-4">
-          <Link to="/" className="block py-2 hover:text-[#FF9500] transition">
+        <div className="md:hidden bg-[secondary] font-medium border-t border-gray-700 px-2 py-2">
+          <Link to="/" 
+          className="block py-2 hover:text-[#FF9500] transition"
+          onClick={() => setMobileMenuOpen(false)}
+          >
             Inicio
           </Link>
           <Link
             to="/nosotros"
             className="block py-2 hover:text-[#FF9500] transition"
+            onClick={() => setMobileMenuOpen(false)}
           >
             Nosotros
           </Link>
           <Link
             to="/modulos"
             className="block py-2 hover:text-[#FF9500] transition"
+            onClick={() => setMobileMenuOpen(false)}
           >
             Módulos
           </Link>
           <Link
             to="/contacto"
             className="block py-2 hover:text-[#FF9500] transition"
+            onClick={() => setMobileMenuOpen(false)}
           >
             Contacto
           </Link>
@@ -211,6 +217,7 @@ const Navbar: React.FC = () => {
             <Link
               to="/dashboard"
               className="block py-2 text-gray-300 hover:text-[#FF9500] transition"
+              onClick={() => setMobileMenuOpen(false)}
             >
               Dashboard
             </Link>
@@ -236,12 +243,14 @@ const Navbar: React.FC = () => {
               <Link
                 to="/login"
                 className="block py-2 hover:text-[#FF9500] transition"
+                onClick={() => setMobileMenuOpen(false)}
               >
                 Iniciar Sesión
               </Link>
               <Link
                 to="/registro"
                 className="block py-2 hover:text-[#FF9500] transition"
+                onClick={() => setMobileMenuOpen(false)}
               >
                 Registrarse
               </Link>

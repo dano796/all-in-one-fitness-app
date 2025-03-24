@@ -107,7 +107,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 relative bg-[#282c3c] text-white">
+    <div className="container mx-auto px-8 py-16 relative bg-[#282c3c] text-white">
       {recoveryModalOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
@@ -126,7 +126,7 @@ const LoginPage = () => {
       )}
 
       <div className="max-w-md mx-auto">
-        <h1 className="text-4xl font-bold mb-8 pb-3 text-center">
+        <h1 className="text-5xl font-bold mb-8 pb-3 text-center">
           Iniciar Sesión
         </h1>
 
@@ -145,7 +145,8 @@ const LoginPage = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400"
+                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400
+                focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0"
                 placeholder="Usuario o tu@email.com"
               />
             </div>
@@ -164,7 +165,8 @@ const LoginPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400"
+                  className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400
+                  focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0"
                   placeholder="••••••••"
                 />
                 <button

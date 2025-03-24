@@ -166,13 +166,13 @@ const CalorieCalculator: React.FC = () => {
   };
 
   const goalLabels: { [key: string]: string } = {
-    maintain: "Maintain Weight",
-    mildLoss: "Mild Weight Loss (0.25 kg/week)",
-    loss: "Weight Loss (0.5 kg/week)",
-    extremeLoss: "Extreme Weight Loss (1 kg/week)",
-    mildGain: "Mild Weight Gain (0.25 kg/week)",
-    gain: "Weight Gain (0.5 kg/week)",
-    fastGain: "Fast Weight Gain (1 kg/week)",
+    maintain: "Mantener peso",
+    mildLoss: "Pérdida leve (0.25 kg/sem)",
+    loss: "Pérdida (0.5 kg/sem)",
+    extremeLoss: "Pérdida extrema (1 kg/sem)",
+    mildGain: "Aumento leve (0.25 kg/sem)",
+    gain: "Aumento (0.5 kg/sem)",
+    fastGain: "Aumento rápido (1 kg/sem)",
   };
 
   useEffect(() => {
@@ -202,7 +202,7 @@ const CalorieCalculator: React.FC = () => {
       weight <= 0
     ) {
       setCalories(null);
-      toast.error("Please enter valid values for all fields.");
+      toast.error("Por favor ingrese valores válidos en todos los campos.");
       return;
     }
 
@@ -226,14 +226,14 @@ const CalorieCalculator: React.FC = () => {
 
       setCalories(goalCalories);
       setIsLoading(false);
-      toast.success("Calories calculated successfully!");
+      toast.success("Calorías calculadas correctamente.");
     }, 1500);
   };
 
   const handleGoalSelect = async (goal: string, calorieValue: number) => {
     if (!userEmail) {
       setError("Debes estar autenticado para seleccionar un objetivo.");
-      toast.error("Authentication required.");
+      toast.error("Autenticación requerida.");
       return;
     }
 
@@ -481,7 +481,7 @@ const CalorieCalculator: React.FC = () => {
                 />
               </svg>
             ) : (
-              "Calculate Calories"
+              "Estimar mis Calorías"
             )}
           </motion.button>
         </form>
@@ -495,13 +495,13 @@ const CalorieCalculator: React.FC = () => {
               transition={{ duration: 0.5 }}
               className="mt-8"
             >
-              <h2 className="text-2xl font-semibold text-center text-white mb-6">
+              <h2 className="mt-12 text-3xl font-bold text-center text-white mb-6">
                 Calorías Diarias Estimadas
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-medium mb-4 text-center">
-                    Perdida de Peso Estimada
+                  <h3 className="text-lg font-semibold mb-4 text-center">
+                    Pérdida de Peso Estimada
                   </h3>
                   <div className="space-y-4">
                     {["maintain", "mildLoss", "loss", "extremeLoss"].map(
@@ -535,7 +535,7 @@ const CalorieCalculator: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium mb-4 text-center">
+                  <h3 className="text-lg font-semibold mb-4 text-center">
                     Ganancia de Peso Estimada
                   </h3>
                   <div className="space-y-4">

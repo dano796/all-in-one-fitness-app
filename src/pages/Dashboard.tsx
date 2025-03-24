@@ -783,11 +783,11 @@ const Dashboard: React.FC = () => {
               height: 100%;
             }
             .eaten-label {
-              left: -150px;
+              left: -75px;
               font-size: 0.875rem;
             }
             .burned-label {
-              right: -150px;
+              right: -75px;
               font-size: 0.875rem;
             }
             .remaining-label {
