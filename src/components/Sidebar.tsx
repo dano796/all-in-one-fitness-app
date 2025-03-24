@@ -29,13 +29,12 @@ const Sidebar: React.FC = () => {
       console.error("Error al cerrar sesión:", error.message);
       return;
     }
-
     logout();
     navigate("/");
   };
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen((prev) => !prev);
   };
 
   return (
@@ -44,7 +43,6 @@ const Sidebar: React.FC = () => {
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       } sm:translate-x-0`}
     >
-      {/* Toggle Tab */}
       <button
         onClick={toggleSidebar}
         className="absolute -right-10 top-4 sm:hidden bg-[#ff9404] text-white p-2 rounded-r-lg shadow-lg"
@@ -56,12 +54,10 @@ const Sidebar: React.FC = () => {
         )}
       </button>
 
-      {/* Logo */}
       <Link to="/" className="mb-6 sm:mb-8">
         <Dumbbell className="h-8 w-8 sm:h-9 sm:w-9 text-[#ff9404]" />
       </Link>
 
-      {/* Navegación principal */}
       <nav className="flex-1 flex flex-col justify-center space-y-4 sm:space-y-6">
         <DashboardNavItem
           to="/dashboard"
@@ -107,7 +103,6 @@ const Sidebar: React.FC = () => {
         />
       </nav>
 
-      {/* Configuración y logout */}
       <div className="space-y-4 sm:space-y-6 mt-auto">
         <DashboardNavItem
           to="/settings"
@@ -126,4 +121,4 @@ const Sidebar: React.FC = () => {
   );
 };
 
-export default Sidebar;
+export default React.memo(Sidebar);

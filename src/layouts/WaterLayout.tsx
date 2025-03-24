@@ -1,5 +1,5 @@
 import React from "react";
-import Sidebar from "../components/Sidebar"; // Reutilizamos tu Sidebar existente
+import Sidebar from "../components/Sidebar";
 
 interface WaterLayoutProps {
   children: React.ReactNode;
@@ -16,4 +16,4 @@ const WaterLayout: React.FC<WaterLayoutProps> = ({ children }) => {
   );
 };
 
-export default WaterLayout;
+export default React.memo(WaterLayout);

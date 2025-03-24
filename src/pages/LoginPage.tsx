@@ -25,7 +25,6 @@ const LoginPage = () => {
             "Error al verificar la sesión (esperado si no hay sesión):",
             error.message
           );
-          // No redirigimos si no hay sesión, simplemente continuamos
           return;
         }
 
@@ -67,11 +66,10 @@ const LoginPage = () => {
           },
         });
       } else if (result.success) {
-        // Configurar el token en Supabase
         await supabase.auth.setSession({
           access_token: result.token,
           refresh_token: "dummy-refresh-token",
-        }); // Necesitas el refresh_token del backend
+        });
         const { data } = await supabase.auth.getUser();
         if (data.user) {
           navigate("/Dashboard", { replace: true });
@@ -213,4 +211,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default React.memo(LoginPage);

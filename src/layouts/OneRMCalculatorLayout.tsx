@@ -18,4 +18,4 @@ const OneRMCalculatorLayout: React.FC<OneRMCalculatorLayoutProps> = ({
   );
 };
 
-export default OneRMCalculatorLayout;
+export default React.memo(OneRMCalculatorLayout);

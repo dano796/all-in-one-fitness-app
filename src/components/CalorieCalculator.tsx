@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, Toaster } from "react-hot-toast";
 
-// Estilos personalizados para scrollbar, dropdown, radio buttons e inputs
+// Estilos personalizados (sin cambios)
 const customStyles = `
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
@@ -130,6 +130,62 @@ const customStyles = `
   }
 `;
 
+// Constantes fuera del componente para evitar recreación
+const activityMultipliers = {
+  basal: 1.2,
+  sedentary: 1.2,
+  light: 1.375,
+  moderate: 1.55,
+  active: 1.725,
+  veryActive: 1.9,
+  extraActive: 2.2,
+};
+
+const goalAdjustments = {
+  maintain: 1.0,
+  mildLoss: 0.91,
+  loss: 0.81,
+  extremeLoss: 0.62,
+  mildGain: 1.09,
+  gain: 1.19,
+  fastGain: 1.38,
+};
+
+const goalLabels: { [key: string]: string } = {
+  maintain: "Mantener peso",
+  mildLoss: "Pérdida leve (0.25 kg/sem)",
+  loss: "Pérdida (0.5 kg/sem)",
+  extremeLoss: "Pérdida extrema (1 kg/sem)",
+  mildGain: "Aumento leve (0.25 kg/sem)",
+  gain: "Aumento (0.5 kg/sem)",
+  fastGain: "Aumento rápido (1 kg/sem)",
+};
+
+// Componente reutilizable para las tarjetas de objetivos
+const GoalCard: React.FC<{
+  goal: string;
+  calorieValue: number;
+  isSelected: boolean;
+  onClick: () => void;
+  baseCalories: number;
+}> = ({ goal, calorieValue, isSelected, onClick, baseCalories }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.2 }}
+    className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-[#2f3447] ${
+      isSelected ? "border-2 border-[#ff9404]" : "border border-gray-600"
+    }`}
+    onClick={onClick}
+  >
+    <p className="font-medium text-[#ff9404]">{goalLabels[goal]}</p>
+    <p className="text-lg text-gray-200">
+      {calorieValue} kcal/day ({Math.round((calorieValue / baseCalories) * 100)}
+      %)
+    </p>
+  </motion.div>
+);
+
 const CalorieCalculator: React.FC = () => {
   const navigate = useNavigate();
   const [age, setAge] = useState<number | undefined>(18);
@@ -144,36 +200,6 @@ const CalorieCalculator: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const activityMultipliers = {
-    basal: 1.2,
-    sedentary: 1.2,
-    light: 1.375,
-    moderate: 1.55,
-    active: 1.725,
-    veryActive: 1.9,
-    extraActive: 2.2,
-  };
-
-  const goalAdjustments = {
-    maintain: 1.0,
-    mildLoss: 0.91,
-    loss: 0.81,
-    extremeLoss: 0.62,
-    mildGain: 1.09,
-    gain: 1.19,
-    fastGain: 1.38,
-  };
-
-  const goalLabels: { [key: string]: string } = {
-    maintain: "Mantener peso",
-    mildLoss: "Pérdida leve (0.25 kg/sem)",
-    loss: "Pérdida (0.5 kg/sem)",
-    extremeLoss: "Pérdida extrema (1 kg/sem)",
-    mildGain: "Aumento leve (0.25 kg/sem)",
-    gain: "Aumento (0.5 kg/sem)",
-    fastGain: "Aumento rápido (1 kg/sem)",
-  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -191,7 +217,23 @@ const CalorieCalculator: React.FC = () => {
     checkAuth();
   }, [navigate]);
 
-  const calculateCalories = () => {
+  const handleInputChange = useCallback(
+    (
+      e: React.ChangeEvent<HTMLInputElement>,
+      setter: React.Dispatch<React.SetStateAction<number | undefined>>,
+      minValue?: number
+    ) => {
+      const value = e.target.value ? Number(e.target.value) : undefined;
+      if (value !== undefined && (minValue === undefined || value > minValue)) {
+        setter(value);
+      } else {
+        setter(undefined);
+      }
+    },
+    []
+  );
+
+  const calculateCalories = useCallback(() => {
     if (
       age === undefined ||
       height === undefined ||
@@ -207,89 +249,63 @@ const CalorieCalculator: React.FC = () => {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      let bmr: number;
-      if (gender === "male") {
-        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-      } else {
-        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
-      }
-
-      const activityFactor =
-        activityMultipliers[activityLevel as keyof typeof activityMultipliers];
-      const baseTDEE = Math.round(bmr * activityFactor);
-
-      const goalCalories: { [key: string]: number } = {};
-      for (const [goal, adjustment] of Object.entries(goalAdjustments)) {
-        goalCalories[goal] = Math.round(baseTDEE * adjustment);
-      }
-
-      setCalories(goalCalories);
-      setIsLoading(false);
-      toast.success("Calorías calculadas correctamente.");
-    }, 1500);
-  };
-
-  const handleGoalSelect = async (goal: string, calorieValue: number) => {
-    if (!userEmail) {
-      setError("Debes estar autenticado para seleccionar un objetivo.");
-      toast.error("Autenticación requerida.");
-      return;
+    let bmr: number;
+    if (gender === "male") {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
     }
 
-    setSelectedGoal(goal);
+    const activityFactor =
+      activityMultipliers[activityLevel as keyof typeof activityMultipliers];
+    const baseTDEE = Math.round(bmr * activityFactor);
 
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/set-calorie-goal`,
-        {
-          email: userEmail,
-          calorieGoal: calorieValue,
-        }
-      );
+    const goalCalories: { [key: string]: number } = {};
+    for (const [goal, adjustment] of Object.entries(goalAdjustments)) {
+      goalCalories[goal] = Math.round(baseTDEE * adjustment);
+    }
 
-      if (response.data.success) {
-        toast.success("Calorie goal set successfully!");
-        navigate("/dashboard");
-      } else {
-        setError(
-          response.data.error || "Error al establecer el límite de calorías."
+    setCalories(goalCalories);
+    setIsLoading(false);
+    toast.success("Calorías calculadas correctamente.");
+  }, [age, height, weight, gender, activityLevel]);
+
+  const handleGoalSelect = useCallback(
+    async (goal: string, calorieValue: number) => {
+      if (!userEmail) {
+        setError("Debes estar autenticado para seleccionar un objetivo.");
+        toast.error("Autenticación requerida.");
+        return;
+      }
+
+      setSelectedGoal(goal);
+
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/set-calorie-goal`,
+          {
+            email: userEmail,
+            calorieGoal: calorieValue,
+          }
         );
-        toast.error(response.data.error || "Error setting calorie goal.");
+
+        if (response.data.success) {
+          toast.success("Calorie goal set successfully!");
+          navigate("/dashboard");
+        } else {
+          setError(
+            response.data.error || "Error al establecer el límite de calorías."
+          );
+          toast.error(response.data.error || "Error setting calorie goal.");
+        }
+      } catch (err) {
+        console.log(err);
+        setError("Error al conectar con el servidor. Intenta de nuevo.");
+        toast.error("Server error. Please try again.");
       }
-    } catch (err) {
-      console.log(err);
-      setError("Error al conectar con el servidor. Intenta de nuevo.");
-      toast.error("Server error. Please try again.");
-    }
-  };
-
-  const handleAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value ? Number(e.target.value) : undefined;
-    if (value !== undefined) {
-      setAge(value);
-    } else {
-      setAge(undefined);
-    }
-  };
-
-  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value ? Number(e.target.value) : undefined;
-    if (value !== undefined && value > 0) {
-      setHeight(value);
-    } else {
-      setHeight(undefined);
-    }
-  };
-
-  const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value ? Number(e.target.value) : undefined;
-    if (value !== undefined && value > 0) {
-      setWeight(value);
-    } else {
-      setWeight(undefined);
-    }
-  };
+    },
+    [userEmail, navigate]
+  );
 
   const isButtonDisabled =
     age === undefined ||
@@ -343,7 +359,7 @@ const CalorieCalculator: React.FC = () => {
               type="number"
               id="age"
               value={age ?? ""}
-              onChange={handleAgeChange}
+              onChange={(e) => handleInputChange(e, setAge)}
               className="calorie-goal-input"
               placeholder="Enter your age"
             />
@@ -393,7 +409,7 @@ const CalorieCalculator: React.FC = () => {
               type="number"
               id="height"
               value={height ?? ""}
-              onChange={handleHeightChange}
+              onChange={(e) => handleInputChange(e, setHeight, 0)}
               className="calorie-goal-input"
               placeholder="Enter your height"
             />
@@ -411,7 +427,7 @@ const CalorieCalculator: React.FC = () => {
               type="number"
               id="weight"
               value={weight ?? ""}
-              onChange={handleWeightChange}
+              onChange={(e) => handleInputChange(e, setWeight, 0)}
               className="calorie-goal-input"
               placeholder="Enter your weight"
             />
@@ -506,63 +522,36 @@ const CalorieCalculator: React.FC = () => {
                   <div className="space-y-4">
                     {["maintain", "mildLoss", "loss", "extremeLoss"].map(
                       (goal) => (
-                        <motion.div
+                        <GoalCard
                           key={goal}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2 }}
-                          className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-[#2f3447] ${
-                            selectedGoal === goal
-                              ? "border-2 border-[#ff9404]"
-                              : "border border-gray-600"
-                          }`}
-                          onClick={() => handleGoalSelect(goal, calories[goal])}
-                        >
-                          <p className="font-medium text-[#ff9404]">
-                            {goalLabels[goal]}
-                          </p>
-                          <p className="text-lg text-gray-200">
-                            {calories[goal]} kcal/day (
-                            {Math.round(
-                              (calories[goal] / calories.maintain) * 100
-                            )}
-                            %)
-                          </p>
-                        </motion.div>
+                          goal={goal}
+                          calorieValue={calories[goal]}
+                          isSelected={selectedGoal === goal}
+                          onClick={() =>
+                            handleGoalSelect(goal, calories[goal])
+                          }
+                          baseCalories={calories.maintain}
+                        />
                       )
                     )}
                   </div>
                 </div>
-
                 <div>
                   <h3 className="text-lg font-semibold mb-4 text-center">
                     Ganancia de Peso Estimada
                   </h3>
                   <div className="space-y-4">
                     {["mildGain", "gain", "fastGain"].map((goal) => (
-                      <motion.div
+                      <GoalCard
                         key={goal}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className={`bg-[#282c3c] p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-[#2f3447] ${
-                          selectedGoal === goal
-                            ? "border-2 border-[#ff9404]"
-                            : "border border-gray-600"
-                        }`}
-                        onClick={() => handleGoalSelect(goal, calories[goal])}
-                      >
-                        <p className="font-medium text-[#ff9404]">
-                          {goalLabels[goal]}
-                        </p>
-                        <p className="text-lg text-gray-200">
-                          {calories[goal]} kcal/day (
-                          {Math.round(
-                            (calories[goal] / calories.maintain) * 100
-                          )}
-                          %)
-                        </p>
-                      </motion.div>
+                        goal={goal}
+                        calorieValue={calories[goal]}
+                        isSelected={selectedGoal === goal}
+                        onClick={() =>
+                          handleGoalSelect(goal, calories[goal])
+                        }
+                        baseCalories={calories.maintain}
+                      />
                     ))}
                   </div>
                 </div>
@@ -575,4 +564,4 @@ const CalorieCalculator: React.FC = () => {
   );
 };
 
-export default CalorieCalculator;
+export default React.memo(CalorieCalculator);

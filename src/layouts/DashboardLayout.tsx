@@ -16,4 +16,4 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   );
 };
 
-export default DashboardLayout;
+export default React.memo(DashboardLayout);

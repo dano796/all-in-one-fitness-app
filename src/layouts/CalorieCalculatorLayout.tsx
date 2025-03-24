@@ -18,4 +18,4 @@ const CalorieCalculatorLayout: React.FC<CalorieCalculatorLayoutProps> = ({
   );
 };
 
-export default CalorieCalculatorLayout;
+export default React.memo(CalorieCalculatorLayout);

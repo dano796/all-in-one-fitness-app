@@ -12,4 +12,4 @@ const WaterDashboard: React.FC = () => {
   );
 };
 
-export default WaterDashboard;
+export default React.memo(WaterDashboard);

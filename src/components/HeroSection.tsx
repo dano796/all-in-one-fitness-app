@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "../lib/supabaseClient";
@@ -19,7 +19,6 @@ const carouselItemsRight = [
   "https://images.unsplash.com/photo-1535914254981-b5012eebbd15?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D?w=300&h=400&fit=crop",
 ];
 
-// Variantes para el carrusel izquierdo (arriba -> abajo -> arriba)
 const leftCarouselVariants = {
   animate: {
     y: ["0%", "-50%"],
@@ -32,7 +31,6 @@ const leftCarouselVariants = {
   },
 };
 
-// Variantes para el carrusel derecho (abajo -> arriba -> abajo)
 const rightCarouselVariants = {
   animate: {
     y: ["-50%", "0%"],
@@ -45,18 +43,39 @@ const rightCarouselVariants = {
   },
 };
 
+const Carousel: React.FC<{
+  items: string[];
+  variants: typeof leftCarouselVariants;
+  direction: "left" | "right";
+}> = ({ items, variants, direction }) => (
+  <motion.div
+    variants={variants}
+    animate="animate"
+    className="flex flex-col gap-4"
+  >
+    {items.map((image, index) => (
+      <motion.img
+        key={`${direction}-${index}`}
+        src={image}
+        alt={`${direction} carousel image ${index + 1}`}
+        className="w-[80%] aspect-[3/4] object-cover rounded-lg mx-auto"
+        transition={{ duration: direction === "left" ? 1.5 : 1 }}
+      />
+    ))}
+  </motion.div>
+);
+
 const HeroSection: React.FC = () => {
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
 
-  // Manejo de autenticación
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(
-        data?.user ? { id: data.user.id, email: data.user.email || "" } : null
-      );
-    };
+  const fetchUser = useCallback(async () => {
+    const { data } = await supabase.auth.getUser();
+    setUser(
+      data?.user ? { id: data.user.id, email: data.user.email || "" } : null
+    );
+  }, []);
 
+  useEffect(() => {
     fetchUser();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
@@ -72,7 +91,7 @@ const HeroSection: React.FC = () => {
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchUser]);
 
   return (
     <section className="container mx-auto px-8 mb-12 lg:px-16 lg:mb-0 bg-[#282c3c] text-left">
@@ -96,38 +115,16 @@ const HeroSection: React.FC = () => {
         </div>
         <div className="hidden lg:block rounded-xl aspect-square overflow-hidden relative">
           <div className="w-full h-full grid grid-cols-2 gap-4 p-6">
-            {/* Carrusel Izquierdo (arriba -> abajo -> arriba) */}
-            <motion.div
+            <Carousel
+              items={carouselItemsLeft}
               variants={leftCarouselVariants}
-              animate="animate"
-              className="flex flex-col gap-4"
-            >
-              {carouselItemsLeft.map((image, index) => (
-                <motion.img
-                  key={`left-${index}`}
-                  src={image}
-                  alt={`Left carousel image ${index + 1}`}
-                  className="w-[80%] aspect-[3/4] object-cover rounded-lg mx-auto"
-                  transition={{ duration: 1.5 }}
-                />
-              ))}
-            </motion.div>
-            {/* Carrusel Derecho (abajo -> arriba -> abajo) */}
-            <motion.div
+              direction="left"
+            />
+            <Carousel
+              items={carouselItemsRight}
               variants={rightCarouselVariants}
-              animate="animate"
-              className="flex flex-col gap-4"
-            >
-              {carouselItemsRight.map((image, index) => (
-                <motion.img
-                  key={`right-${index}`}
-                  src={image}
-                  alt={`Right carousel image ${index + 1}`}
-                  className="w-[80%] aspect-[3/4] object-cover rounded-lg mx-auto"
-                  transition={{ duration: 1 }}
-                />
-              ))}
-            </motion.div>
+              direction="right"
+            />
           </div>
         </div>
       </div>
@@ -135,4 +132,4 @@ const HeroSection: React.FC = () => {
   );
 };
 
-export default HeroSection;
+export default React.memo(HeroSection);

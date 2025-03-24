@@ -5,7 +5,7 @@ interface PasswordRecoveryProps {
   onClose: () => void;
 }
 
-const PasswordRecovery = ({ onClose }: PasswordRecoveryProps) => {
+const PasswordRecovery: React.FC<PasswordRecoveryProps> = ({ onClose }) => {
   const [email, setEmail] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [tipoMensaje, setTipoMensaje] = useState<"error" | "success" | "">("");
@@ -83,7 +83,7 @@ const PasswordRecovery = ({ onClose }: PasswordRecoveryProps) => {
 
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg hover:bg-[#ff9404] hover:text-[#282c3c] transition"
+            className="w-full py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg hover:bg-[#FF9500] hover:text-[#282c3c] transition"
           >
             Enviar enlace de recuperación
           </button>
@@ -100,4 +100,4 @@ const PasswordRecovery = ({ onClose }: PasswordRecoveryProps) => {
   );
 };
 
-export default PasswordRecovery;
+export default React.memo(PasswordRecovery);
