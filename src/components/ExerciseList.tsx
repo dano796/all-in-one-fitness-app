@@ -5,7 +5,7 @@ import { FaArrowLeft, FaPlus, FaChevronDown, FaChevronUp, FaMinus } from 'react-
 import { supabase } from '../lib/supabaseClient';
 import { motion } from 'framer-motion';
 import GalaxyBackground from '../components/GalaxyBackground';
-import styles from '../pages/ExerciseList.module.css';
+import styles from './ExerciseList.module.css';
 
 interface Exercise {
   id: string;

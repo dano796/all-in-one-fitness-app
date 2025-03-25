@@ -5,7 +5,7 @@ import { ChevronLeft, Plus, Trash2, CheckCircle, XCircle, X } from "lucide-react
 import axios from "axios";
 import GalaxyBackground from "../components/GalaxyBackground";
 import { Progress } from "@/components/ui/progress";
-import styles from "./RoutineDetails.module.css";
+import styles from "../components/RoutineDetails.module.css";
 
 // Importar el sonido (asegúrate de tener un archivo de audio en tu proyecto)
 import timerEndSound from "../assets/sounds/timer-end.mp3.wav"; // Asegúrate de agregar este archivo

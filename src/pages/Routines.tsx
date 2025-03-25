@@ -5,7 +5,7 @@ import { MoreHorizontal, Plus } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import axios from "axios";
 import GalaxyBackground from "../components/GalaxyBackground";
-import styles from "../pages/Routines.module.css";
+import styles from "../components/Routines.module.css";
 
 interface Routine {
   id: string;
