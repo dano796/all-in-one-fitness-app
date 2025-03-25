@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MoreHorizontal, Plus } from "lucide-react";
+import { MoreHorizontal, Plus, Trash2 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import axios from "axios";
 import GalaxyBackground from "../components/GalaxyBackground";
@@ -20,6 +20,8 @@ const Routines: React.FC = () => {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const deleteConfirmRef = useRef<HTMLDivElement>(null); // Referencia al diálogo
 
   const checkAuth = useCallback(async () => {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -56,6 +58,38 @@ const Routines: React.FC = () => {
   const handleRoutineClick = useCallback((routineId: string) => {
     navigate(`/routine-details?id=${routineId}`);
   }, [navigate]);
+
+  const handleDeleteRoutine = useCallback(async (routineId: string) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/routines/${routineId}`);
+      setRoutines((prevRoutines) => prevRoutines.filter((routine) => routine.id !== routineId));
+      setShowDeleteConfirm(null);
+    } catch (err) {
+      setError("Error al eliminar la rutina.");
+    }
+  }, []);
+
+  const toggleDeleteConfirm = useCallback((routineId: string | null) => {
+    setShowDeleteConfirm(routineId);
+  }, []);
+
+  // Cerrar el diálogo al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        deleteConfirmRef.current &&
+        !deleteConfirmRef.current.contains(event.target as Node) &&
+        showDeleteConfirm
+      ) {
+        setShowDeleteConfirm(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDeleteConfirm]);
 
   useEffect(() => {
     checkAuth();
@@ -140,23 +174,49 @@ const Routines: React.FC = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.6 + index * 0.3, duration: 1.0 }}
                     className={styles.item}
-                    onClick={() => handleRoutineClick(routine.id)}
                   >
-                    <div className={styles.itemContent}>
-                      <div>
-                        <h3 className={styles.itemText}>
-                          {routine.day}: {routine.name}
-                        </h3>
-                      </div>
+                    <div
+                      className={styles.itemContent}
+                      onClick={() => handleRoutineClick(routine.id)}
+                    >
+                      <h3 className={styles.itemText}>
+                        {routine.day}: {routine.name}
+                      </h3>
                     </div>
                     <motion.button
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 1.0 + index * 0.3, duration: 0.8 }}
                       className={styles.itemButton}
+                      onClick={() => toggleDeleteConfirm(routine.id)}
                     >
                       <MoreHorizontal className={styles.itemIcon} />
                     </motion.button>
+                    {showDeleteConfirm === routine.id && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.3 }}
+                        className={styles.deleteConfirm}
+                        ref={deleteConfirmRef}
+                      >
+                        <p className={styles.deleteConfirmText}>¿Eliminar esta rutina?</p>
+                        <button
+                          onClick={() => handleDeleteRoutine(routine.id)}
+                          className={styles.confirmDeleteButton}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Sí
+                        </button>
+                        <button
+                          onClick={() => toggleDeleteConfirm(null)}
+                          className={styles.cancelDeleteButton}
+                        >
+                          No
+                        </button>
+                      </motion.div>
+                    )}
                   </motion.div>
                 ))
               ) : (
