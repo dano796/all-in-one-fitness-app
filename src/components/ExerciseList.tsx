@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaArrowLeft, FaPlus, FaChevronDown, FaChevronUp, FaMinus } from 'react-icons/fa';
 import { supabase } from '../lib/supabaseClient';
 import { motion } from 'framer-motion';
@@ -21,8 +21,22 @@ interface Exercise {
   note?: string;
 }
 
+interface Routine {
+  id: string;
+  day: string;
+  name: string;
+  exercises: Exercise[];
+}
+
 const ExerciseList: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determinar si venimos de RoutineDetails o Routines
+  const fromRoutineDetails = location.state?.fromRoutineDetails || false;
+  const routineId = location.state?.routineId || null;
+  const existingExercises = location.state?.existingExercises || [];
+
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +49,7 @@ const ExerciseList: React.FC = () => {
   }>({
     day: '',
     name: '',
-    exercises: [],
+    exercises: existingExercises, // Inicializamos con los ejercicios existentes si venimos de RoutineDetails
   });
   const [userEmail, setUserEmail] = useState<string>('');
   const [expandedExercises, setExpandedExercises] = useState<{ [key: string]: boolean }>({});
@@ -207,21 +221,47 @@ const ExerciseList: React.FC = () => {
   };
 
   const handleSaveRoutine = async () => {
-    if (!newRoutine.day || !newRoutine.name || newRoutine.exercises.length === 0) {
-      setError('Por favor, completa todos los campos y agrega al menos un ejercicio.');
-      return;
-    }
+    if (fromRoutineDetails) {
+      // Actualizar la rutina existente (solo ejercicios)
+      if (newRoutine.exercises.length === 0) {
+        setError('Por favor, agrega al menos un ejercicio.');
+        return;
+      }
 
-    try {
-      await axios.post(`${backendUrl}/api/routines`, {
-        user_email: userEmail,
-        day: newRoutine.day,
-        name: newRoutine.name,
-        exercises: newRoutine.exercises,
-      });
+      try {
+        await axios.put(`${backendUrl}/api/routines/${routineId}`, {
+          exercises: newRoutine.exercises,
+        });
+        navigate(`/routine-details?id=${routineId}`);
+      } catch (err) {
+        setError('Error al actualizar la rutina');
+      }
+    } else {
+      // Crear una nueva rutina
+      if (!newRoutine.day || !newRoutine.name || newRoutine.exercises.length === 0) {
+        setError('Por favor, completa todos los campos y agrega al menos un ejercicio.');
+        return;
+      }
+
+      try {
+        await axios.post(`${backendUrl}/api/routines`, {
+          user_email: userEmail,
+          day: newRoutine.day,
+          name: newRoutine.name,
+          exercises: newRoutine.exercises,
+        });
+        navigate('/routines');
+      } catch (err) {
+        setError('Error al guardar la rutina');
+      }
+    }
+  };
+
+  const handleBackClick = () => {
+    if (fromRoutineDetails) {
+      navigate(`/routine-details?id=${routineId}`);
+    } else {
       navigate('/routines');
-    } catch (err) {
-      setError('Error al guardar la rutina');
     }
   };
 
@@ -235,10 +275,10 @@ const ExerciseList: React.FC = () => {
         transition={{ duration: 1.2, ease: "easeOut" }}
         className={styles.header}
       >
-        <Link to="/routines" className={styles.backButton}>
+        <button onClick={handleBackClick} className={styles.backButton}>
           <FaArrowLeft className={styles.backIcon} />
           Volver
-        </Link>
+        </button>
       </motion.div>
 
       <motion.div
@@ -247,38 +287,41 @@ const ExerciseList: React.FC = () => {
         transition={{ duration: 1.2, ease: "easeOut" }}
         className={styles.content}
       >
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-          className={styles.form}
-        >
-          <div>
-            <label className={styles.label}>Día de la semana:</label>
-            <select
-              value={newRoutine.day}
-              onChange={(e) => setNewRoutine({ ...newRoutine, day: e.target.value })}
-              className={styles.select}
-            >
-              <option value="">Selecciona un día</option>
-              {days.map((day) => (
-                <option key={day} value={day}>
-                  {day}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={styles.label}>Nombre de la rutina:</label>
-            <input
-              type="text"
-              value={newRoutine.name}
-              onChange={(e) => setNewRoutine({ ...newRoutine, name: e.target.value })}
-              placeholder="Nombre de la rutina"
-              className={styles.input}
-            />
-          </div>
-        </motion.div>
+        {/* Formulario condicional: solo se muestra si NO venimos de RoutineDetails */}
+        {!fromRoutineDetails && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className={styles.form}
+          >
+            <div>
+              <label className={styles.label}>Día de la semana:</label>
+              <select
+                value={newRoutine.day}
+                onChange={(e) => setNewRoutine({ ...newRoutine, day: e.target.value })}
+                className={styles.select}
+              >
+                <option value="">Selecciona un día</option>
+                {days.map((day) => (
+                  <option key={day} value={day}>
+                    {day}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={styles.label}>Nombre de la rutina:</label>
+              <input
+                type="text"
+                value={newRoutine.name}
+                onChange={(e) => setNewRoutine({ ...newRoutine, name: e.target.value })}
+                placeholder="Nombre de la rutina"
+                className={styles.input}
+              />
+            </div>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -354,8 +397,7 @@ const ExerciseList: React.FC = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 1.0 + index * 0.3, duration: 1.0 }}
                     onClick={() => handleExerciseClick(exercise)}
-                    className={`${styles.listItem} ${selectedExercise?.id === exercise.id ? styles.selected : ''
-                      }`}
+                    className={`${styles.listItem} ${selectedExercise?.id === exercise.id ? styles.selected : ''}`}
                   >
                     <img
                       src={exercise.gifUrl}
@@ -582,7 +624,7 @@ const ExerciseList: React.FC = () => {
                             className={styles.removeSetButton}
                           >
                             <FaMinus className={styles.addSetIcon} />
-                          Eliminar serie
+                            Eliminar serie
                           </button>
                         )}
                       </div>
@@ -610,7 +652,7 @@ const ExerciseList: React.FC = () => {
           onClick={handleSaveRoutine}
           className={styles.saveButton}
         >
-          Guardar rutina
+          {fromRoutineDetails ? 'Actualizar rutina' : 'Guardar rutina'}
         </motion.button>
       </motion.div>
     </div>

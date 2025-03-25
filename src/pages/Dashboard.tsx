@@ -269,11 +269,11 @@ const Dashboard: React.FC = () => {
 
   const mealCalorieLimits = totalCaloriesGoal
     ? {
-        Desayuno: Math.round(totalCaloriesGoal * 0.3),
-        Almuerzo: Math.round(totalCaloriesGoal * 0.4),
-        Merienda: Math.round(totalCaloriesGoal * 0.05),
-        Cena: Math.round(totalCaloriesGoal * 0.25),
-      }
+      Desayuno: Math.round(totalCaloriesGoal * 0.3),
+      Almuerzo: Math.round(totalCaloriesGoal * 0.4),
+      Merienda: Math.round(totalCaloriesGoal * 0.05),
+      Cena: Math.round(totalCaloriesGoal * 0.25),
+    }
     : { Desayuno: 0, Almuerzo: 0, Merienda: 0, Cena: 0 };
 
   const carbGoal = totalCaloriesGoal ? Math.round((totalCaloriesGoal * 0.4) / 4) : 0;
@@ -344,27 +344,27 @@ const Dashboard: React.FC = () => {
     <div className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-hidden -mt-12">
       <GalaxyBackground />
 
-      <motion.div 
-        initial={{ opacity: 0, y: -50 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 1.2, ease: "easeOut" }} 
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
         className="mb-6 text-center"
       >
-        <motion.div 
-          initial={{ opacity: 0 }} 
-          animate={{ opacity: 1 }} 
-          transition={{ delay: 0.4, duration: 0.8 }} 
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
           className="mb-2 text-xs text-gray-400"
         >
           Semana {getWeek()}
         </motion.div>
-        <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }} 
-          animate={{ scale: 1, opacity: 1 }} 
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.8 }}
         >
-          <button 
-            onClick={handleDatePicker} 
+          <button
+            onClick={handleDatePicker}
             className="min-w-[120px] px-6 py-3 bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#3B4252] hover:to-[#4B5563] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300"
           >
             {getDateLabel()}
@@ -380,53 +380,53 @@ const Dashboard: React.FC = () => {
         </motion.div>
       </motion.div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 50 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 1.2, ease: "easeOut" }} 
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
         className="max-w-[700px] mx-auto bg-[#3B4252] rounded-lg p-5 relative z-10"
       >
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }} 
-          animate={{ opacity: 1, x: 0 }} 
-          transition={{ delay: 0.4, duration: 0.8 }} 
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
           className="flex justify-between items-center mb-4"
         >
           <h2 className="text-sm font-semibold text-white">Resumen</h2>
           {totalCaloriesGoal ? (
-            <motion.p 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              transition={{ delay: 0.6 }} 
-              onClick={handleRemoveCalorieGoal} 
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              onClick={handleRemoveCalorieGoal}
               className="text-sm text-white cursor-pointer hover:text-[#ff4444] transition-colors duration-300"
             >
               Eliminar límite
             </motion.p>
           ) : (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              transition={{ delay: 0.6 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
               className="flex items-center gap-2"
             >
-              <input 
-                type="number" 
-                id="customCalorieGoal" 
-                value={customCalorieGoal} 
-                onChange={(e) => setCustomCalorieGoal(e.target.value)} 
-                className="w-[70px] p-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+              <input
+                type="number"
+                id="customCalorieGoal"
+                value={customCalorieGoal}
+                onChange={(e) => setCustomCalorieGoal(e.target.value)}
+                className="w-[70px] p-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 placeholder="2000+"
               />
-              <button 
-                onClick={handleSetCustomCalorieGoal} 
+              <button
+                onClick={handleSetCustomCalorieGoal}
                 className="px-3 py-1.5 text-sm bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white border-none rounded-md shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300"
               >
                 Agregar
               </button>
               <p className="text-sm text-gray-400">o</p>
-              <p 
-                onClick={() => navigate("/calorie-calculator")} 
+              <p
+                onClick={() => navigate("/calorie-calculator")}
                 className="text-sm text-[#ff9404] cursor-pointer hover:text-[#e08503] hover:shadow-[0_0_10px_rgba(255,148,4,0.5)] transition-all duration-300"
               >
                 Ir a la calculadora
@@ -434,70 +434,92 @@ const Dashboard: React.FC = () => {
             </motion.div>
           )}
         </motion.div>
-        
+
         {error && (
-          <motion.p 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            transition={{ delay: 0.6 }} 
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
             className="text-red-400 mb-4 text-center"
           >
             {error}
           </motion.p>
         )}
         {calorieGoalError && (
-          <motion.p 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            transition={{ delay: 0.6 }} 
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
             className="text-red-400 mb-4 text-center text-xs"
           >
             {calorieGoalError}
           </motion.p>
         )}
 
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }} 
-          animate={{ opacity: 1, scale: 1 }} 
-          transition={{ duration: 1.5, ease: "easeOut", delay: 0.8 }} 
-          className="relative flex justify-center mb-8"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut", delay: 0.8 }}
+          className="relative flex flex-col items-center mb-8"
         >
-          <div className="relative w-48 h-48 sm:w-56 sm:h-56">
-            <Doughnut 
-              data={caloriesData} 
-              options={{ cutout: "85%", plugins: { legend: { display: false } }, maintainAspectRatio: true }} 
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative w-full h-full flex items-center justify-center">
-                <motion.div 
-                  initial={{ opacity: 0, x: -30 }} 
-                  animate={{ opacity: 1, x: 0 }} 
-                  transition={{ delay: 1.0, duration: 0.8 }} 
-                  className="absolute -left-[135px] top-1/2 -translate-y-1/2 text-center flex flex-col items-center"
-                >
-                  <div className="text-lg font-bold sm:text-xl">{consumedCalories}</div>
-                  <div className="text-xs text-gray-400">Consumido</div>
-                </motion.div>
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.8 }} 
-                  animate={{ opacity: 1, scale: 1 }} 
-                  transition={{ delay: 1.2, duration: 0.8 }} 
-                  className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 text-center flex flex-col items-center w-20"
-                >
-                  <div className="text-3xl font-bold leading-none min-w-[60px] text-center">{remainingCalories > 0 ? remainingCalories : 0}</div>
-                  <div className="text-xs text-gray-500 leading-none">Restante</div>
-                </motion.div>
-                <motion.div 
-                  initial={{ opacity: 0, x: 20 }} 
-                  animate={{ opacity: 1, x: 0 }} 
-                  transition={{ delay: 1.0, duration: 0.8 }} 
-                  className="absolute -right-[135px] top-1/2 -translate-y-1/2 text-center flex flex-col items-center"
-                >
-                  <div className="text-lg font-bold sm:text-xl">{burnedCalories}</div>
-                  <div className="text-xs text-gray-400">Quemado</div>
-                </motion.div>
+          <div className="relative w-full max-w-[300px] sm:max-w-[400px] flex justify-center">
+            <div className="relative w-48 h-48 sm:w-56 sm:h-56">
+              <Doughnut
+                data={caloriesData}
+                options={{ cutout: "85%", plugins: { legend: { display: false } }, maintainAspectRatio: true }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <motion.div
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.0, duration: 0.8 }}
+                    className="absolute top-1/2 -translate-y-1/2 text-center flex flex-col items-center sm:-left-[120px] hidden sm:flex"
+                  >
+                    <div className="text-lg font-bold sm:text-xl">{consumedCalories}</div>
+                    <div className="text-xs text-gray-400">Consumido</div>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1.2, duration: 0.8 }}
+                    className="absolute top-1/2 left-[33%] sm:left-1/7 -translate-x-1/2 -translate-y-1/2 text-center flex flex-col items-center w-20"
+                  >
+                    <div className="text-3xl font-bold leading-none min-w-[60px] text-center">{remainingCalories > 0 ? remainingCalories : 0}</div>
+                    <div className="text-xs text-gray-400 leading-none">Restante</div>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.0, duration: 0.8 }}
+                    className="absolute top-1/2 -translate-y-1/2 text-center flex flex-col items-center sm:-right-[120px] hidden sm:flex"
+                  >
+                    <div className="text-lg font-bold sm:text-xl">{burnedCalories}</div>
+                    <div className="text-xs text-gray-400">Quemado</div>
+                  </motion.div>
+                </div>
               </div>
             </div>
+          </div>
+          <div className="flex justify-between w-full max-w-[300px] sm:max-w-[400px] mt-4 sm:hidden">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.0, duration: 0.8 }}
+              className="text-center flex flex-col items-center"
+            >
+              <div className="text-lg font-bold">{consumedCalories}</div>
+              <div className="text-xs text-gray-400">Consumido</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.0, duration: 0.8 }}
+              className="text-center flex flex-col items-center"
+            >
+              <div className="text-lg font-bold">{burnedCalories}</div>
+              <div className="text-xs text-gray-400">Quemado</div>
+            </motion.div>
           </div>
         </motion.div>
 
@@ -505,29 +527,29 @@ const Dashboard: React.FC = () => {
           {progressData.map((item, index) => {
             const progressValue = item.value > 0 && item.max > 0 ? Math.min((item.value / item.max) * 100, 100) : 0;
             return (
-              <motion.div 
-                key={item.name} 
-                initial={{ opacity: 0, y: 20 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                transition={{ delay: 1.0 + index * 0.3, duration: 1.0 }} 
+              <motion.div
+                key={item.name}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.0 + index * 0.3, duration: 1.0 }}
                 className="text-center"
               >
                 <div className="text-xs text-gray-400 mb-1">{item.name}</div>
-                <motion.div 
-                  initial={{ width: 0 }} 
-                  animate={{ width: "100%" }} 
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
                   transition={{ delay: 1.2 + index * 0.3, duration: 1.5, ease: "easeOut" }}
                 >
-                  <Progress 
-                    value={progressValue} 
+                  <Progress
+                    value={progressValue}
                     className="w-full h-2 bg-gray-600 rounded-full [&>div]:bg-[#ff9404] [&>div]:rounded-full [&>div]:transition-all [&>div]:duration-[1500ms] [&>div]:ease-out data-[value='0']:[&>div]:w-0 data-[value='0']:[&>div]:hidden"
                     data-value={progressValue === 0 ? "0" : "non-zero"}
                   />
                 </motion.div>
-                <motion.div 
-                  initial={{ opacity: 0 }} 
-                  animate={{ opacity: 1 }} 
-                  transition={{ delay: 1.5 + index * 0.3, duration: 0.8 }} 
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.5 + index * 0.3, duration: 0.8 }}
                   className="text-xs text-gray-400 mt-1"
                 >
                   {item.value}/{item.max} g
@@ -538,16 +560,16 @@ const Dashboard: React.FC = () => {
         </div>
       </motion.div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 50 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 1.2, ease: "easeOut", delay: 1.2 }} 
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: "easeOut", delay: 1.2 }}
         className="max-w-[700px] mx-auto mt-6 relative z-10"
       >
-        <motion.h2 
-          initial={{ opacity: 0, x: -20 }} 
-          animate={{ opacity: 1, x: 0 }} 
-          transition={{ delay: 1.4, duration: 0.8 }} 
+        <motion.h2
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1.4, duration: 0.8 }}
           className="text-sm font-semibold mb-4 text-white"
         >
           Nutrición

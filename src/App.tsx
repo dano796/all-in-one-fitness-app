@@ -25,7 +25,8 @@ const ComidasRegistro = lazy(() => import("./pages/RegisteredFoods"));
 const CalorieCalculator = lazy(() => import("./components/CalorieCalculator"));
 const FoodQuantityAdjust = lazy(() => import("./components/FoodQuantityAdjust"));
 const OneRMCalculator = lazy(() => import("./components/OneRepMaxCalculator"));
-const Routines = lazy(() => import("./pages/Routines")); // Add the Routines page
+const Routines = lazy(() => import("./pages/Routines"));
+const RoutineDetails = lazy(() => import("./pages/RoutineDetails")); // Nueva página
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -83,6 +84,11 @@ const protectedRoutes = [
     component: Routines,
   },
   {
+    path: "/routine-details",
+    layout: DashboardLayout,
+    component: RoutineDetails, // Nueva ruta
+  },
+  {
     path: "/ejercicios",
     layout: DashboardLayout,
     component: ExerciseList,
@@ -120,7 +126,6 @@ function App() {
 
   const renderRoutes = () => (
     <Routes>
-
       {/* Public Routes */}
       <Route element={<AuthLayout />}>
         <Route path="/" element={<LandingPage />} />

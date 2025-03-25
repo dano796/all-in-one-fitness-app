@@ -1,44 +1,81 @@
 /* src/pages/Routines.module.css */
 .container {
     position: relative;
-    padding: 1rem;
+    padding: 2rem 2rem 2rem 0;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
     background-color: #282c3c;
     min-height: 100vh;
     overflow: hidden;
-    margin-top: -3rem;
+    margin-top: 3rem; /* Adjusted to push content down (previously -3rem) */
   }
   
   .header {
-    margin-bottom: 1.5rem;
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-left: 0;
   }
   
   .title {
-    font-size: 1.25rem;
+    flex: 1;
+    text-align: left;
+    font-size: 1.5rem;
     font-weight: bold;
     color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin-left: 0;
+  }
+  
+  .routinesLabel {
+    flex: 1;
+    text-align: right;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    padding-right: 2rem;
+  }
+  
+  .listWrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    max-width: 100%;
+    margin: 0;
+  }
+  
+  .addButtonContainer {
+    display: flex;
+    align-items: flex-start;
+    width: auto;
+    margin-left: 0;
+    margin-right: 1rem;
   }
   
   .addButton {
-    margin-top: 1rem;
     padding: 0.75rem 1.5rem;
     background: linear-gradient(to right, #ff9404, #e08503);
     color: white;
     font-weight: 600;
     border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ff9404;
+    box-shadow: 0 0 10px rgba(255, 148, 4, 0.3);
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    justify-content: center;
+    margin-left: 2rem;
   }
   
   .addButton:hover {
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
     background: linear-gradient(to right, #e08503, #ff9404);
+    box-shadow: 0 0 15px rgba(255, 148, 4, 0.5);
     transform: scale(1.05);
   }
   
@@ -47,20 +84,19 @@
   }
   
   .listContainer {
-    max-width: 700px;
-    margin: 0 auto;
+    flex: 1;
+    max-width: none;
+    width: auto;
     background-color: #3b4252;
     border-radius: 0.5rem;
-    padding: 1.25rem;
+    padding: 2rem;
     position: relative;
     z-index: 10;
-  }
-  
-  .listTitle {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: white;
-    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
   }
   
   .error {
@@ -70,27 +106,36 @@
     font-size: 0.875rem;
   }
   
+  .loading {
+    color: #9ca3af;
+    text-align: center;
+    font-size: 0.875rem;
+  }
+  
   .list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
   
   .item {
     max-width: 100%;
-    background-color: white;
+    background-color: #4b5563;
     border-radius: 0.5rem;
-    padding: 0.625rem;
+    padding: 1rem;
     margin-bottom: 0.625rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.3s ease;
+    border: 1px solid #5b6673;
   }
   
   .item:hover {
-    background-color: #e5e7eb;
+    background-color: #5b6673;
+    border-color: #ff9404;
+    box-shadow: 0 0 10px rgba(255, 148, 4, 0.2);
   }
   
   .itemContent {
@@ -101,15 +146,15 @@
   }
   
   .itemText {
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 600;
-    color: black;
+    color: white;
   }
   
   .itemButton {
     padding: 0.125rem;
-    transition: transform 0.2s ease;
     background: transparent;
+    transition: transform 0.2s ease;
   }
   
   .itemButton:hover {
@@ -123,7 +168,7 @@
   .itemIcon {
     height: 1rem;
     width: 1rem;
-    color: black;
+    color: #9ca3af;
     transition: color 0.3s ease;
   }
   
@@ -138,11 +183,70 @@
   }
   
   @media (max-width: 640px) {
+    .container {
+      padding: 1rem;
+      margin-top: 4rem; /* Increase margin-top on mobile to account for the sidebar button */
+    }
+  
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding-left: 0;
+    }
+  
+    .title {
+      margin-left: 0;
+      font-size: 1.25rem;
+      line-height: 1.2;
+    }
+  
+    .routinesLabel {
+      text-align: left;
+      padding-right: 0;
+      font-size: 0.75rem;
+      color: #d1d5db;
+    }
+  
+    .listWrapper {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+    }
+  
+    .addButtonContainer {
+      width: 100%;
+      margin-right: 0;
+      margin-left: 0;
+      padding: 0 0.5rem;
+    }
+  
+    .addButton {
+      margin-left: 0;
+      width: 100%;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+  
     .listContainer {
       padding: 1rem;
+      min-height: 300px;
+      border-radius: 0.25rem;
     }
   
     .item {
-      padding: 0.5rem;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 0.25rem;
+    }
+  
+    .itemText {
+      font-size: 0.875rem;
+    }
+  
+    .itemIcon {
+      height: 0.875rem;
+      width: 0.875rem;
     }
   }
