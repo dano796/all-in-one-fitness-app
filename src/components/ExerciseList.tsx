@@ -331,7 +331,7 @@ const ExerciseList: React.FC = () => {
                 <select
                   value={newRoutine.day}
                   onChange={(e) => setNewRoutine({ ...newRoutine, day: e.target.value })}
-                  className="w-full p-3 rounded-lg border border-gray-600 bg-gray-800 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
+                  className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
                 >
                   <option value="">Selecciona un día</option>
                   {days.map((day) => (
@@ -348,7 +348,7 @@ const ExerciseList: React.FC = () => {
                   value={newRoutine.name}
                   onChange={(e) => setNewRoutine({ ...newRoutine, name: e.target.value })}
                   placeholder="Nombre de la rutina"
-                  className="w-full p-3 rounded-lg border border-gray-600 bg-gray-800 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
+                  className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
                 />
               </div>
             </motion.div>
@@ -379,7 +379,7 @@ const ExerciseList: React.FC = () => {
                 <select
                   value={selectedBodyPart}
                   onChange={handleBodyPartChange}
-                  className="w-full p-3 rounded-lg border border-gray-600 bg-gray-800 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102 disabled:opacity-50"
+                  className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102 disabled:opacity-50"
                   disabled={loading}
                 >
                   <option value="">Selecciona</option>
@@ -428,7 +428,7 @@ const ExerciseList: React.FC = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 1.0 + index * 0.3, duration: 1.0 }}
                       onClick={() => handleExerciseClick(exercise)}
-                      className={`p-4 rounded-lg bg-gray-800 cursor-pointer flex items-center gap-4 transition-colors duration-200 hover:bg-gray-600 ${selectedExercise?.id === exercise.id ? 'bg-[#ff9404]' : ''}`}
+                      className={`p-4 rounded-lg bg-gray-700 cursor-pointer flex items-center gap-4 transition-colors duration-200 hover:bg-gray-600 ${selectedExercise?.id === exercise.id ? 'bg-[#ff9404]' : ''}`}
                     >
                       <img
                         src={exercise.gifUrl}
@@ -530,7 +530,7 @@ const ExerciseList: React.FC = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 1.0 + index * 0.3, duration: 1.0 }}
-                  className="max-w-full bg-gray-800 rounded-lg p-4 mb-6 transition-colors duration-200 hover:bg-gray-600"
+                  className="max-w-full bg-gray-700 rounded-lg p-4 mb-6 transition-colors duration-200 hover:bg-gray-600"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-4">
@@ -581,7 +581,7 @@ const ExerciseList: React.FC = () => {
                           value={exercise.note || ''}
                           onChange={(e) => handleUpdateNote(exercise.id, e.target.value)}
                           placeholder="Agregar nota"
-                          className="w-full max-w-[300px] p-3 rounded-lg border border-gray-600 bg-gray-800 text-base text-white ml-4 transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
+                          className="w-full max-w-[300px] p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white ml-4 transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
                         />
                       </div>
                       <div className="flex flex-col gap-2 mt-2">
@@ -589,7 +589,7 @@ const ExerciseList: React.FC = () => {
                         <select
                           value={exercise.restTimer || 'Apagado'}
                           onChange={(e) => handleUpdateRestTimer(exercise.id, e.target.value)}
-                          className="w-full max-w-[200px] p-3 rounded-lg border border-gray-600 bg-gray-800 text-base text-white ml-4 transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
+                          className="w-full max-w-[200px] p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white ml-4 transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
                         >
                           <option value="Apagado">Apagado</option>
                           <option value="30 segundos">30 segundos</option>
@@ -614,7 +614,7 @@ const ExerciseList: React.FC = () => {
                                   handleUpdateSet(exercise.id, setIndex, 'kg', e.target.value)
                                 }
                                 placeholder="KG"
-                                className="w-full p-3 rounded-lg border border-gray-600 bg-gray-800 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
+                                className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
                               />
                             </div>
                             <div className="flex flex-col items-center">
@@ -625,7 +625,7 @@ const ExerciseList: React.FC = () => {
                                   handleUpdateSet(exercise.id, setIndex, 'reps', e.target.value)
                                 }
                                 placeholder="REPS"
-                                className="w-full p-3 rounded-lg border border-gray-600 bg-gray-800 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
+                                className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
                               />
                             </div>
                           </div>
