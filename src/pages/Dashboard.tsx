@@ -347,13 +347,13 @@ const Dashboard: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: -50 }} 
         animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 1.2, ease: "easeOut" }} 
+        transition={{ duration: 0.5, ease: "easeOut" }} 
         className="mb-6 text-center"
       >
         <motion.div 
           initial={{ opacity: 0 }} 
           animate={{ opacity: 1 }} 
-          transition={{ delay: 0.4, duration: 0.8 }} 
+          transition={{ delay: 0.4, duration: 0.5 }} 
           className="mb-2 text-xs text-gray-400"
         >
           Semana {getWeek()}
@@ -361,7 +361,7 @@ const Dashboard: React.FC = () => {
         <motion.div 
           initial={{ scale: 0.9, opacity: 0 }} 
           animate={{ scale: 1, opacity: 1 }} 
-          transition={{ delay: 0.6, duration: 0.8 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
         >
           <button 
             onClick={handleDatePicker} 
@@ -383,13 +383,13 @@ const Dashboard: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 50 }} 
         animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 1.2, ease: "easeOut" }} 
+        transition={{ duration: 0.5, ease: "easeOut" }} 
         className="max-w-[700px] mx-auto bg-[#3B4252] rounded-lg p-5 relative z-10"
       >
         <motion.div 
           initial={{ opacity: 0, x: -20 }} 
           animate={{ opacity: 1, x: 0 }} 
-          transition={{ delay: 0.4, duration: 0.8 }} 
+          transition={{ delay: 0.4, duration: 0.5 }} 
           className="flex justify-between items-center mb-4"
         >
           <h2 className="text-sm font-semibold text-white">Resumen</h2>
@@ -459,7 +459,7 @@ const Dashboard: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }} 
           animate={{ opacity: 1, scale: 1 }} 
-          transition={{ duration: 1.5, ease: "easeOut", delay: 0.8 }} 
+          transition={{ duration: 0.5, ease: "easeOut", delay: 0.8 }} 
           className="relative flex justify-center mb-8"
         >
           <div className="relative w-48 h-48 sm:w-56 sm:h-56">
@@ -472,7 +472,7 @@ const Dashboard: React.FC = () => {
                 <motion.div 
                   initial={{ opacity: 0, x: -30 }} 
                   animate={{ opacity: 1, x: 0 }} 
-                  transition={{ delay: 1.0, duration: 0.8 }} 
+                  transition={{ delay: 1.0, duration: 0.5 }} 
                   className="absolute -left-[135px] top-1/2 -translate-y-1/2 text-center flex flex-col items-center"
                 >
                   <div className="text-lg font-bold sm:text-xl">{consumedCalories}</div>
@@ -481,7 +481,7 @@ const Dashboard: React.FC = () => {
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.8 }} 
                   animate={{ opacity: 1, scale: 1 }} 
-                  transition={{ delay: 1.2, duration: 0.8 }} 
+                  transition={{ delay: 1.2, duration: 0.5 }} 
                   className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 text-center flex flex-col items-center w-20"
                 >
                   <div className="text-3xl font-bold leading-none min-w-[60px] text-center">{remainingCalories > 0 ? remainingCalories : 0}</div>
@@ -490,7 +490,7 @@ const Dashboard: React.FC = () => {
                 <motion.div 
                   initial={{ opacity: 0, x: 20 }} 
                   animate={{ opacity: 1, x: 0 }} 
-                  transition={{ delay: 1.0, duration: 0.8 }} 
+                  transition={{ delay: 1.0, duration: 0.5 }} 
                   className="absolute -right-[135px] top-1/2 -translate-y-1/2 text-center flex flex-col items-center"
                 >
                   <div className="text-lg font-bold sm:text-xl">{burnedCalories}</div>
@@ -509,14 +509,14 @@ const Dashboard: React.FC = () => {
                 key={item.name} 
                 initial={{ opacity: 0, y: 20 }} 
                 animate={{ opacity: 1, y: 0 }} 
-                transition={{ delay: 1.0 + index * 0.3, duration: 1.0 }} 
+                transition={{ delay: 1.0 + index * 0.3, duration: 0.5}} 
                 className="text-center"
               >
                 <div className="text-xs text-gray-400 mb-1">{item.name}</div>
                 <motion.div 
                   initial={{ width: 0 }} 
                   animate={{ width: "100%" }} 
-                  transition={{ delay: 1.2 + index * 0.3, duration: 1.5, ease: "easeOut" }}
+                  transition={{ delay: 1.2 + index * 0.3, duration: 0.5, ease: "easeOut" }}
                 >
                   <Progress 
                     value={progressValue} 
@@ -527,7 +527,7 @@ const Dashboard: React.FC = () => {
                 <motion.div 
                   initial={{ opacity: 0 }} 
                   animate={{ opacity: 1 }} 
-                  transition={{ delay: 1.5 + index * 0.3, duration: 0.8 }} 
+                  transition={{ delay: 1.5 + index * 0.3, duration: 0.5 }} 
                   className="text-xs text-gray-400 mt-1"
                 >
                   {item.value}/{item.max} g
@@ -541,13 +541,13 @@ const Dashboard: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 50 }} 
         animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 1.2, ease: "easeOut", delay: 1.2 }} 
+        transition={{ duration: 0.5, ease: "easeOut", delay: 1.2 }} 
         className="max-w-[700px] mx-auto mt-6 relative z-10"
       >
         <motion.h2 
           initial={{ opacity: 0, x: -20 }} 
           animate={{ opacity: 1, x: 0 }} 
-          transition={{ delay: 1.4, duration: 0.8 }} 
+          transition={{ delay: 1.4, duration: 0.5 }} 
           className="text-sm font-semibold mb-4 text-white"
         >
           Nutrición
@@ -562,7 +562,7 @@ const Dashboard: React.FC = () => {
                 key={meal.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 1.6 + index * 0.3, duration: 1.0 }}
+                transition={{ delay: 1.6 + index * 0.3, duration: 0.5 }}
                 className="max-w-full bg-[#3B4252] rounded-lg p-2.5 flex items-center justify-between cursor-pointer hover:bg-[#4B5563] transition duration-200"
                 onClick={() => handleMealClick(meal.type)}
               >
@@ -579,7 +579,7 @@ const Dashboard: React.FC = () => {
                           strokeDasharray={circumference}
                           initial={{ strokeDasharray: `0 ${circumference}` }}
                           animate={{ strokeDasharray }}
-                          transition={{ delay: 2.0 + index * 0.3, duration: 1.5, ease: "easeOut" }}
+                          transition={{ delay: 2.0 + index * 0.3, duration: 0.5, ease: "easeOut" }}
                         />
                       )}
                     </svg>
@@ -594,7 +594,7 @@ const Dashboard: React.FC = () => {
                   <motion.button
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 2.0 + index * 0.3, duration: 0.8 }}
+                    transition={{ delay: 2.0 + index * 0.3, duration: 0.5 }}
                     className="p-0.5 hover:scale-120 active:scale-90 transition-transform duration-200"
                     onClick={(e) => { e.stopPropagation(); handleAddFoodClick(meal.type); }}
                   >
