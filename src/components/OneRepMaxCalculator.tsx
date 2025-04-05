@@ -100,7 +100,16 @@ const OneRepMaxCalculator: React.FC = () => {
         return;
       }
 
-      const fecha = new Date().toISOString().split("T")[0]; // Fecha actual sin hora
+      const fecha = new Intl.DateTimeFormat("es-CO", {
+        timeZone: "America/Bogota",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+        .format(new Date())
+        .split("/")
+        .reverse()
+        .join("-"); // Fecha actual en formato colombiano (YYYY-MM-DD)
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/1rm/save`,
         {
@@ -277,4 +286,5 @@ const OneRepMaxCalculator: React.FC = () => {
   );
 };
 
+export { exercises };
 export default React.memo(OneRepMaxCalculator);

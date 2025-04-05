@@ -13,6 +13,7 @@ import {
   Weight,
   ChevronRight,
   ChevronLeft,
+  LineChart,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { supabase } from "../lib/supabaseClient";
@@ -62,7 +63,6 @@ const Sidebar: React.FC = () => {
             <Dumbbell className="h-8 w-8 sm:h-9 sm:w-9 text-[#ff9404]" />
           </Link>
 
-          {/* Margen superior del nav: mt-24 en móvil, mt-12 en sm y superior */}
           <nav className="flex flex-col justify-center space-y-4 sm:space-y-6 mt-24 sm:mt-18">
             <DashboardNavItem
               to="/dashboard"
@@ -106,9 +106,14 @@ const Sidebar: React.FC = () => {
                 <Weight className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
             />
+            <DashboardNavItem
+              to="/rm-progress"
+              icon={
+                <LineChart className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+              }
+            />
           </nav>
 
-          {/* Margen superior del div inferior: mt-52 en móvil, mt-24 en sm y superior */}
           <div className="space-y-4 sm:space-y-6 pb-6 sm:pb-8 mt-52 sm:mt-24">
             <DashboardNavItem
               to="/settings"

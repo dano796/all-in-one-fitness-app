@@ -26,7 +26,8 @@ const CalorieCalculator = lazy(() => import("./components/CalorieCalculator"));
 const FoodQuantityAdjust = lazy(() => import("./components/FoodQuantityAdjust"));
 const OneRMCalculator = lazy(() => import("./components/OneRepMaxCalculator"));
 const Routines = lazy(() => import("./pages/Routines"));
-const RoutineDetails = lazy(() => import("./pages/RoutineDetails")); // Nueva página
+const RoutineDetails = lazy(() => import("./pages/RoutineDetails"));
+const RMProgressPage = lazy(() => import("./pages/RMProgressPage")); // Añade esta importación
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -86,12 +87,17 @@ const protectedRoutes = [
   {
     path: "/routine-details",
     layout: DashboardLayout,
-    component: RoutineDetails, // Nueva ruta
+    component: RoutineDetails,
   },
   {
     path: "/ejercicios",
     layout: DashboardLayout,
     component: ExerciseList,
+  },
+  {
+    path: "/rm-progress", // Añade esta nueva ruta
+    layout: DashboardLayout,
+    component: RMProgressPage, // Usa el componente de progreso
   },
 ];
 
@@ -177,11 +183,11 @@ function App() {
   return (
     <Router>
       <Suspense fallback={<Loader />}>
-        <div className="relative min-h-screen">
-          {renderRoutes()}
-          {isLoading && <Loader />}
-        </div>
-      </Suspense>
+      <div className="relative min-h-screen">
+        {renderRoutes()}
+        {isLoading && <Loader />}
+      </div>
+    </Suspense>
     </Router>
   );
 }
