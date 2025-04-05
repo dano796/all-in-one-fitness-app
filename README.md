@@ -55,7 +55,7 @@ macronutrientes de los alimentos registrados**, el **registro de ejercicios y pe
 
 ![Hidratación](previews/control-agua.png)
 
-## Desarrolladores
+## Desarrollado por
 
 - [Camilo Marín Muriel](https://github.com/MarinNoSkill)
 - [Daniel Ortiz Aristizábal](https://github.com/dano796)
