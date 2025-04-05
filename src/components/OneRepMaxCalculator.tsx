@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { supabase } from "../lib/supabaseClient"; // Asegúrate de tener esto configurado
 
 const exercises = [
   "Peso Muerto",
@@ -17,6 +19,7 @@ const OneRepMaxCalculator: React.FC = () => {
   const [rpe, setRpe] = useState<number | undefined>(undefined);
   const [exercise, setExercise] = useState<string>("Peso Muerto");
   const [oneRepMax, setOneRepMax] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const convertWeight = (value: number, toUnit: "kg" | "lb"): number => {
     return toUnit === "kg"
@@ -41,54 +44,88 @@ const OneRepMaxCalculator: React.FC = () => {
 
   const handleRepsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value ? Number(e.target.value) : undefined;
-    setReps(
-      value !== undefined && value > 0 && value <= 30 ? value : undefined
-    );
+    setReps(value !== undefined && value > 0 && value <= 30 ? value : undefined);
   };
 
-  const handleRpeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRpeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value ? Number(e.target.value) : undefined;
     setRpe(value !== undefined && value >= 1 && value <= 10 ? value : undefined);
   };
 
-  const calculateOneRepMax = () => {
-    if (
-      weight === undefined ||
-      reps === undefined ||
-      rpe === undefined ||
-      weight <= 0 ||
-      reps <= 0 ||
-      rpe < 1 ||
-      rpe > 10
-    ) {
-      setOneRepMax(null);
+  const isInputValid = () =>
+    weight !== undefined &&
+    reps !== undefined &&
+    rpe !== undefined &&
+    weight > 0 &&
+    reps > 0 &&
+    reps <= 30 &&
+    rpe >= 1 &&
+    rpe <= 10;
+
+  const calculateOneRepMax = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isInputValid()) {
+      setError("Por favor, completa todos los campos con valores válidos.");
       return;
     }
 
-    const weightInKg = unit === "lb" ? convertWeight(weight, "kg") : weight;
-    const isCompound = [
-      "Peso Muerto",
-      "Sentadilla",
-      "Press de Banca",
-      "Press Militar",
-    ].includes(exercise);
-    const oneRm = isCompound
-      ? weightInKg * (1 + reps / 30) // Epley
-      : weightInKg * (36 / (37 - reps)); // Brzycki
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setError("Debes iniciar sesión para calcular el 1RM.");
+        return;
+      }
 
-    const rpeAdjustment = 1 + (10 - rpe) * 0.033;
-    const adjustedOneRm = Math.round(oneRm * rpeAdjustment);
-    setOneRepMax(unit === "lb" ? convertWeight(adjustedOneRm, "lb") : adjustedOneRm);
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/1rm/calculate`,
+        { weight, unit, reps, rpe, exercise }
+      );
+      setOneRepMax(response.data.oneRepMax);
+      setError(null);
+    } catch (err) {
+      setError((err as any).response?.data?.error || "Error al calcular el 1RM");
+    }
   };
 
-  const isButtonDisabled =
-    weight === undefined ||
-    reps === undefined ||
-    rpe === undefined ||
-    weight <= 0 ||
-    reps <= 0 ||
-    rpe < 1 ||
-    rpe > 10;
+  const saveOneRepMax = async () => {
+    if (!isInputValid() || oneRepMax === null) {
+      setError("Calcula el 1RM antes de guardarlo.");
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setError("Debes iniciar sesión para guardar el 1RM.");
+        return;
+      }
+
+      const fecha = new Date().toISOString().split("T")[0]; // Fecha actual sin hora
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/1rm/save`,
+        {
+          email: user.email,
+          weight,
+          unit,
+          reps,
+          rpe,
+          rm_maximo: oneRepMax,
+          fecha,
+          exercise,
+        }
+      );
+      alert(response.data.message); // Puedes usar un modal más bonito si prefieres
+      setError(null);
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError("Error al guardar el 1RM");
+      }
+    }
+  };
+
+  const isButtonDisabled = !isInputValid();
 
   return (
     <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white min-h-screen">
@@ -98,18 +135,9 @@ const OneRepMaxCalculator: React.FC = () => {
         </h1>
 
         <div className="bg-[#3B4252] rounded-xl p-6 shadow-md">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              calculateOneRepMax();
-            }}
-            className="space-y-6"
-          >
+          <form onSubmit={calculateOneRepMax} className="space-y-6">
             <div>
-              <label
-                htmlFor="weight"
-                className="block text-sm font-medium text-white mb-1"
-              >
+              <label htmlFor="weight" className="block text-sm font-medium text-white mb-1">
                 Peso
               </label>
               <div className="relative">
@@ -132,10 +160,7 @@ const OneRepMaxCalculator: React.FC = () => {
             </div>
 
             <div>
-              <label
-                htmlFor="reps"
-                className="block text-sm font-medium text-white mb-1"
-              >
+              <label htmlFor="reps" className="block text-sm font-medium text-white mb-1">
                 Repeticiones (1-30)
               </label>
               <input
@@ -149,27 +174,31 @@ const OneRepMaxCalculator: React.FC = () => {
             </div>
 
             <div>
-              <label
-                htmlFor="rpe"
-                className="block text-sm font-medium text-white mb-1"
-              >
+              <label htmlFor="rpe" className="block text-sm font-medium text-white mb-1">
                 RPE (1-10)
               </label>
-              <input
-                type="number"
+              <select
                 id="rpe"
                 value={rpe ?? ""}
                 onChange={handleRpeChange}
-                className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 placeholder:text-center [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5"
-                placeholder="Ingresa RPE (1-10)"
-              />
+                className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 appearance-none 
+                  [background-image:url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] 
+                  bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.5em_1.5em] 
+                  sm:text-sm sm:px-2.5 sm:py-1.5 sm:pr-7 pr-6"
+              >
+                <option value="" className="bg-[#2D3242] text-gray-200">
+                  Selecciona RPE
+                </option>
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((value) => (
+                  <option key={value} value={value} className="bg-[#2D3242] text-gray-200">
+                    {value}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
-              <label
-                htmlFor="exercise"
-                className="block text-sm font-medium text-white mb-1"
-              >
+              <label htmlFor="exercise" className="block text-sm font-medium text-white mb-1">
                 Ejercicio
               </label>
               <select
@@ -189,13 +218,25 @@ const OneRepMaxCalculator: React.FC = () => {
               </select>
             </div>
 
-            <button
-              type="submit"
-              className="w-full px-4 py-2 text-sm bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white border-none rounded-md hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.5)] hover:scale-102 transition-all duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed sm:text-sm sm:px-4 sm:py-2 "
-              disabled={isButtonDisabled}
-            >
-              Calcular 1RM (Repetición Máxima)
-            </button>
+            <div className="flex space-x-4">
+              <button
+                type="submit"
+                className="w-full px-4 py-2 text-sm bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white border-none rounded-md hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.5)] hover:scale-102 transition-all duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed sm:text-sm sm:px-4 sm:py-2"
+                disabled={isButtonDisabled}
+              >
+                Calcular 1RM
+              </button>
+              <button
+                type="button"
+                onClick={saveOneRepMax}
+                className="w-full px-4 py-2 text-sm bg-gradient-to-br from-[#4CAF50] to-[#388E3C] text-white border-none rounded-md hover:bg-gradient-to-br hover:from-[#388E3C] hover:to-[#4CAF50] hover:shadow-[0_0_10px_rgba(76,175,80,0.5)] hover:scale-102 transition-all duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed sm:text-sm sm:px-4 sm:py-2"
+                disabled={isButtonDisabled || oneRepMax === null}
+              >
+                Guardar 1RM
+              </button>
+            </div>
+
+            {error && <p className="text-red-400 text-sm">{error}</p>}
 
             {oneRepMax && (
               <div className="mt-6 space-y-4">
