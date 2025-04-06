@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 interface DashboardNavItemProps {
   to: string;
   icon: React.ReactNode;
-  title?: string; // Opcional: para mostrar un texto debajo del ícono
-  className?: string; // Opcional: para personalizar estilos
+  title?: string; 
+  className?: string; 
 }
 
 const DashboardNavItem: React.FC<DashboardNavItemProps> = ({

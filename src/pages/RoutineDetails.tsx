@@ -6,7 +6,6 @@ import axios from "axios";
 import GalaxyBackground from "../components/GalaxyBackground";
 import { Progress } from "@/components/ui/progress";
 
-// Import sound (ensure the file exists in your project)
 import timerEndSound from "../assets/sounds/timer-end.mp3.wav";
 
 interface Routine {
@@ -83,6 +82,7 @@ const RoutineDetails: React.FC = () => {
       setEditedExercises(exercises);
       setError(null);
     } catch (err) {
+      console.error("Error al cargar los detalles de la rutina:", err);
       setError("Error al cargar los detalles de la rutina.");
     } finally {
       setLoading(false);
@@ -175,6 +175,7 @@ const RoutineDetails: React.FC = () => {
       setRoutine({ ...routine!, exercises: editedExercises });
       navigate("/routines");
     } catch (err) {
+      console.error("Error al guardar los cambios:", err);
       setError("Error al guardar los cambios.");
     }
   };
@@ -222,7 +223,7 @@ const RoutineDetails: React.FC = () => {
         <button onClick={handleBackClick} className="text-white p-2 hover:text-[#ff9404] transition-colors">
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-xl font-bold text-center flex-1">Log Workout</h1>
+        <h1 className="text-xl font-bold text-center flex-1">Registro de Entrenamiento</h1>
         <button
           onClick={handleSaveChanges}
           className="bg-[#ff9404] text-white py-2 px-4 rounded-lg font-semibold hover:bg-[#e08503] transition-colors"

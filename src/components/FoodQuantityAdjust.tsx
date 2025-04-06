@@ -5,7 +5,6 @@ import Swal from "sweetalert2";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface Food {
   food_id: string;
   food_name: string;
@@ -181,7 +180,6 @@ const FoodQuantityAdjust: React.FC = () => {
     return result;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const parseFraction = (value: string): string => {
     const fractionMatch = value.match(/^(\d+)(?:\/(\d+))?$/);
     if (fractionMatch) {

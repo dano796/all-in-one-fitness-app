@@ -106,6 +106,7 @@ const ExerciseList: React.FC = () => {
         setSelectedExercise(response.data[0]);
       }
     } catch (err) {
+      console.error(err);
       setError('Error al consultar los ejercicios');
     } finally {
       setLoading(false);
@@ -231,6 +232,7 @@ const ExerciseList: React.FC = () => {
         });
         navigate(`/routine-details?id=${routineId}`);
       } catch (err) {
+        console.error(err);
         setError('Error al actualizar la rutina');
       }
     } else {
@@ -248,6 +250,7 @@ const ExerciseList: React.FC = () => {
         });
         navigate('/routines');
       } catch (err) {
+        console.error(err);
         setError('Error al guardar la rutina');
       }
     }

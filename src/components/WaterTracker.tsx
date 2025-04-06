@@ -199,7 +199,7 @@ const WaterTracker: React.FC = () => {
 
   useEffect(() => {
     setWaterUnitStages((prevStages) =>
-      prevStages.map((stage, i) => (i < filledWaterUnits ? 3 : 0))
+      prevStages.map((_stage, i) => (i < filledWaterUnits ? 3 : 0))
     );
   }, [filledWaterUnits]);
 

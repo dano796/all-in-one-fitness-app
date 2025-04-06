@@ -44,6 +44,7 @@ const Routines: React.FC = () => {
       setRoutines(response.data.routines);
       setError(null);
     } catch (err) {
+      console.error(err);
       setError("Error al consultar las rutinas.");
     } finally {
       setLoading(false);
@@ -64,6 +65,7 @@ const Routines: React.FC = () => {
       setRoutines((prevRoutines) => prevRoutines.filter((routine) => routine.id !== routineId));
       setShowDeleteConfirm(null);
     } catch (err) {
+      console.error(err);
       setError("Error al eliminar la rutina.");
     }
   }, []);
