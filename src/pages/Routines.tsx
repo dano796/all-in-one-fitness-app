@@ -100,7 +100,7 @@ const Routines: React.FC = () => {
   }, [userEmail, fetchRoutines]);
 
   return (
-    <div className="relative flex flex-col gap-8 p-8 pr-0 min-h-screen overflow-hidden mt-12 z-10">
+    <div className="relative flex flex-col gap-8 p-8 pr-0 min-h-screen overflow-hidden ml-6 mt-0 z-10">
       <GalaxyBackground />
       <motion.div
         initial={{ opacity: 0, y: -50 }}
@@ -112,7 +112,7 @@ const Routines: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          className="flex-1 text-left text-xl font-bold text-white drop-shadow-md"
+          className="flex-1 left-20 text-left text-xl font-bold text-white drop-shadow-md"
         >
           <h1>All In One Fitness App</h1>
         </motion.div>

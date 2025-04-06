@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { supabase } from "../lib/supabaseClient"; // Asegúrate de tener esto configurado
+import { supabase } from "../lib/supabaseClient";
+import GalaxyBackground from "./GalaxyBackground";
 
 const exercises = [
   "Peso Muerto",
@@ -137,7 +138,9 @@ const OneRepMaxCalculator: React.FC = () => {
   const isButtonDisabled = !isInputValid();
 
   return (
-    <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white min-h-screen">
+    <div className="absolute inset-0 overflow-hidden">
+      <GalaxyBackground />
+    <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white min-h-screen z-10">
       <div className="max-w-2xl mx-auto w-full">
         <h1 className="text-5xl font-bold mb-12 text-center text-white flex items-center justify-center">
           Calculadora Repetición Máxima (1RM)
@@ -282,6 +285,7 @@ const OneRepMaxCalculator: React.FC = () => {
           </form>
         </div>
       </div>
+    </div>
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, Toaster } from "react-hot-toast";
+import GalaxyBackground from "./GalaxyBackground";
 
 
 const activityMultipliers = {
@@ -192,6 +193,7 @@ const CalorieCalculator: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative w-full bg-[#282c3c]">
+      <GalaxyBackground />
         <Toaster position="top-center" reverseOrder={false} />
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 50 }}

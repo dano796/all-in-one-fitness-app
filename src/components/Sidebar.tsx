@@ -63,51 +63,59 @@ const Sidebar: React.FC = () => {
             <Dumbbell className="h-8 w-8 sm:h-9 sm:w-9 text-[#ff9404]" />
           </Link>
 
-          <nav className="flex flex-col justify-center space-y-4 sm:space-y-6 mt-24 sm:mt-18">
+          <nav className="flex flex-col justify-center space-y-4 sm:space-y-6 mt-2 sm:mt-18">
             <DashboardNavItem
               to="/dashboard"
+              label="Dashboard"
               icon={
                 <Home className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
             />
             <DashboardNavItem
               to="/routines"
-              icon={
-                <Utensils className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
-              }
-            />
-            <DashboardNavItem
-              to="/workouts"
+              label="Routines"
               icon={
                 <Calendar className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
             />
             <DashboardNavItem
+              to="/foodDashboard"
+              label="Food"
+              icon={
+                <Utensils className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+              }
+            />
+            <DashboardNavItem
               to="/water"
+              label="Water"
               icon={
                 <Droplets className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
             />
             <DashboardNavItem
               to="/activity"
+              label="Activity"
               icon={
                 <Activity className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
             />
             <DashboardNavItem
               to="/calorie-calculator"
+              label="Calorie Calculator"
               icon={
                 <Calculator className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
             />
             <DashboardNavItem
               to="/onerm-calculator"
+              label="1RM Calculator"
               icon={
                 <Weight className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
             />
             <DashboardNavItem
               to="/rm-progress"
+              label="RM Progress"
               icon={
                 <LineChart className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }

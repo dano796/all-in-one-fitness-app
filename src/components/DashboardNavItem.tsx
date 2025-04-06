@@ -6,6 +6,7 @@ interface DashboardNavItemProps {
   icon: React.ReactNode;
   title?: string; 
   className?: string; 
+  label?: string;
 }
 
 const DashboardNavItem: React.FC<DashboardNavItemProps> = ({

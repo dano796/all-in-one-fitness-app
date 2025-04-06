@@ -13,7 +13,7 @@ const particlesOptions: IParticlesProps['options'] = {
   interactivity: {
     events: {
       onHover: {
-        enable: true,
+        enable: false,
         mode: "repulse",
       },
       onClick: {
@@ -96,12 +96,12 @@ const GalaxyBackground: React.FC = () => {
       init={particlesInit}
       options={particlesOptions}
       style={{
-        position: "absolute",
+        position: "fixed",
         top: 0,
         left: 0,
         width: "100%",
         height: "100%",
-        zIndex: 0,
+        zIndex: -1,
       }}
     />
   );

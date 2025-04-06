@@ -37,6 +37,7 @@ import WaterLayout from "./layouts/WaterLayout";
 import CalorieCalculatorLayout from "./layouts/CalorieCalculatorLayout";
 import OneRMCalculatorLayout from "./layouts/OneRMCalculatorLayout";
 import ExerciseList from "./components/ExerciseList";
+import FoodDashboard from "./pages/FoodDashboard";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, user }: { children: React.ReactNode; user: User | null }) =>
@@ -58,6 +59,11 @@ const protectedRoutes = [
     path: "/dashboard",
     layout: DashboardLayout,
     component: Dashboard,
+  },
+  {
+    path: "/foodDashboard",
+    layout: DashboardLayout,
+    component: FoodDashboard
   },
   {
     path: "/water",
