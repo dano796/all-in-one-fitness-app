@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Dumbbell, UserCircle, LogOut, Menu, X } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
-import { User as SupabaseUser } from "@supabase/supabase-js"; 
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 type User = SupabaseUser;
 
@@ -17,7 +17,10 @@ const DesktopMenu: React.FC<{
     <div className="flex-1 flex justify-center">
       <ul className="flex space-x-6">
         <li>
-          <Link to="/" className="hover:text-[#FF9500] font-semibold transition">
+          <Link
+            to="/"
+            className="hover:text-[#FF9500] font-semibold transition"
+          >
             Inicio
           </Link>
         </li>
@@ -230,7 +233,7 @@ const Navbar: React.FC = () => {
 
   return (
     <header className="px-4 bg-[#282c3c] border-b border-[#3B4252]">
-      <nav className="container mx-auto my-2 px-4 h-16 flex items-center justify-between md:my-4 lg:my-2">
+      <nav className="container mx-auto my-2 px-4 h-16 flex items-center justify-between md:my-4 lg:my-0">
         <div className="flex items-center gap-2">
           <Dumbbell className="w-6 h-6 text-[#ff9404]" />
           <Link to="/" className="text-xl font-semibold text-white">
@@ -248,7 +251,11 @@ const Navbar: React.FC = () => {
           className="md:hidden text-white"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {mobileMenuOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <Menu className="w-6 h-6" />
+          )}
         </button>
       </nav>
       <MobileMenu

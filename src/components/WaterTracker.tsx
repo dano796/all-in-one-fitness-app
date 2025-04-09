@@ -84,13 +84,17 @@ const WaterUnit: React.FC<{ stage: number }> = ({ stage }) => {
 
 const WaterTracker: React.FC = () => {
   const navigate = useNavigate();
-  const todayStr = new Date().toLocaleDateString("en-CA", { timeZone: TIMEZONE });
+  const todayStr = new Date().toLocaleDateString("en-CA", {
+    timeZone: TIMEZONE,
+  });
   const [date, setDate] = useState<string>(todayStr);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [filledWaterUnits, setFilledWaterUnits] = useState<number>(0);
-  const [waterUnitStages, setWaterUnitStages] = useState<number[]>(Array(TOTAL_WATER_UNITS).fill(0));
+  const [waterUnitStages, setWaterUnitStages] = useState<number[]>(
+    Array(TOTAL_WATER_UNITS).fill(0)
+  );
   const [isToday, setIsToday] = useState<boolean>(true);
 
   const checkAuth = useCallback(async () => {
@@ -110,9 +114,12 @@ const WaterTracker: React.FC = () => {
   const fetchWaterData = useCallback(async () => {
     if (!userEmail || !date) return;
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/water/user`, {
-        params: { email: userEmail, date: date },
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/water/user`,
+        {
+          params: { email: userEmail, date: date },
+        }
+      );
       const aguasllenadas = response.data.aguasllenadas || 0;
       setFilledWaterUnits(aguasllenadas);
       setError(null);
@@ -122,18 +129,24 @@ const WaterTracker: React.FC = () => {
     }
   }, [userEmail, date]);
 
-  const saveWaterData = useCallback(async (aguasllenadas: number) => {
-    try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/water/update`, {
-        email: userEmail,
-        date: date,
-        aguasllenadas,
-      });
-    } catch (err) {
-      console.log(err);
-      setError("Error al guardar los datos de agua.");
-    }
-  }, [userEmail, date]);
+  const saveWaterData = useCallback(
+    async (aguasllenadas: number) => {
+      try {
+        await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/water/update`,
+          {
+            email: userEmail,
+            date: date,
+            aguasllenadas,
+          }
+        );
+      } catch (err) {
+        console.log(err);
+        setError("Error al guardar los datos de agua.");
+      }
+    },
+    [userEmail, date]
+  );
 
   const handleAddWaterUnit = useCallback(async () => {
     if (filledWaterUnits < TOTAL_WATER_UNITS && isToday) {
@@ -151,11 +164,14 @@ const WaterTracker: React.FC = () => {
     }
   }, [filledWaterUnits, isToday, saveWaterData]);
 
-  const handleDateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedDate = e.target.value;
-    setDate(selectedDate);
-    setIsToday(selectedDate === todayStr);
-  }, [todayStr]);
+  const handleDateChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedDate = e.target.value;
+      setDate(selectedDate);
+      setIsToday(selectedDate === todayStr);
+    },
+    [todayStr]
+  );
 
   const handleDatePicker = useCallback(() => {
     if (dateInputRef.current) {
@@ -210,7 +226,12 @@ const WaterTracker: React.FC = () => {
   ));
 
   return (
-    <div className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-auto -mt-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
+      className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-auto -mt-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+    >
       <GalaxyBackground />
 
       <motion.div
@@ -230,10 +251,10 @@ const WaterTracker: React.FC = () => {
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
+          transition={{ duration: 0.8 }}
         >
-          <button 
-            onClick={handleDatePicker} 
+          <button
+            onClick={handleDatePicker}
             className="min-w-[120px] px-6 py-3 bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#3B4252] hover:to-[#4B5563] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 sm:text-base text-sm sm:px-6 sm:py-3 sm:min-w-[120px]"
           >
             {getDateLabel()}
@@ -266,7 +287,8 @@ const WaterTracker: React.FC = () => {
 
         <div className="bg-[#4B5563]/50 rounded-lg p-6 mb-8">
           <p className="text-xl font-semibold text-white">
-            Consumido: <span className="text-[#ff9404]">{waterConsumed} ml</span>
+            Consumido:{" "}
+            <span className="text-[#ff9404]">{waterConsumed} ml</span>
           </p>
           <p className="text-base text-gray-400">
             {((waterConsumed / waterGoal) * 100).toFixed(0)}% de tu meta
@@ -300,7 +322,7 @@ const WaterTracker: React.FC = () => {
             : "¡Sigue así, cada gota cuenta!"}
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
