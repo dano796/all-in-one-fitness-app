@@ -4,26 +4,27 @@ import { Link } from "react-router-dom";
 interface DashboardNavItemProps {
   to: string;
   icon: React.ReactNode;
-  title?: string; 
-  className?: string; 
   label?: string;
+  showLabel?: boolean;
 }
 
 const DashboardNavItem: React.FC<DashboardNavItemProps> = ({
   to,
   icon,
-  title,
-  className = "",
+  label = "",
+  showLabel = false,
 }) => {
   return (
     <Link
       to={to}
-      className={`flex flex-col items-center text-[#FFFFFF] hover:text-[#ff9404] bg-[#282c3c] p-2 rounded-lg ${className}`}
+      className={`flex items-center text-gray-300 hover:text-[#ff9404] transition-all duration-300 w-full ${
+        showLabel ? "justify-start pl-6" : "justify-center"
+      }`}
     >
       {icon}
-      {title && <span className="text-xs mt-1">{title}</span>}
+      {showLabel && label && <span className="ml-3">{label}</span>}
     </Link>
   );
 };
 
-export default React.memo(DashboardNavItem);
+export default DashboardNavItem;
