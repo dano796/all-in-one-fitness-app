@@ -149,15 +149,15 @@ const OneRepMaxCalculator: React.FC = () => {
   const isButtonDisabled = !isInputValid();
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className="relative min-h-screen overflow-y-auto">
       <GalaxyBackground />
-      <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white min-h-screen ">
+      <div className="container mx-auto px-4 py-16 bg-[#282c3c] text-white">
         <div className="max-w-2xl mx-auto w-full relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="bg-[#3B4252] rounded-xl p-6 shadow-md"
+            className="bg-[#3B4252] rounded-xl p-6 shadow-md mb-8"
           >
             <h1 className="text-3xl lg:text-4xl font-bold mb-6 text-center text-white flex items-center justify-center">
               Calculadora Repetición Máxima (1RM)
