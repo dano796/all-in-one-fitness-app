@@ -23,11 +23,14 @@ const FoodSearch = lazy(() => import("./components/FoodSearch"));
 const WaterTracker = lazy(() => import("./components/WaterTracker"));
 const ComidasRegistro = lazy(() => import("./pages/RegisteredFoods"));
 const CalorieCalculator = lazy(() => import("./components/CalorieCalculator"));
-const FoodQuantityAdjust = lazy(() => import("./components/FoodQuantityAdjust"));
+const FoodQuantityAdjust = lazy(
+  () => import("./components/FoodQuantityAdjust")
+);
 const OneRMCalculator = lazy(() => import("./components/OneRepMaxCalculator"));
 const Routines = lazy(() => import("./pages/Routines"));
 const RoutineDetails = lazy(() => import("./pages/RoutineDetails"));
 const RMProgressPage = lazy(() => import("./pages/RMProgressPage")); // Añade esta importación
+const Settings = lazy(() => import("./pages/Settings"));
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -40,11 +43,22 @@ import ExerciseList from "./components/ExerciseList";
 import FoodDashboard from "./pages/FoodDashboard";
 
 // Protected Route Component
-const ProtectedRoute = ({ children, user }: { children: React.ReactNode; user: User | null }) =>
-  user ? children : <Navigate to="/login" />;
+const ProtectedRoute = ({
+  children,
+  user,
+}: {
+  children: React.ReactNode;
+  user: User | null;
+}) => (user ? children : <Navigate to="/login" />);
 
 // Food Search Protected Route Component
-const FoodSearchProtectedRoute = ({ children, user }: { children: React.ReactNode; user: User | null }) => {
+const FoodSearchProtectedRoute = ({
+  children,
+  user,
+}: {
+  children: React.ReactNode;
+  user: User | null;
+}) => {
   const location = useLocation();
   const fromAddButton = location.state?.fromAddButton || false;
 
@@ -63,7 +77,7 @@ const protectedRoutes = [
   {
     path: "/foodDashboard",
     layout: DashboardLayout,
-    component: FoodDashboard
+    component: FoodDashboard,
   },
   {
     path: "/water",
@@ -105,6 +119,11 @@ const protectedRoutes = [
     layout: DashboardLayout,
     component: RMProgressPage, // Usa el componente de progreso
   },
+  {
+    path: "/settings",
+    layout: DashboardLayout,
+    component: Settings,
+  },
 ];
 
 function App() {
@@ -115,9 +134,11 @@ function App() {
     let mounted = true;
 
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       if (mounted) {
         setUser(user);
         setIsLoading(false);
@@ -189,11 +210,11 @@ function App() {
   return (
     <Router>
       <Suspense fallback={<Loader />}>
-      <div className="relative min-h-screen">
-        {renderRoutes()}
-        {isLoading && <Loader />}
-      </div>
-    </Suspense>
+        <div className="relative min-h-screen">
+          {renderRoutes()}
+          {isLoading && <Loader />}
+        </div>
+      </Suspense>
     </Router>
   );
 }
