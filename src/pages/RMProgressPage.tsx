@@ -183,9 +183,8 @@ const RMProgressPage: React.FC = () => {
         },
         ticks: {
           color: "#ffffff",
-          // Limitamos la cantidad de etiquetas en dispositivos pequeños
-          maxRotation: 45,
-          minRotation: 45,
+          maxRotation: 0,
+          minRotation: 0,
           autoSkip: true,
           maxTicksLimit: window.innerWidth < 768 ? 5 : 10,
           font: {
