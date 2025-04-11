@@ -178,7 +178,7 @@ function App() {
           element={
             <ProtectedRoute user={user}>
               <Layout>
-                <Component />
+                <Component user={null} />
               </Layout>
             </ProtectedRoute>
           }
