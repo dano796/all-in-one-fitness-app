@@ -34,6 +34,13 @@ const Sidebar: React.FC = () => {
     }
     logout();
     navigate("/");
+    // Collapse sidebar when logging out
+    if (isExpanded) {
+      setIsExpanded(false);
+    }
+    if (isMobileOpen) {
+      setIsMobileOpen(false);
+    }
   };
 
   const toggleExpand = () => {
@@ -42,6 +49,18 @@ const Sidebar: React.FC = () => {
 
   const toggleMobile = () => {
     setIsMobileOpen((prev) => !prev);
+  };
+
+  // New function to handle navigation item clicks
+  const handleNavItemClick = () => {
+    // Only collapse if expanded
+    if (isExpanded) {
+      setIsExpanded(false);
+    }
+    // Always close mobile menu when clicking a nav item
+    if (isMobileOpen) {
+      setIsMobileOpen(false);
+    }
   };
 
   return (
@@ -66,6 +85,7 @@ const Sidebar: React.FC = () => {
           <Link
             to="/"
             className="flex items-center justify-center mb-6 sm:mb-4"
+            onClick={handleNavItemClick}
           >
             <Dumbbell className="h-8 w-8 sm:h-9 sm:w-9 text-[#ff9404]" />
             {isExpanded && (
@@ -95,6 +115,7 @@ const Sidebar: React.FC = () => {
               icon={
                 <Home className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
+              onClick={handleNavItemClick}
             />
             <DashboardNavItem
               to="/routines"
@@ -103,6 +124,7 @@ const Sidebar: React.FC = () => {
               icon={
                 <Calendar className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
+              onClick={handleNavItemClick}
             />
             <DashboardNavItem
               to="/foodDashboard"
@@ -111,6 +133,7 @@ const Sidebar: React.FC = () => {
               icon={
                 <Utensils className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
+              onClick={handleNavItemClick}
             />
             <DashboardNavItem
               to="/water"
@@ -119,6 +142,7 @@ const Sidebar: React.FC = () => {
               icon={
                 <Droplets className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
+              onClick={handleNavItemClick}
             />
             <DashboardNavItem
               to="/activity"
@@ -127,6 +151,7 @@ const Sidebar: React.FC = () => {
               icon={
                 <Activity className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
+              onClick={handleNavItemClick}
             />
             <DashboardNavItem
               to="/calorie-calculator"
@@ -135,6 +160,7 @@ const Sidebar: React.FC = () => {
               icon={
                 <Calculator className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
+              onClick={handleNavItemClick}
             />
             <DashboardNavItem
               to="/onerm-calculator"
@@ -143,6 +169,7 @@ const Sidebar: React.FC = () => {
               icon={
                 <Weight className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
+              onClick={handleNavItemClick}
             />
             <DashboardNavItem
               to="/rm-progress"
@@ -151,6 +178,7 @@ const Sidebar: React.FC = () => {
               icon={
                 <LineChart className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
+              onClick={handleNavItemClick}
             />
           </nav>
 
@@ -162,6 +190,7 @@ const Sidebar: React.FC = () => {
               icon={
                 <Settings className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
+              onClick={handleNavItemClick}
             />
             <div
               className={`flex ${
