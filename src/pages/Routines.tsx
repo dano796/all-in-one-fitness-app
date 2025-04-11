@@ -19,11 +19,16 @@ const Routines: React.FC = () => {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(
+    null
+  );
   const deleteConfirmRef = useRef<HTMLDivElement>(null);
 
   const checkAuth = useCallback(async () => {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       setError("Debes iniciar sesión para ver tus rutinas.");
       navigate("/login");
@@ -55,14 +60,21 @@ const Routines: React.FC = () => {
     navigate("/ejercicios");
   }, [navigate]);
 
-  const handleRoutineClick = useCallback((routineId: string) => {
-    navigate(`/routine-details?id=${routineId}`);
-  }, [navigate]);
+  const handleRoutineClick = useCallback(
+    (routineId: string) => {
+      navigate(`/routine-details?id=${routineId}`);
+    },
+    [navigate]
+  );
 
   const handleDeleteRoutine = useCallback(async (routineId: string) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/routines/${routineId}`);
-      setRoutines((prevRoutines) => prevRoutines.filter((routine) => routine.id !== routineId));
+      await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}/api/routines/${routineId}`
+      );
+      setRoutines((prevRoutines) =>
+        prevRoutines.filter((routine) => routine.id !== routineId)
+      );
       setShowDeleteConfirm(null);
     } catch (err) {
       console.error(err);
@@ -100,19 +112,19 @@ const Routines: React.FC = () => {
   }, [userEmail, fetchRoutines]);
 
   return (
-    <div className="relative flex flex-col gap-8 p-8 pr-0 min-h-screen overflow-hidden ml-6 mt-0 z-10">
+    <div className="relative flex flex-col gap-4 sm:gap-8 p-4 sm:p-8 pr-0 min-h-screen overflow-hidden ml-0 sm:ml-6 mt-0 z-10">
       <GalaxyBackground />
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="flex justify-between items-center mb-8 pl-0"
+        className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-8 pl-0 px-4 sm:px-0"
       >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          className="flex-1 left-20 text-left text-xl font-bold text-white drop-shadow-md"
+          className="w-full sm:flex-1 text-center sm:text-left text-lg sm:text-xl font-bold text-white drop-shadow-md mb-2 sm:mb-0"
         >
           <h1>All In One Fitness App</h1>
         </motion.div>
@@ -120,22 +132,22 @@ const Routines: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          className="flex-1 text-right text-sm font-semibold text-white uppercase tracking-wide drop-shadow-sm pr-8"
+          className="w-full sm:flex-1 text-center sm:text-right text-sm font-semibold text-white uppercase tracking-wide drop-shadow-sm pr-0 sm:pr-8"
         >
           MIS RUTINAS
         </motion.div>
       </motion.div>
 
-      <div className="flex items-start gap-4 max-w-full m-0">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 max-w-full m-0 px-4 pl-0 sm:px-0">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          className="flex items-start w-auto ml-0 mr-4"
+          className="flex items-center justify-center w-full sm:w-auto mb-4 sm:mb-0 sm:ml-0 sm:mr-4"
         >
           <button
             onClick={handleAddRoutineClick}
-            className="py-3 px-6 bg-gradient-to-r from-[#ff9404] to-[#e08503] text-white font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] transition-all duration-300 flex items-center gap-2 justify-center ml-8 hover:bg-gradient-to-r hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95"
+            className="w-full sm:w-auto py-3 px-6 bg-gradient-to-r from-[#ff9404] to-[#e08503] text-white font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] transition-all duration-300 flex items-center gap-2 justify-center ml-0 sm:ml-8 hover:bg-gradient-to-r hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95"
           >
             <Plus className="w-4 h-4" />
             Nueva rutina
@@ -146,7 +158,7 @@ const Routines: React.FC = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="flex-1 bg-gray-700 rounded-lg p-8 relative z-10 shadow-lg min-h-[500px] flex flex-col justify-start"
+          className="w-full flex-1 bg-gray-700 rounded-lg p-4 sm:p-8 relative z-10 shadow-lg min-h-[300px] sm:min-h-[500px] flex flex-col justify-start"
         >
           {error && (
             <motion.p
@@ -178,10 +190,10 @@ const Routines: React.FC = () => {
                   className="max-w-full bg-gray-600 rounded-lg p-4 mb-2.5 flex items-center justify-between cursor-pointer transition-all duration-300 border border-gray-500 hover:bg-gray-500 hover:border-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.2)] relative"
                 >
                   <div
-                    className="flex items-center gap-3 flex-1"
+                    className="flex items-center gap-3 flex-1 overflow-hidden"
                     onClick={() => handleRoutineClick(routine.id)}
                   >
-                    <h3 className="text-base font-semibold text-white">
+                    <h3 className="text-sm sm:text-base font-semibold text-white truncate">
                       {routine.day}: {routine.name}
                     </h3>
                   </div>
@@ -189,7 +201,7 @@ const Routines: React.FC = () => {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 1.0 + index * 0.3, duration: 0.8 }}
-                    className="p-1 bg-transparent transition-transform duration-200 hover:scale-125 active:scale-90"
+                    className="p-1 bg-transparent transition-transform duration-200 hover:scale-125 active:scale-90 ml-2"
                     onClick={() => toggleDeleteConfirm(routine.id)}
                   >
                     <MoreHorizontal className="h-4 w-4 text-gray-400 transition-colors duration-300 hover:text-[#ff9404]" />
@@ -200,7 +212,7 @@ const Routines: React.FC = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.3 }}
-                      className="absolute -top-14 right-0 bg-gray-700/95 rounded-lg p-3 shadow-lg z-20 border border-gray-500 flex flex-col gap-2 w-44"
+                      className="absolute -top-14 right-0 sm:right-0 bg-gray-700/95 rounded-lg p-3 shadow-lg z-20 border border-gray-500 flex flex-col gap-2 w-44"
                       ref={deleteConfirmRef}
                     >
                       <p className="text-xs text-gray-300 text-center m-0 font-medium">
