@@ -30,14 +30,13 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Interceptar peticiones y servir desde el caché si está disponible
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       return (
         cachedResponse ||
         fetch(event.request).catch(() => {
-          // Aquí podrías devolver una página offline si quieres
+          console.error('Network request failed and no cached response available.');
         })
       );
     })

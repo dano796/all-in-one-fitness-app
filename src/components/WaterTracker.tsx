@@ -66,7 +66,7 @@ const WaterUnit: React.FC<{ stage: number }> = ({ stage }) => {
         className="absolute w-full h-full object-contain"
         style={{
           opacity: opacity75.opacity,
-          display: fillSpring.stage.to((s) => (s >= 2 ? "block" : "none")), // Fixed typo "привлечениеnone" -> "block"
+          display: fillSpring.stage.to((s) => (s >= 2 ? "block" : "none")), 
         }}
       />
       <animated.img

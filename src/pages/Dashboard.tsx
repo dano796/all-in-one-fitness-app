@@ -55,8 +55,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   // State for date selection
   const [dateOption, setDateOption] = useState<string>("Hoy");
-  const [nValue, setNValue] = useState<number>(1); // For "Últimos N meses/años" (triggers update)
-  const [tempNValue, setTempNValue] = useState<string>("1"); // Temporary value while typing
+  const [nValue, setNValue] = useState<number>(1);
+  const [tempNValue, setTempNValue] = useState<string>("1");
   const [startDate, setStartDate] = useState<string>(todayStr);
   const [endDate, setEndDate] = useState<string>(todayStr);
 
@@ -123,7 +123,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     calculateDateRange();
   }, [dateOption, nValue]);
 
-  // Fetch de datos cuando userEmail, startDate o endDate cambian
   useEffect(() => {
     const fetchDashboardData = async () => {
       if (!userEmail || !startDate || !endDate) return;
@@ -163,7 +162,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   ];
 
   // Log the radialData to debug
-  console.log("radialData:", radialData);
+  //console.log("radialData:", radialData);
 
   // Data for the BarChart (daily calorie intake)
   const barData = dashboardData.calorieIntake.dailyBreakdown.map((day) => ({
@@ -171,14 +170,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     calories: Number(formatValue(day.calories)),
   }));
 
-  // Handle "Enter" key press to update nValue
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       const newValue = Number(tempNValue);
       if (newValue >= 1) {
         setNValue(newValue);
       } else {
-        setTempNValue("1"); // Reset to 1 if invalid
+        setTempNValue("1");
         setNValue(1);
       }
     }
