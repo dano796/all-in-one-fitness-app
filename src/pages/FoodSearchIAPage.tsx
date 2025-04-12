@@ -18,7 +18,7 @@ const FoodSearchIAPage: React.FC = () => {
       </div>
       <div className="w-full px-4 py-8 md:py-12 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <FoodSearchIA type="Desayuno" />
+          <FoodSearchIA />
         </div>
       </div>
     </div>

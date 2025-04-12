@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import axios, { AxiosError } from "axios";
+import FoodItem from "./FoodItem";
 
 interface Food {
   food_id: string;
@@ -11,17 +12,14 @@ interface Food {
   food_description: string;
 }
 
-interface FoodSearchIAProps {
-  type: string;
-}
-
-const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ type }) => {
+const FoodSearchIA: React.FC = () => {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [loadingAdd, setLoadingAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>("Desayuno"); // Estado para el tipo de comida
 
   const navigate = useNavigate();
 
@@ -70,7 +68,7 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ type }) => {
       const formData = new FormData();
       formData.append("image", uploadedImage);
       formData.append("email", user.email || "");
-      formData.append("type", type);
+      formData.append("type", selectedType); // Usamos el tipo seleccionado
 
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/foods/analyze-image`, {
         method: "POST",
@@ -92,33 +90,28 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ type }) => {
     } finally {
       setLoading(false);
     }
-  }, [uploadedImage, type]);
+  }, [uploadedImage, selectedType]);
 
   const handleAddFood = useCallback(
-    async () => {
-      if (!result || !result.foods || !result.foods.food || !result.foods.food[0]) {
-        setError("No hay comida válida para agregar. Primero analiza una imagen.");
-        return;
-      }
-
+    async (food: Food) => {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
         setError("Debes iniciar sesión para agregar alimentos.");
         return;
       }
 
-      if (!type) {
+      if (!selectedType) {
         setError("No se especificó el tipo de comida (Desayuno, Almuerzo, etc.).");
         return;
       }
 
-      const normalizedType = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+      const normalizedType = selectedType.charAt(0).toUpperCase() + selectedType.slice(1).toLowerCase();
 
       const requestBody = {
         email: user.email,
-        food_id: result.foods.food[0].food_id,
-        food_name: result.foods.food[0].food_name,
-        food_description: result.foods.food[0].food_description,
+        food_id: food.food_id,
+        food_name: food.food_name,
+        food_description: food.food_description,
         type: normalizedType,
       };
 
@@ -172,12 +165,38 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ type }) => {
         setLoadingAdd(false);
       }
     },
-    [result, type, navigate]
+    [selectedType, navigate]
+  );
+
+  const handleFoodClick = useCallback(
+    (food: Food) => {
+      navigate("/food-quantity-adjust", { state: { food, type: selectedType } });
+    },
+    [navigate, selectedType]
   );
 
   return (
     <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-4">
       <h2 className="text-sm font-semibold mb-2 text-white">Registro de Comida con IA</h2>
+      
+      {/* Dropdown para seleccionar el tipo de comida */}
+      <div className="mb-4">
+        <label htmlFor="meal-type" className="text-sm font-medium text-white mr-2">
+          Selecciona el tipo de comida:
+        </label>
+        <select
+          id="meal-type"
+          value={selectedType}
+          onChange={(e) => setSelectedType(e.target.value)}
+          className="px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 transition-all duration-300 focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20"
+        >
+          <option value="Desayuno">Desayuno</option>
+          <option value="Almuerzo">Almuerzo</option>
+          <option value="Cena">Cena</option>
+          <option value="Merienda">Merienda</option>
+        </select>
+      </div>
+
       <ImageUploadDragDrop
         onImageUpload={handleImageUpload}
         onImageRemove={handleImageRemove}
@@ -199,19 +218,16 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ type }) => {
       {error && (
         <p className="text-red-400 mt-2 text-xs text-center">{error}</p>
       )}
-      {result && (
-        <div className="mt-4 text-gray-400 text-center">
-          <p className="text-sm font-medium text-white">
-            Comida identificada: {result.foods.food[0].food_name}
-          </p>
-          <p className="text-xs text-gray-300">{result.foods.food[0].food_description}</p>
-          <button
-            onClick={handleAddFood}
-            className="mt-4 flex items-center py-2 px-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-green-600 hover:to-green-500 transition-all duration-300 hover:-translate-y-1 z-10 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={loadingAdd}
-          >
-            {loadingAdd ? "Agregando..." : "Agregar"}
-          </button>
+      {result && result.foods && result.foods.food && result.foods.food[0] && (
+        <div className="mt-4">
+          <h3 className="text-sm font-semibold mb-2 text-white">Resultado</h3>
+          <div className="space-y-3">
+            <FoodItem
+              food={result.foods.food[0]}
+              onSelect={() => handleAddFood(result.foods.food[0])}
+              onNavigate={handleFoodClick}
+            />
+          </div>
         </div>
       )}
     </div>
