@@ -29,8 +29,9 @@ const FoodQuantityAdjust = lazy(
 const OneRMCalculator = lazy(() => import("./components/OneRepMaxCalculator"));
 const Routines = lazy(() => import("./pages/Routines"));
 const RoutineDetails = lazy(() => import("./pages/RoutineDetails"));
-const RMProgressPage = lazy(() => import("./pages/RMProgressPage")); // Añade esta importación
+const RMProgressPage = lazy(() => import("./pages/RMProgressPage"));
 const Settings = lazy(() => import("./pages/Settings"));
+const FoodSearchIAPage = lazy(() => import("./pages/FoodSearchIAPage")); // Nueva importación
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -115,14 +116,19 @@ const protectedRoutes = [
     component: ExerciseList,
   },
   {
-    path: "/rm-progress", // Añade esta nueva ruta
+    path: "/rm-progress",
     layout: DashboardLayout,
-    component: RMProgressPage, // Usa el componente de progreso
+    component: RMProgressPage,
   },
   {
     path: "/settings",
     layout: DashboardLayout,
     component: Settings,
+  },
+  {
+    path: "/foodsearchia", // Nueva ruta para FoodSearchIA
+    layout: DashboardLayout,
+    component: FoodSearchIAPage,
   },
 ];
 

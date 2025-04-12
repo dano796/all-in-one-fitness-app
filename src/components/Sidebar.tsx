@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   LineChart,
   Menu,
+  Search, // Añadido para FoodSearchIA
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { supabase } from "../lib/supabaseClient";
@@ -34,7 +35,6 @@ const Sidebar: React.FC = () => {
     }
     logout();
     navigate("/");
-    // Collapse sidebar when logging out
     if (isExpanded) {
       setIsExpanded(false);
     }
@@ -51,13 +51,10 @@ const Sidebar: React.FC = () => {
     setIsMobileOpen((prev) => !prev);
   };
 
-  // New function to handle navigation item clicks
   const handleNavItemClick = () => {
-    // Only collapse if expanded
     if (isExpanded) {
       setIsExpanded(false);
     }
-    // Always close mobile menu when clicking a nav item
     if (isMobileOpen) {
       setIsMobileOpen(false);
     }
@@ -65,7 +62,6 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      {/* Botón para móviles */}
       <button
         onClick={toggleMobile}
         className="fixed z-50 top-4 left-4 sm:hidden bg-[#ff9404] text-white p-2 rounded-lg shadow-lg"
@@ -73,7 +69,6 @@ const Sidebar: React.FC = () => {
         <Menu className="h-6 w-6" />
       </button>
 
-      {/* Sidebar */}
       <aside
         className={`h-screen bg-[#1C1C1E] flex flex-col items-center py-4 sm:py-6 shadow-xl fixed top-0 z-40 transition-all duration-300 
         ${isExpanded ? "sm:w-56" : "sm:w-20"} 
@@ -81,7 +76,6 @@ const Sidebar: React.FC = () => {
         sm:translate-x-0 overflow-hidden`}
       >
         <div className="flex flex-col items-center w-full h-full">
-          {/* Logo separado del botón de expansión */}
           <Link
             to="/"
             className="flex items-center justify-center mb-6 sm:mb-4"
@@ -95,7 +89,6 @@ const Sidebar: React.FC = () => {
             )}
           </Link>
 
-          {/* Botón para expandir en desktop */}
           <button
             onClick={toggleExpand}
             className="text-white p-1 rounded-md hidden sm:flex justify-center items-center mb-6"
@@ -177,6 +170,16 @@ const Sidebar: React.FC = () => {
               showLabel={isExpanded || isMobileOpen}
               icon={
                 <LineChart className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+              }
+              onClick={handleNavItemClick}
+            />
+            
+            <DashboardNavItem
+              to="/foodsearchia"
+              label="FoodSearchIA"
+              showLabel={isExpanded || isMobileOpen}
+              icon={
+                <Search className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
             />
