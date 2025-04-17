@@ -23,23 +23,26 @@ const ImageUploadDragDrop: React.FC<ImageUploadDragDropProps> = ({
     setIsDragging(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragging(false);
 
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      if (file.type.startsWith("image/")) {
-        onImageUpload(file);
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImagePreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith("image/")) {
+          onImageUpload(file);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setImagePreview(reader.result as string);
+          };
+          reader.readAsDataURL(file);
+        }
       }
-    }
-  }, [onImageUpload]);
+    },
+    [onImageUpload]
+  );
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -96,7 +99,7 @@ const ImageUploadDragDrop: React.FC<ImageUploadDragDropProps> = ({
             </p>
             <label
               htmlFor="file-upload"
-              className="bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white py-2 px-4 rounded-lg cursor-pointer hover:from-[#e08503] hover:to-[#ff9404] transition-all duration-300"
+              className="bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white py-2 px-4 font-semibold rounded-lg cursor-pointer hover:from-[#e08503] hover:to-[#ff9404] transition-all duration-300"
             >
               Seleccionar un archivo
             </label>

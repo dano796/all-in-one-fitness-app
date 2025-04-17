@@ -25,7 +25,10 @@ const FoodSearchIA: React.FC = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
         setError("Debes iniciar sesión para analizar imágenes.");
         navigate("/login");
@@ -55,7 +58,10 @@ const FoodSearchIA: React.FC = () => {
       return;
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       setError("Debes iniciar sesión para analizar imágenes.");
       return;
@@ -70,10 +76,13 @@ const FoodSearchIA: React.FC = () => {
       formData.append("email", user.email || "");
       formData.append("type", selectedType); // Usamos el tipo seleccionado
 
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/foods/analyze-image`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/foods/analyze-image`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const data = await response.json();
       if (!response.ok) {
@@ -85,7 +94,9 @@ const FoodSearchIA: React.FC = () => {
       setError(
         err instanceof Error && err.message.includes("No se pudo parsear")
           ? "No se pudo identificar la comida en la imagen. Por favor, intenta con otra imagen más clara."
-          : (err instanceof Error ? err.message : "Error al procesar la imagen con IA")
+          : err instanceof Error
+          ? err.message
+          : "Error al procesar la imagen con IA"
       );
     } finally {
       setLoading(false);
@@ -94,18 +105,25 @@ const FoodSearchIA: React.FC = () => {
 
   const handleAddFood = useCallback(
     async (food: Food) => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
         setError("Debes iniciar sesión para agregar alimentos.");
         return;
       }
 
       if (!selectedType) {
-        setError("No se especificó el tipo de comida (Desayuno, Almuerzo, etc.).");
+        setError(
+          "No se especificó el tipo de comida (Desayuno, Almuerzo, etc.)."
+        );
         return;
       }
 
-      const normalizedType = selectedType.charAt(0).toUpperCase() + selectedType.slice(1).toLowerCase();
+      const normalizedType =
+        selectedType.charAt(0).toUpperCase() +
+        selectedType.slice(1).toLowerCase();
 
       const requestBody = {
         email: user.email,
@@ -170,18 +188,25 @@ const FoodSearchIA: React.FC = () => {
 
   const handleFoodClick = useCallback(
     (food: Food) => {
-      navigate("/food-quantity-adjust", { state: { food, type: selectedType } });
+      navigate("/food-quantity-adjust", {
+        state: { food, type: selectedType },
+      });
     },
     [navigate, selectedType]
   );
 
   return (
-    <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-4">
-      <h2 className="text-sm font-semibold mb-2 text-white">Registro de Comida con IA</h2>
-      
+    <div className="bg-[#3B4252] rounded-lg p-6 shadow-md flex-1 mt-4">
+      <h2 className="text-xl font-semibold mb-6 text-white">
+        Registro de Comida con IA
+      </h2>
+
       {/* Dropdown para seleccionar el tipo de comida */}
       <div className="mb-4">
-        <label htmlFor="meal-type" className="text-sm font-medium text-white mr-2">
+        <label
+          htmlFor="meal-type"
+          className="text-base font-medium text-white mr-2"
+        >
           Selecciona el tipo de comida:
         </label>
         <select
@@ -204,7 +229,8 @@ const FoodSearchIA: React.FC = () => {
       {uploadedImage && (
         <div className="mt-4 flex flex-col items-center space-y-4">
           <p className="text-gray-400 text-center text-xs">
-            Imagen cargada: <span className="font-semibold">{uploadedImage.name}</span>
+            Imagen cargada:{" "}
+            <span className="font-semibold">{uploadedImage.name}</span>
           </p>
           <button
             onClick={handleCalculate}

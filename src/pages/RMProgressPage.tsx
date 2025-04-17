@@ -226,16 +226,16 @@ const RMProgressPage: React.FC = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="max-w-4xl mx-auto p-3 sm:p-4 md:p-6 bg-[#3B4252] rounded-lg shadow-md relative z-10"
+          className="max-w-4xl mx-auto p-5 sm:p-4 md:p-6 bg-[#3B4252] rounded-lg shadow-md relative z-10"
         >
-          <h2 className="text-xl sm:text-2xl font-bold mb-3 md:mb-4 text-white text-center md:text-left">
+          <h2 className="text-xl sm:text-2xl font-bold mb-6 md:mb-4 text-white text-center md:text-left">
             Progreso de 1RM
           </h2>
 
           <div className="mb-4 md:mb-6">
             <label
               htmlFor="exercise-select"
-              className="block text-xs sm:text-sm font-medium text-white mb-1"
+              className="block text-sm sm:text-sm font-medium text-white mb-1"
             >
               Selecciona un ejercicio:
             </label>

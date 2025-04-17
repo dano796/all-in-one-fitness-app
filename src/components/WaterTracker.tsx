@@ -66,7 +66,7 @@ const WaterUnit: React.FC<{ stage: number }> = ({ stage }) => {
         className="absolute w-full h-full object-contain"
         style={{
           opacity: opacity75.opacity,
-          display: fillSpring.stage.to((s) => (s >= 2 ? "block" : "none")), 
+          display: fillSpring.stage.to((s) => (s >= 2 ? "block" : "none")),
         }}
       />
       <animated.img
@@ -281,12 +281,12 @@ const WaterTracker: React.FC = () => {
             {error}
           </motion.p>
         )}
-        <h2 className="text-lg font-semibold text-white mb-6">
+        <h2 className="text-xl font-semibold text-white mb-6">
           Control de Agua
         </h2>
 
         <div className="bg-[#4B5563]/50 rounded-lg p-6 mb-8">
-          <p className="text-xl font-semibold text-white">
+          <p className="text-lg font-semibold text-white">
             Consumido:{" "}
             <span className="text-[#ff9404]">{waterConsumed} ml</span>
           </p>
@@ -316,7 +316,7 @@ const WaterTracker: React.FC = () => {
           </button>
         </div>
 
-        <p className="text-sm text-gray-400 mt-8 text-center italic">
+        <p className="text-sm text-gray-400 mt-8 text-center">
           {filledWaterUnits === TOTAL_WATER_UNITS
             ? "¡Meta alcanzada! Eres un maestro del agua 💧"
             : "¡Sigue así, cada gota cuenta!"}

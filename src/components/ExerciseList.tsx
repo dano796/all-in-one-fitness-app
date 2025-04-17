@@ -1,10 +1,16 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { FaArrowLeft, FaPlus, FaChevronDown, FaChevronUp, FaMinus } from 'react-icons/fa';
-import { supabase } from '../lib/supabaseClient';
-import { motion } from 'framer-motion';
-import GalaxyBackground from '../components/GalaxyBackground';
+import React, { useCallback, useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  FaArrowLeft,
+  FaPlus,
+  FaChevronDown,
+  FaChevronUp,
+  FaMinus,
+} from "react-icons/fa";
+import { supabase } from "../lib/supabaseClient";
+import { motion } from "framer-motion";
+import GalaxyBackground from "../components/GalaxyBackground";
 
 interface Exercise {
   id: string;
@@ -38,42 +44,56 @@ const ExerciseList: React.FC = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedBodyPart, setSelectedBodyPart] = useState<string>('');
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [selectedBodyPart, setSelectedBodyPart] = useState<string>("");
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+    null
+  );
   const [newRoutine, setNewRoutine] = useState<{
     day: string;
     name: string;
     exercises: Exercise[];
   }>({
-    day: '',
-    name: '',
+    day: "",
+    name: "",
     exercises: existingExercises,
   });
-  const [userEmail, setUserEmail] = useState<string>('');
-  const [expandedExercises, setExpandedExercises] = useState<{ [key: string]: boolean }>({});
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [expandedExercises, setExpandedExercises] = useState<{
+    [key: string]: boolean;
+  }>({});
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+  const backendUrl =
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   const bodyParts = [
-    { value: 'back', label: 'Espalda' },
-    { value: 'cardio', label: 'Cardio' },
-    { value: 'chest', label: 'Pecho' },
-    { value: 'lower arms', label: 'Brazos inferiores' },
-    { value: 'lower legs', label: 'Piernas inferiores' },
-    { value: 'neck', label: 'Cuello' },
-    { value: 'shoulders', label: 'Hombros' },
-    { value: 'upper arms', label: 'Brazos superiores' },
-    { value: 'upper legs', label: 'Piernas superiores' },
-    { value: 'waist', label: 'Cintura' },
+    { value: "back", label: "Espalda" },
+    { value: "cardio", label: "Cardio" },
+    { value: "chest", label: "Pecho" },
+    { value: "lower arms", label: "Brazos inferiores" },
+    { value: "lower legs", label: "Piernas inferiores" },
+    { value: "neck", label: "Cuello" },
+    { value: "shoulders", label: "Hombros" },
+    { value: "upper arms", label: "Brazos superiores" },
+    { value: "upper legs", label: "Piernas superiores" },
+    { value: "waist", label: "Cintura" },
   ];
 
   const days = [
-    'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo",
   ];
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
         setError("Debes iniciar sesión para crear una rutina.");
         navigate("/login");
@@ -97,17 +117,20 @@ const ExerciseList: React.FC = () => {
     setSelectedExercise(null);
 
     try {
-      const response = await axios.get<Exercise[]>(`${backendUrl}/api/exercises`, {
-        params: { bodyPart: selectedBodyPart, t: Date.now() },
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await axios.get<Exercise[]>(
+        `${backendUrl}/api/exercises`,
+        {
+          params: { bodyPart: selectedBodyPart, t: Date.now() },
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       setExercises(response.data);
       if (response.data.length > 0) {
         setSelectedExercise(response.data[0]);
       }
     } catch (err) {
       console.error(err);
-      setError('Error al consultar los ejercicios');
+      setError("Error al consultar los ejercicios");
     } finally {
       setLoading(false);
     }
@@ -132,9 +155,9 @@ const ExerciseList: React.FC = () => {
         ...prev.exercises,
         {
           ...exercise,
-          sets: [{ kg: '', reps: '' }],
-          restTimer: 'Apagado',
-          note: '',
+          sets: [{ kg: "", reps: "" }],
+          restTimer: "Apagado",
+          note: "",
         },
       ],
     }));
@@ -161,7 +184,7 @@ const ExerciseList: React.FC = () => {
       ...prev,
       exercises: prev.exercises.map((ex) =>
         ex.id === exerciseId
-          ? { ...ex, sets: [...(ex.sets || []), { kg: '', reps: '' }] }
+          ? { ...ex, sets: [...(ex.sets || []), { kg: "", reps: "" }] }
           : ex
       ),
     }));
@@ -172,23 +195,31 @@ const ExerciseList: React.FC = () => {
       ...prev,
       exercises: prev.exercises.map((ex) =>
         ex.id === exerciseId
-          ? { ...ex, sets: (ex.sets || []).filter((_, idx) => idx !== setIndex) }
+          ? {
+              ...ex,
+              sets: (ex.sets || []).filter((_, idx) => idx !== setIndex),
+            }
           : ex
       ),
     }));
   };
 
-  const handleUpdateSet = (exerciseId: string, setIndex: number, field: 'kg' | 'reps', value: string) => {
+  const handleUpdateSet = (
+    exerciseId: string,
+    setIndex: number,
+    field: "kg" | "reps",
+    value: string
+  ) => {
     setNewRoutine((prev) => ({
       ...prev,
       exercises: prev.exercises.map((ex) =>
         ex.id === exerciseId
           ? {
-            ...ex,
-            sets: (ex.sets || []).map((set, idx) =>
-              idx === setIndex ? { ...set, [field]: value } : set
-            ),
-          }
+              ...ex,
+              sets: (ex.sets || []).map((set, idx) =>
+                idx === setIndex ? { ...set, [field]: value } : set
+              ),
+            }
           : ex
       ),
     }));
@@ -222,7 +253,7 @@ const ExerciseList: React.FC = () => {
   const handleSaveRoutine = async () => {
     if (fromRoutineDetails) {
       if (newRoutine.exercises.length === 0) {
-        setError('Por favor, agrega al menos un ejercicio.');
+        setError("Por favor, agrega al menos un ejercicio.");
         return;
       }
 
@@ -233,11 +264,17 @@ const ExerciseList: React.FC = () => {
         navigate(`/routine-details?id=${routineId}`);
       } catch (err) {
         console.error(err);
-        setError('Error al actualizar la rutina');
+        setError("Error al actualizar la rutina");
       }
     } else {
-      if (!newRoutine.day || !newRoutine.name || newRoutine.exercises.length === 0) {
-        setError('Por favor, completa todos los campos y agrega al menos un ejercicio.');
+      if (
+        !newRoutine.day ||
+        !newRoutine.name ||
+        newRoutine.exercises.length === 0
+      ) {
+        setError(
+          "Por favor, completa todos los campos y agrega al menos un ejercicio."
+        );
         return;
       }
 
@@ -248,10 +285,10 @@ const ExerciseList: React.FC = () => {
           name: newRoutine.name,
           exercises: newRoutine.exercises,
         });
-        navigate('/routines');
+        navigate("/routines");
       } catch (err) {
         console.error(err);
-        setError('Error al guardar la rutina');
+        setError("Error al guardar la rutina");
       }
     }
   };
@@ -260,7 +297,7 @@ const ExerciseList: React.FC = () => {
     if (fromRoutineDetails) {
       navigate(`/routine-details?id=${routineId}`);
     } else {
-      navigate('/routines');
+      navigate("/routines");
     }
   };
 
@@ -330,10 +367,14 @@ const ExerciseList: React.FC = () => {
               className="flex flex-col gap-4 mb-8 bg-gray-700 p-6 rounded-xl min-h-[120px]"
             >
               <div className="flex flex-col gap-2">
-                <label className="text-base font-medium text-white text-left">Día de la semana:</label>
+                <label className="text-base font-medium text-white text-left">
+                  Día de la semana:
+                </label>
                 <select
                   value={newRoutine.day}
-                  onChange={(e) => setNewRoutine({ ...newRoutine, day: e.target.value })}
+                  onChange={(e) =>
+                    setNewRoutine({ ...newRoutine, day: e.target.value })
+                  }
                   className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
                 >
                   <option value="">Selecciona un día</option>
@@ -345,11 +386,15 @@ const ExerciseList: React.FC = () => {
                 </select>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-base font-medium text-white text-left">Nombre de la rutina:</label>
+                <label className="text-base font-medium text-white text-left">
+                  Nombre de la rutina:
+                </label>
                 <input
                   type="text"
                   value={newRoutine.name}
-                  onChange={(e) => setNewRoutine({ ...newRoutine, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewRoutine({ ...newRoutine, name: e.target.value })
+                  }
                   placeholder="Nombre de la rutina"
                   className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
                 />
@@ -378,11 +423,13 @@ const ExerciseList: React.FC = () => {
                 transition={{ delay: 0.6, duration: 0.8 }}
                 className="mb-6"
               >
-                <label className="text-base font-medium text-white text-left">Selecciona una parte del cuerpo:</label>
+                <label className="text-base font-medium text-white text-left">
+                  Selecciona una parte del cuerpo:
+                </label>
                 <select
                   value={selectedBodyPart}
                   onChange={handleBodyPartChange}
-                  className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102 disabled:opacity-50"
+                  className="w-full p-3 mt-2 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102 disabled:opacity-50"
                   disabled={loading}
                 >
                   <option value="">Selecciona</option>
@@ -422,37 +469,49 @@ const ExerciseList: React.FC = () => {
                   {error}
                 </motion.p>
               )}
-              {!loading && !error && selectedBodyPart && exercises.length > 0 && (
-                <div className="flex flex-col gap-3 flex-1 overflow-y-auto custom-scroll">
-                  {exercises.map((exercise, index) => (
-                    <motion.div
-                      key={exercise.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 1.0 + index * 0.3, duration: 1.0 }}
-                      onClick={() => handleExerciseClick(exercise)}
-                      className={`p-4 rounded-lg bg-gray-700 cursor-pointer flex items-center gap-4 transition-colors duration-200 hover:bg-gray-600 ${selectedExercise?.id === exercise.id ? 'bg-[#ff9404]' : ''}`}
-                    >
-                      <img
-                        src={exercise.gifUrl}
-                        alt={exercise.name}
-                        className="w-12 h-12 object-contain rounded-lg"
-                      />
-                      <p className="text-base font-medium text-white">{exercise.name}</p>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-              {!loading && !error && selectedBodyPart && exercises.length === 0 && (
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="text-gray-400 text-center text-base flex-1 flex items-center justify-center"
-                >
-                  No se encontraron ejercicios para esta parte del cuerpo.
-                </motion.p>
-              )}
+              {!loading &&
+                !error &&
+                selectedBodyPart &&
+                exercises.length > 0 && (
+                  <div className="flex flex-col gap-3 flex-1 overflow-y-auto custom-scroll">
+                    {exercises.map((exercise, index) => (
+                      <motion.div
+                        key={exercise.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 1.0 + index * 0.3, duration: 1.0 }}
+                        onClick={() => handleExerciseClick(exercise)}
+                        className={`p-4 rounded-lg bg-gray-700 cursor-pointer flex items-center gap-4 transition-colors duration-200 hover:bg-gray-600 ${
+                          selectedExercise?.id === exercise.id
+                            ? "bg-[#ff9404]"
+                            : ""
+                        }`}
+                      >
+                        <img
+                          src={exercise.gifUrl}
+                          alt={exercise.name}
+                          className="w-12 h-12 object-contain rounded-lg"
+                        />
+                        <p className="text-base font-medium text-white">
+                          {exercise.name}
+                        </p>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              {!loading &&
+                !error &&
+                selectedBodyPart &&
+                exercises.length === 0 && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="text-gray-400 text-center text-base flex-1 flex items-center justify-center"
+                  >
+                    No se encontraron ejercicios para esta parte del cuerpo.
+                  </motion.p>
+                )}
               {!selectedBodyPart && (
                 <motion.p
                   initial={{ opacity: 0 }}
@@ -460,7 +519,8 @@ const ExerciseList: React.FC = () => {
                   transition={{ delay: 0.6 }}
                   className="text-gray-400 text-center text-base flex-1 flex items-center justify-center"
                 >
-                  Por favor, selecciona una parte del cuerpo para ver los ejercicios.
+                  Por favor, selecciona una parte del cuerpo para ver los
+                  ejercicios.
                 </motion.p>
               )}
             </div>
@@ -487,15 +547,37 @@ const ExerciseList: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex-1 text-white overflow-y-auto custom-scroll">
-                    <p className="mb-3 text-base"><strong className="text-[#ff9404]">Parte del cuerpo:</strong> {selectedExercise.bodyPart}</p>
-                    <p className="mb-3 text-base"><strong className="text-[#ff9404]">Equipo:</strong> {selectedExercise.equipment}</p>
-                    <p className="mb-3 text-base"><strong className="text-[#ff9404]">Objetivo:</strong> {selectedExercise.target}</p>
-                    <p className="mb-3 text-base"><strong className="text-[#ff9404]">Músculos secundarios:</strong> {selectedExercise.secondaryMuscles.join(', ')}</p>
-                    <p className="mb-3 text-base"><strong className="text-[#ff9404]">Instrucciones:</strong></p>
+                    <p className="mb-3 text-base">
+                      <strong className="text-[#ff9404]">
+                        Parte del cuerpo:
+                      </strong>{" "}
+                      {selectedExercise.bodyPart}
+                    </p>
+                    <p className="mb-3 text-base">
+                      <strong className="text-[#ff9404]">Equipo:</strong>{" "}
+                      {selectedExercise.equipment}
+                    </p>
+                    <p className="mb-3 text-base">
+                      <strong className="text-[#ff9404]">Objetivo:</strong>{" "}
+                      {selectedExercise.target}
+                    </p>
+                    <p className="mb-3 text-base">
+                      <strong className="text-[#ff9404]">
+                        Músculos secundarios:
+                      </strong>{" "}
+                      {selectedExercise.secondaryMuscles.join(", ")}
+                    </p>
+                    <p className="mb-3 text-base">
+                      <strong className="text-[#ff9404]">Instrucciones:</strong>
+                    </p>
                     <ul className="list-disc pl-6 text-base">
-                      {selectedExercise.instructions.map((instruction, index) => (
-                        <li key={index} className="mb-2">{instruction}</li>
-                      ))}
+                      {selectedExercise.instructions.map(
+                        (instruction, index) => (
+                          <li key={index} className="mb-2">
+                            {instruction}
+                          </li>
+                        )
+                      )}
                     </ul>
                   </div>
                 </div>
@@ -542,7 +624,9 @@ const ExerciseList: React.FC = () => {
                         alt={exercise.name}
                         className="w-12 h-12 object-contain rounded-lg"
                       />
-                      <h3 className="text-base font-semibold text-white">{exercise.name} ({exercise.equipment})</h3>
+                      <h3 className="text-base font-semibold text-white">
+                        {exercise.name} ({exercise.equipment})
+                      </h3>
                     </div>
                     <div className="flex items-center gap-3">
                       <motion.button
@@ -562,36 +646,48 @@ const ExerciseList: React.FC = () => {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 1.2 + index * 0.3, duration: 0.8 }}
-                        onClick={() => handleRemoveExerciseFromRoutine(exercise.id)}
+                        onClick={() =>
+                          handleRemoveExerciseFromRoutine(exercise.id)
+                        }
                         className="bg-transparent border-none cursor-pointer p-1 transition-transform duration-200 hover:scale-125 active:scale-90"
                       >
-                        <span className="text-red-500 text-xl hover:text-red-600 transition-colors duration-300">🗑️</span>
+                        <span className="text-red-500 text-xl hover:text-red-600 transition-colors duration-300">
+                          🗑️
+                        </span>
                       </motion.button>
                     </div>
                   </div>
                   {expandedExercises[exercise.id] && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
+                      animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3 }}
                       className="overflow-hidden"
                     >
                       <div className="flex flex-col gap-2">
-                        <label className="text-base font-medium text-white ml-4">Nota:</label>
+                        <label className="text-base font-medium text-white ml-4">
+                          Nota:
+                        </label>
                         <input
                           type="text"
-                          value={exercise.note || ''}
-                          onChange={(e) => handleUpdateNote(exercise.id, e.target.value)}
+                          value={exercise.note || ""}
+                          onChange={(e) =>
+                            handleUpdateNote(exercise.id, e.target.value)
+                          }
                           placeholder="Agregar nota"
                           className="w-full max-w-[300px] p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white ml-4 transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
                         />
                       </div>
                       <div className="flex flex-col gap-2 mt-2">
-                        <label className="text-base font-medium text-white ml-4">Temporizador de descanso:</label>
+                        <label className="text-base font-medium text-white ml-4">
+                          Temporizador de descanso:
+                        </label>
                         <select
-                          value={exercise.restTimer || 'Apagado'}
-                          onChange={(e) => handleUpdateRestTimer(exercise.id, e.target.value)}
+                          value={exercise.restTimer || "Apagado"}
+                          onChange={(e) =>
+                            handleUpdateRestTimer(exercise.id, e.target.value)
+                          }
                           className="w-full max-w-[200px] p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white ml-4 transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
                         >
                           <option value="Apagado">Apagado</option>
@@ -607,14 +703,24 @@ const ExerciseList: React.FC = () => {
                           <span>REPS</span>
                         </div>
                         {(exercise.sets || []).map((set, setIndex) => (
-                          <div key={setIndex} className="grid grid-cols-[1fr_2fr_2fr] items-center gap-3 mt-2">
-                            <span className="text-base text-center text-white">{setIndex + 1}</span>
+                          <div
+                            key={setIndex}
+                            className="grid grid-cols-[1fr_2fr_2fr] items-center gap-3 mt-2"
+                          >
+                            <span className="text-base text-center text-white">
+                              {setIndex + 1}
+                            </span>
                             <div className="flex flex-col items-center">
                               <input
                                 type="text"
                                 value={set.kg}
                                 onChange={(e) =>
-                                  handleUpdateSet(exercise.id, setIndex, 'kg', e.target.value)
+                                  handleUpdateSet(
+                                    exercise.id,
+                                    setIndex,
+                                    "kg",
+                                    e.target.value
+                                  )
                                 }
                                 placeholder="KG"
                                 className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
@@ -625,7 +731,12 @@ const ExerciseList: React.FC = () => {
                                 type="text"
                                 value={set.reps}
                                 onChange={(e) =>
-                                  handleUpdateSet(exercise.id, setIndex, 'reps', e.target.value)
+                                  handleUpdateSet(
+                                    exercise.id,
+                                    setIndex,
+                                    "reps",
+                                    e.target.value
+                                  )
                                 }
                                 placeholder="REPS"
                                 className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
@@ -637,7 +748,10 @@ const ExerciseList: React.FC = () => {
                           <motion.button
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 1.4 + index * 0.3, duration: 0.8 }}
+                            transition={{
+                              delay: 1.4 + index * 0.3,
+                              duration: 0.8,
+                            }}
                             onClick={() => handleAddSet(exercise.id)}
                             className="bg-transparent border-none text-[#ff9404] text-base cursor-pointer flex items-center gap-2 hover:text-[#e08503] transition-colors duration-300"
                           >
@@ -646,7 +760,12 @@ const ExerciseList: React.FC = () => {
                           </motion.button>
                           {(exercise.sets || []).length > 1 && (
                             <button
-                              onClick={() => handleRemoveSet(exercise.id, (exercise.sets || []).length - 1)}
+                              onClick={() =>
+                                handleRemoveSet(
+                                  exercise.id,
+                                  (exercise.sets || []).length - 1
+                                )
+                              }
                               className="bg-transparent border-none text-red-500 text-base cursor-pointer flex items-center gap-2 hover:text-red-600 transition-colors duration-300"
                             >
                               <FaMinus className="w-5 h-5" />
@@ -676,9 +795,9 @@ const ExerciseList: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.2, duration: 0.8 }}
             onClick={handleSaveRoutine}
-            className="mt-8 w-full py-4 bg-gradient-to-r from-[#ff9404] to-[#e08503] text-white rounded-lg font-medium text-xl shadow-[0_0_10px_rgba(255,148,4,0.3)] transition-all duration-300 hover:bg-gradient-to-r hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95"
+            className="mt-8 w-full py-3 bg-gradient-to-r from-[#ff9404] to-[#e08503] text-white rounded-lg font-medium text-base shadow-[0_0_10px_rgba(255,148,4,0.3)] transition-all duration-300 hover:bg-gradient-to-r hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95"
           >
-            {fromRoutineDetails ? 'Actualizar rutina' : 'Guardar rutina'}
+            {fromRoutineDetails ? "Actualizar rutina" : "Guardar rutina"}
           </motion.button>
         </motion.div>
       </div>
