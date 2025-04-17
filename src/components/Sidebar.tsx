@@ -15,7 +15,7 @@ import {
   ChevronLeft,
   LineChart,
   Menu,
-  Search, // Añadido para FoodSearchIA
+  Camera,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { supabase } from "../lib/supabaseClient";
@@ -112,7 +112,7 @@ const Sidebar: React.FC = () => {
             />
             <DashboardNavItem
               to="/routines"
-              label="Routines"
+              label="Rutinas"
               showLabel={isExpanded || isMobileOpen}
               icon={
                 <Calendar className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
@@ -121,7 +121,7 @@ const Sidebar: React.FC = () => {
             />
             <DashboardNavItem
               to="/foodDashboard"
-              label="Food"
+              label="Ingesta Calórica"
               showLabel={isExpanded || isMobileOpen}
               icon={
                 <Utensils className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
@@ -130,7 +130,7 @@ const Sidebar: React.FC = () => {
             />
             <DashboardNavItem
               to="/water"
-              label="Water"
+              label="Hidratación"
               showLabel={isExpanded || isMobileOpen}
               icon={
                 <Droplets className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
@@ -139,7 +139,7 @@ const Sidebar: React.FC = () => {
             />
             <DashboardNavItem
               to="/activity"
-              label="Activity"
+              label="Actividad"
               showLabel={isExpanded || isMobileOpen}
               icon={
                 <Activity className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
@@ -148,7 +148,7 @@ const Sidebar: React.FC = () => {
             />
             <DashboardNavItem
               to="/calorie-calculator"
-              label="Calorie Calculator"
+              label="Calculadora de Calorías"
               showLabel={isExpanded || isMobileOpen}
               icon={
                 <Calculator className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
@@ -157,7 +157,7 @@ const Sidebar: React.FC = () => {
             />
             <DashboardNavItem
               to="/onerm-calculator"
-              label="1RM Calculator"
+              label="Calculadora RM"
               showLabel={isExpanded || isMobileOpen}
               icon={
                 <Weight className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
@@ -166,20 +166,20 @@ const Sidebar: React.FC = () => {
             />
             <DashboardNavItem
               to="/rm-progress"
-              label="RM Progress"
+              label="Progreso RM"
               showLabel={isExpanded || isMobileOpen}
               icon={
                 <LineChart className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
             />
-            
+
             <DashboardNavItem
               to="/foodsearchia"
-              label="FoodSearchIA"
+              label="Registro con IA"
               showLabel={isExpanded || isMobileOpen}
               icon={
-                <Search className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+                <Camera className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
             />
@@ -188,7 +188,7 @@ const Sidebar: React.FC = () => {
           <div className="space-y-5 sm:space-y-6 pb-6 sm:pb-8 mt-auto w-full">
             <DashboardNavItem
               to="/settings"
-              label="Settings"
+              label="Ajustes"
               showLabel={isExpanded || isMobileOpen}
               icon={
                 <Settings className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
@@ -208,7 +208,7 @@ const Sidebar: React.FC = () => {
               >
                 <LogOut className="h-5 w-5 sm:h-6 sm:w-6" />
                 {(isExpanded || isMobileOpen) && (
-                  <span className="ml-3">Logout</span>
+                  <span className="ml-3">Salir</span>
                 )}
               </button>
             </div>
