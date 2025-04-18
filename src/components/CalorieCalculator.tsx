@@ -5,7 +5,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, Toaster } from "react-hot-toast";
 import GalaxyBackground from "./GalaxyBackground";
-
+import ButtonToolTip from "./ButtonToolTip";
 
 const activityMultipliers = {
   basal: 1.2,
@@ -191,250 +191,229 @@ const CalorieCalculator: React.FC = () => {
     height <= 0 ||
     weight <= 0;
 
+  const infoText = {
+    calorieCalculatorInfo:
+      "Calcula tus necesidades calóricas diarias basadas en tu edad, género, altura, peso y nivel de actividad. Selecciona un objetivo para establecer tu meta diaria de calorías.",
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative w-full bg-[#282c3c]">
       <GalaxyBackground />
-        <Toaster position="top-center" reverseOrder={false} />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 50 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="max-w-2xl w-full bg-[#3B4252] rounded-xl shadow-md p-8 relative z-10"
-        >
-          <h1 className="text-4xl font-bold text-center text-white mb-8 flex items-center justify-center gap-3">
+      <Toaster position="top-center" reverseOrder={false} />
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-2xl w-full bg-[#3B4252] rounded-xl shadow-md p-8 relative z-10"
+      >
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <h2 className="text-4xl font-bold text-white">
             Calculadora de Calorías
-          </h1>
-  
-          {error && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-red-400 mb-4 text-center text-sm"
-            >
-              {error}
-            </motion.p>
-          )}
-  
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              calculateCalories();
-            }}
-            className="space-y-6"
+          </h2>
+          <ButtonToolTip content={infoText.calorieCalculatorInfo} />
+        </div>
+
+        {error && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-red-400 mb-4 text-center text-sm"
           >
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                Edad (15-80)
+            {error}
+          </motion.p>
+        )}
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            calculateCalories();
+          }}
+          className="space-y-6"
+        >
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Edad (15-80)
+            </label>
+            <input
+              type="number"
+              id="age"
+              value={age ?? ""}
+              onChange={(e) => handleInputChange(e, setAge)}
+              className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5 "
+              placeholder="Enter your age"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Género
+            </label>
+            <div className="flex space-x-6">
+              <label className="flex items-center text-gray-200">
+                <input
+                  type="radio"
+                  value="male"
+                  checked={gender === "male"}
+                  onChange={() => setGender("male")}
+                  className="w-5 h-5 border-2 border-black rounded-full bg-transparent checked:bg-white checked:after:content-[''] checked:after:block checked:after:w-3 checked:after:h-3 checked:after:bg-[#ff9404] checked:after:rounded-full checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 relative transition-all duration-300 hover:border-[#ff9404] hover:shadow-[0_0_8px_rgba(255,148,4,0.5)] mr-2 appearance-none"
+                />
+                Masculino
               </label>
-              <input
-                type="number"
-                id="age"
-                value={age ?? ""}
-                onChange={(e) => handleInputChange(e, setAge)}
-                className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5 "
-                placeholder="Enter your age"
-              />
-            </motion.div>
-  
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                Género
+              <label className="flex items-center text-gray-200">
+                <input
+                  type="radio"
+                  value="female"
+                  checked={gender === "female"}
+                  onChange={() => setGender("female")}
+                  className="w-5 h-5 border-2 border-black rounded-full bg-transparent checked:bg-white checked:after:content-[''] checked:after:block checked:after:w-3 checked:after:h-3 checked:after:bg-[#ff9404] checked:after:rounded-full checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 relative transition-all duration-300 hover:border-[#ff9404] hover:shadow-[0_0_8px_rgba(255,148,4,0.5)] mr-2 appearance-none"
+                />
+                Femenino
               </label>
-              <div className="flex space-x-6">
-                <label className="flex items-center text-gray-200">
-                  <input
-                    type="radio"
-                    value="male"
-                    checked={gender === "male"}
-                    onChange={() => setGender("male")}
-                    className="w-5 h-5 border-2 border-black rounded-full bg-transparent checked:bg-white checked:after:content-[''] checked:after:block checked:after:w-3 checked:after:h-3 checked:after:bg-[#ff9404] checked:after:rounded-full checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 relative transition-all duration-300 hover:border-[#ff9404] hover:shadow-[0_0_8px_rgba(255,148,4,0.5)] mr-2 appearance-none"
-                  />
-                  Masculino
-                </label>
-                <label className="flex items-center text-gray-200">
-                  <input
-                    type="radio"
-                    value="female"
-                    checked={gender === "female"}
-                    onChange={() => setGender("female")}
-                    className="w-5 h-5 border-2 border-black rounded-full bg-transparent checked:bg-white checked:after:content-[''] checked:after:block checked:after:w-3 checked:after:h-3 checked:after:bg-[#ff9404] checked:after:rounded-full checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 relative transition-all duration-300 hover:border-[#ff9404] hover:shadow-[0_0_8px_rgba(255,148,4,0.5)] mr-2 appearance-none"
-                  />
-                  Femenino
-                </label>
-              </div>
-            </motion.div>
-  
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Altura (cm)
+            </label>
+            <input
+              type="number"
+              id="height"
+              value={height ?? ""}
+              onChange={(e) => handleInputChange(e, setHeight, 0)}
+              className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5"
+              placeholder="Enter your height"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Peso (kg)
+            </label>
+            <input
+              type="number"
+              id="weight"
+              value={weight ?? ""}
+              onChange={(e) => handleInputChange(e, setWeight, 0)}
+              className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5"
+              placeholder="Enter your weight"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Nivel de Actividad
+            </label>
+            <select
+              id="activity"
+              value={activityLevel}
+              onChange={(e) => setActivityLevel(e.target.value)}
+              className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.5em_1.5em] sm:text-sm sm:px-2.5 sm:py-1.5 sm:pr-7 pr-6"
             >
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                Altura (cm)
-              </label>
-              <input
-                type="number"
-                id="height"
-                value={height ?? ""}
-                onChange={(e) => handleInputChange(e, setHeight, 0)}
-                className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5"
-                placeholder="Enter your height"
-              />
-            </motion.div>
-  
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                Peso (kg)
-              </label>
-              <input
-                type="number"
-                id="weight"
-                value={weight ?? ""}
-                onChange={(e) => handleInputChange(e, setWeight, 0)}
-                className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5"
-                placeholder="Enter your weight"
-              />
-            </motion.div>
-  
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                Nivel de Actividad
-              </label>
-              <select
-                id="activity"
-                value={activityLevel}
-                onChange={(e) => setActivityLevel(e.target.value)}
-                className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.5em_1.5em] sm:text-sm sm:px-2.5 sm:py-1.5 sm:pr-7 pr-6"
+              <option value="basal">Tasa Metabólica Basal (BMR)</option>
+              <option value="sedentary">
+                Sedentario: sin ejercicio o actividad física ligera
+              </option>
+              <option value="light">Ligero: ejercicio 1-2 veces/semana</option>
+              <option value="moderate">
+                Moderado: ejercicio 2-4 veces/semana
+              </option>
+              <option value="active">Activo: ejercicio 4-5 veces/semana</option>
+              <option value="veryActive">
+                Muy Activo: ejercicio intenso diario o trabajo físico
+              </option>
+              <option value="extraActive">
+                Extra Activo: ejercicio intenso 2 veces al día
+              </option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full py-3 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            disabled={isButtonDisabled || isLoading}
+          >
+            {isLoading ? (
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
               >
-                <option value="basal">Tasa Metabólica Basal (BMR)</option>
-                <option value="sedentary">
-                  Sedentario: sin ejercicio o actividad física ligera
-                </option>
-                <option value="light">Ligero: ejercicio 1-2 veces/semana</option>
-                <option value="moderate">
-                  Moderado: ejercicio 2-4 veces/semana
-                </option>
-                <option value="active">
-                  Activo: ejercicio 4-5 veces/semana
-                </option>
-                <option value="veryActive">
-                  Muy Activo: ejercicio intenso diario o trabajo físico
-                </option>
-                <option value="extraActive">
-                  Extra Activo: ejercicio intenso 2 veces al día
-                </option>
-              </select>
-            </motion.div>
-  
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              type="submit"
-              className="w-full py-3 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              disabled={isButtonDisabled || isLoading}
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                />
+              </svg>
+            ) : (
+              "Estimar mis Calorías"
+            )}
+          </button>
+        </form>
+
+        <AnimatePresence>
+          {calories && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mt-8"
             >
-              {isLoading ? (
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"
-                  />
-                </svg>
-              ) : (
-                "Estimar mis Calorías"
-              )}
-            </motion.button>
-          </form>
-  
-          <AnimatePresence>
-            {calories && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mt-8"
-              >
-                <h2 className="mt-12 text-3xl font-bold text-center text-white mb-6">
-                  Calorías Diarias Estimadas
-                </h2>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4 text-center text-white">
-                      Pérdida de Peso Estimada
-                    </h3>
-                    <div className="space-y-4">
-                      {["maintain", "mildLoss", "loss", "extremeLoss"].map(
-                        (goal) => (
-                          <GoalCard
-                            key={goal}
-                            goal={goal}
-                            calorieValue={calories[goal]}
-                            isSelected={selectedGoal === goal}
-                            onClick={() =>
-                              handleGoalSelect(goal, calories[goal])
-                            }
-                            baseCalories={calories.maintain}
-                          />
-                        )
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4 text-center text-white">
-                      Ganancia de Peso Estimada
-                    </h3>
-                    <div className="space-y-4">
-                      {["mildGain", "gain", "fastGain"].map((goal) => (
+              <h2 className="mt-12 text-3xl font-bold text-center text-white mb-6">
+                Calorías Diarias Estimadas
+              </h2>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-center text-white">
+                    Pérdida de Peso Estimada
+                  </h3>
+                  <div className="space-y-4">
+                    {["maintain", "mildLoss", "loss", "extremeLoss"].map(
+                      (goal) => (
                         <GoalCard
                           key={goal}
                           goal={goal}
                           calorieValue={calories[goal]}
                           isSelected={selectedGoal === goal}
-                          onClick={() =>
-                            handleGoalSelect(goal, calories[goal])
-                          }
+                          onClick={() => handleGoalSelect(goal, calories[goal])}
                           baseCalories={calories.maintain}
                         />
-                      ))}
-                    </div>
+                      )
+                    )}
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-center text-white">
+                    Ganancia de Peso Estimada
+                  </h3>
+                  <div className="space-y-4">
+                    {["mildGain", "gain", "fastGain"].map((goal) => (
+                      <GoalCard
+                        key={goal}
+                        goal={goal}
+                        calorieValue={calories[goal]}
+                        isSelected={selectedGoal === goal}
+                        onClick={() => handleGoalSelect(goal, calories[goal])}
+                        baseCalories={calories.maintain}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };
