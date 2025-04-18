@@ -20,6 +20,7 @@ import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 import GalaxyBackground from "../components/GalaxyBackground";
+import ButtonToolTip from "../components/ButtonToolTip";
 
 ChartJS.register(
   CategoryScale,
@@ -89,6 +90,21 @@ const FoodDashboard: React.FC = () => {
   );
   const [customCalorieGoal, setCustomCalorieGoal] = useState<string>("");
   const [calorieGoalError, setCalorieGoalError] = useState<string | null>(null);
+  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+
+  // Detectar tamaño de pantalla pequeña
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth < 640);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => {
+      window.removeEventListener("resize", checkScreenSize);
+    };
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -328,28 +344,28 @@ const FoodDashboard: React.FC = () => {
       type: "Desayuno",
       calories: calculateCaloriesByType("Desayuno"),
       maxCalories: mealCalorieLimits.Desayuno,
-      icon: "🍞",
+      iconUrl: "https://img.icons8.com/emoji/48/croissant-emoji.png",
     },
     {
       id: 2,
       type: "Almuerzo",
       calories: calculateCaloriesByType("Almuerzo"),
       maxCalories: mealCalorieLimits.Almuerzo,
-      icon: "🍽️",
+      iconUrl: "https://img.icons8.com/emoji/48/cooking-pot-emoji.png",
     },
     {
       id: 3,
       type: "Cena",
       calories: calculateCaloriesByType("Cena"),
       maxCalories: mealCalorieLimits.Cena,
-      icon: "🍳",
+      iconUrl: "https://img.icons8.com/emoji/48/spaghetti-emoji.png",
     },
     {
       id: 4,
-      type: "Merienda",
+      type: "Snacks",
       calories: calculateCaloriesByType("Merienda"),
       maxCalories: mealCalorieLimits.Merienda,
-      icon: "🍎",
+      iconUrl: "https://img.icons8.com/emoji/48/red-apple.png",
     },
   ];
 
@@ -393,6 +409,13 @@ const FoodDashboard: React.FC = () => {
     return getWeekNumber(date);
   };
 
+  const infoText = {
+    dashboardSummary:
+      "Muestra tu resumen diario de calorías consumidas, restantes según tu límite diario establecido, y los macronutrientes (carbohidratos, proteínas y grasas) consumidos en relación con tus objetivos personalizados.",
+    nutrition:
+      "Muestra el desglose de tus comidas diarias. Puedes hacer clic en cada comida para ver detalles o agregar nuevos alimentos usando el botón '+' que aparece a la derecha.",
+  };
+
   return (
     <div className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-hidden -mt-12">
       <GalaxyBackground />
@@ -400,13 +423,13 @@ const FoodDashboard: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         className="mb-6 text-center"
       >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
+          transition={{ delay: 0.4, duration: 0.4 }}
           className="mb-2 text-xs text-gray-400"
         >
           Semana {getWeek()}
@@ -414,7 +437,7 @@ const FoodDashboard: React.FC = () => {
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
+          transition={{ delay: 0.6, duration: 0.4 }}
         >
           <button
             onClick={handleDatePicker}
@@ -436,16 +459,19 @@ const FoodDashboard: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         className="max-w-[700px] mx-auto bg-[#3B4252] rounded-lg p-5 relative z-10"
       >
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
           className="flex justify-between items-center mb-4"
         >
-          <h2 className="text-sm font-semibold text-white">Resumen</h2>
+          <div className="flex items-center">
+            <h2 className="text-sm font-semibold text-white mr-2">Resumen</h2>
+            <ButtonToolTip content={infoText.dashboardSummary} />
+          </div>
           {totalCaloriesGoal ? (
             <motion.p
               initial={{ opacity: 0 }}
@@ -461,7 +487,7 @@ const FoodDashboard: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 flex-wrap justify-end"
             >
               <input
                 type="number"
@@ -477,13 +503,15 @@ const FoodDashboard: React.FC = () => {
               >
                 Agregar
               </button>
-              <p className="text-sm text-gray-400">o</p>
-              <p
-                onClick={() => navigate("/calorie-calculator")}
-                className="text-sm text-[#ff9404] cursor-pointer hover:text-[#e08503] hover:shadow-[0_0_10px_rgba(255,148,4,0.5)] transition-all duration-300"
-              >
-                Ir a la calculadora
-              </p>
+              <div className="flex items-center">
+                <p className="text-sm text-gray-400 mx-1">o</p>
+                <p
+                  onClick={() => navigate("/calorie-calculator")}
+                  className="text-sm text-[#ff9404] cursor-pointer hover:text-[#e08503] hover:shadow-[0_0_10px_rgba(255,148,4,0.5)] transition-all duration-300"
+                >
+                  Ir a la calculadora
+                </p>
+              </div>
             </motion.div>
           )}
         </motion.div>
@@ -526,22 +554,24 @@ const FoodDashboard: React.FC = () => {
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative w-full h-full flex items-center justify-center">
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.0, duration: 0.5 }}
-                  className="absolute -left-[135px] top-1/2 -translate-y-1/2 text-center flex flex-col items-center"
-                >
-                  <div className="text-lg font-bold sm:text-xl">
-                    {consumedCalories}
-                  </div>
-                  <div className="text-xs text-gray-400">Consumido</div>
-                </motion.div>
+                {!isSmallScreen && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.9, duration: 0.5 }}
+                    className="absolute -left-[135px] top-1/2 -translate-y-1/2 text-center flex flex-col items-center"
+                  >
+                    <div className="text-lg font-bold sm:text-xl">
+                      {consumedCalories}
+                    </div>
+                    <div className="text-xs text-gray-400">Consumido</div>
+                  </motion.div>
+                )}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.2, duration: 0.5 }}
-                  className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 text-center flex flex-col items-center w-20"
+                  transition={{ delay: 1.1, duration: 0.5 }}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center flex flex-col items-center w-0 sm:w-0"
                 >
                   <div className="text-3xl font-bold leading-none min-w-[60px] text-center">
                     {remainingCalories > 0 ? remainingCalories : 0}
@@ -550,21 +580,41 @@ const FoodDashboard: React.FC = () => {
                     Restante
                   </div>
                 </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.0, duration: 0.5 }}
-                  className="absolute -right-[135px] top-1/2 -translate-y-1/2 text-center flex flex-col items-center"
-                >
-                  <div className="text-lg font-bold sm:text-xl">
-                    {burnedCalories}
-                  </div>
-                  <div className="text-xs text-gray-400">Quemado</div>
-                </motion.div>
+                {!isSmallScreen && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.2, duration: 0.5 }}
+                    className="absolute -right-[135px] top-1/2 -translate-y-1/2 text-center flex flex-col items-center"
+                  >
+                    <div className="text-lg font-bold sm:text-xl">
+                      {burnedCalories}
+                    </div>
+                    <div className="text-xs text-gray-400">Quemado</div>
+                  </motion.div>
+                )}
               </div>
             </div>
           </div>
         </motion.div>
+
+        {isSmallScreen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.1, duration: 0.5 }}
+            className="flex justify-between mb-6"
+          >
+            <div className="text-center flex-1">
+              <div className="text-lg font-bold">{consumedCalories}</div>
+              <div className="text-xs text-gray-400">Consumido</div>
+            </div>
+            <div className="text-center flex-1">
+              <div className="text-lg font-bold">{burnedCalories}</div>
+              <div className="text-xs text-gray-400">Quemado</div>
+            </div>
+          </motion.div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {progressData.map((item, index) => {
@@ -577,7 +627,7 @@ const FoodDashboard: React.FC = () => {
                 key={item.name}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.0 + index * 0.3, duration: 0.5 }}
+                transition={{ delay: 0.6 + index * 0.1, duration: 0.4 }}
                 className="text-center"
               >
                 <div className="text-xs text-gray-400 mb-1">{item.name}</div>
@@ -585,8 +635,8 @@ const FoodDashboard: React.FC = () => {
                   initial={{ width: 0 }}
                   animate={{ width: "100%" }}
                   transition={{
-                    delay: 1.2 + index * 0.3,
-                    duration: 0.5,
+                    delay: 0.6 + index * 0.1,
+                    duration: 0.4,
                     ease: "easeOut",
                   }}
                 >
@@ -599,7 +649,7 @@ const FoodDashboard: React.FC = () => {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 1.5 + index * 0.3, duration: 0.5 }}
+                  transition={{ delay: 0.7 + index * 0.1, duration: 0.4 }}
                   className="text-xs text-gray-400 mt-1"
                 >
                   {item.value}/{item.max} g
@@ -613,18 +663,19 @@ const FoodDashboard: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut", delay: 1.2 }}
+        transition={{ duration: 0.4, ease: "easeOut", delay: 1.2 }}
         className="max-w-[700px] mx-auto mt-6 relative z-10"
       >
-        <motion.h2
+        <motion.div
+          className="flex items-center"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 1.4, duration: 0.5 }}
-          className="text-sm font-semibold mb-4 text-white"
+          transition={{ delay: 0.9, duration: 0.4 }}
         >
-          Nutrición
-        </motion.h2>
-        <div className="space-y-2">
+          <h2 className="text-sm font-semibold mr-2 text-white">Nutrición</h2>
+          <ButtonToolTip content={infoText.nutrition} />
+        </motion.div>
+        <div className="space-y-2 mt-2">
           {meals.map((meal, index) => {
             const progressPercentage =
               meal.maxCalories > 0 && meal.calories > 0
@@ -639,7 +690,7 @@ const FoodDashboard: React.FC = () => {
                 key={meal.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 1.6 + index * 0.3, duration: 0.5 }}
+                transition={{ delay: 1.2 + index * 0.2, duration: 0.5 }}
                 className="max-w-full bg-[#3B4252] rounded-lg p-2.5 flex items-center justify-between cursor-pointer hover:bg-[#4B5563] transition duration-200"
                 onClick={() => handleMealClick(meal.type)}
               >
@@ -666,16 +717,18 @@ const FoodDashboard: React.FC = () => {
                           initial={{ strokeDasharray: `0 ${circumference}` }}
                           animate={{ strokeDasharray }}
                           transition={{
-                            delay: 2.0 + index * 0.3,
+                            delay: 1.2 + index * 0.2,
                             duration: 0.5,
                             ease: "easeOut",
                           }}
                         />
                       )}
                     </svg>
-                    <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl leading-none">
-                      {meal.icon}
-                    </span>
+                    <img
+                      src={meal.iconUrl}
+                      alt={`${meal.type} icon`}
+                      className="absolute w-6 h-6 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                    />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-white">
@@ -690,7 +743,7 @@ const FoodDashboard: React.FC = () => {
                   <motion.button
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 2.0 + index * 0.3, duration: 0.5 }}
+                    transition={{ delay: 1 + index * 0.1, duration: 0.5 }}
                     className="p-0.5 hover:scale-120 active:scale-90 transition-transform duration-200"
                     onClick={(e) => {
                       e.stopPropagation();
