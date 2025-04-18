@@ -3,6 +3,7 @@ import axios from "axios";
 import { supabase } from "../lib/supabaseClient";
 import GalaxyBackground from "./GalaxyBackground";
 import { motion } from "framer-motion";
+import ButtonToolTip from "./ButtonToolTip";
 
 const exercises = [
   "Peso Muerto",
@@ -148,6 +149,11 @@ const OneRepMaxCalculator: React.FC = () => {
 
   const isButtonDisabled = !isInputValid();
 
+  const infoText = {
+    oneRmCalculatorInfo:
+      "Calcula tu repetición máxima (1RM) basada en el peso, repeticiones y RPE. Esta herramienta estima el peso máximo que puedes levantar una sola vez en un ejercicio específico.",
+  };
+
   return (
     <div className="relative min-h-screen overflow-y-auto">
       <GalaxyBackground />
@@ -159,9 +165,12 @@ const OneRepMaxCalculator: React.FC = () => {
             transition={{ duration: 0.5 }}
             className="bg-[#3B4252] rounded-xl p-6 shadow-md mb-8"
           >
-            <h1 className="text-3xl lg:text-4xl font-bold mb-6 text-center text-white flex items-center justify-center">
-              Calculadora Repetición Máxima (1RM)
-            </h1>
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <h2 className="text-3xl lg:text-4xl font-bold text-white">
+                Calculadora Repetición Máxima
+              </h2>
+              <ButtonToolTip content={infoText.oneRmCalculatorInfo} />
+            </div>
             <form onSubmit={calculateOneRepMax} className="space-y-6">
               <div>
                 <label
@@ -202,7 +211,7 @@ const OneRepMaxCalculator: React.FC = () => {
                   value={reps ?? ""}
                   onChange={handleRepsChange}
                   className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 placeholder:text-center [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5"
-                  placeholder="Ingresa el número de reps"
+                  placeholder="Ingresa el número de repeticiones"
                 />
               </div>
 

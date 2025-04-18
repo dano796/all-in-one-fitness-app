@@ -9,6 +9,7 @@ import axios from "axios";
 import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import ButtonToolTip from "../components/ButtonToolTip";
 
 const preloadImages = [BotellaVacia, Botella25, Botella75, Botella100];
 preloadImages.forEach((src) => {
@@ -225,6 +226,11 @@ const WaterTracker: React.FC = () => {
     <WaterUnit key={index} stage={stage} />
   ));
 
+  const infoText = {
+    waterTrackerInfo:
+      "Seguimiento de tu consumo diario de agua. La meta recomendada es de 8 vasos (2000 ml) al día para mantener una hidratación adecuada.",
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -281,9 +287,12 @@ const WaterTracker: React.FC = () => {
             {error}
           </motion.p>
         )}
-        <h2 className="text-xl font-semibold text-white mb-6">
-          Control de Agua
-        </h2>
+        <div className="flex items-center mb-6">
+          <h2 className="text-xl font-semibold text-white mr-2">
+            Control de Agua
+          </h2>
+          <ButtonToolTip content={infoText.waterTrackerInfo} />
+        </div>
 
         <div className="bg-[#4B5563]/50 rounded-lg p-6 mb-8">
           <p className="text-lg font-semibold text-white">

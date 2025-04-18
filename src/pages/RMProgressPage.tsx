@@ -15,6 +15,7 @@ import { supabase } from "../lib/supabaseClient";
 import { exercises } from "../components/OneRepMaxCalculator";
 import { motion } from "framer-motion";
 import GalaxyBackground from "../components/GalaxyBackground";
+import ButtonToolTip from "../components/ButtonToolTip";
 
 ChartJS.register(
   CategoryScale,
@@ -218,6 +219,11 @@ const RMProgressPage: React.FC = () => {
     },
   };
 
+  const infoText = {
+    progressRM:
+      "Visualiza el progreso de tu repetición máxima para diferentes ejercicios a lo largo del tiempo. Esta gráfica te permite identificar tendencias y mejoras en tu fuerza.",
+  };
+
   return (
     <div className="relative z-0 min-h-screen w-full mt-4 sm:mt-0">
       <GalaxyBackground />
@@ -228,9 +234,12 @@ const RMProgressPage: React.FC = () => {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="max-w-4xl mx-auto p-5 sm:p-4 md:p-6 bg-[#3B4252] rounded-lg shadow-md relative z-10"
         >
-          <h2 className="text-xl sm:text-2xl font-bold mb-6 md:mb-4 text-white text-center md:text-left">
-            Progreso de 1RM
-          </h2>
+          <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-white">
+              Progreso de 1RM
+            </h2>
+            <ButtonToolTip content={infoText.progressRM} />
+          </div>
 
           <div className="mb-4 md:mb-6">
             <label

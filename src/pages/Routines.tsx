@@ -117,13 +117,13 @@ const Routines: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
         className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-8 pl-0 px-4 sm:px-0"
       >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
           className="w-full sm:flex-1 text-center sm:text-left text-lg sm:text-xl font-bold text-white drop-shadow-md mb-2 sm:mb-0"
         >
           <h1>All In One Fitness App</h1>
@@ -131,8 +131,8 @@ const Routines: React.FC = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-          className="w-full sm:flex-1 text-center sm:text-right text-sm font-semibold text-white uppercase tracking-wide drop-shadow-sm pr-0 sm:pr-8"
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="w-full sm:flex-1 text-center sm:text-right text-sm font-semibold text-white uppercase tracking-wide drop-shadow-sm pr-0"
         >
           MIS RUTINAS
         </motion.div>
@@ -142,7 +142,7 @@ const Routines: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
           className="flex items-center justify-center w-full sm:w-auto mb-4 sm:mb-0 sm:ml-0 sm:mr-4"
         >
           <button
@@ -157,7 +157,7 @@ const Routines: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="w-full flex-1 bg-gray-700 rounded-lg p-4 sm:p-8 relative z-10 shadow-lg min-h-[300px] sm:min-h-[500px] flex flex-col justify-start"
         >
           {error && (
@@ -186,7 +186,7 @@ const Routines: React.FC = () => {
                   key={routine.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.6 + index * 0.3, duration: 1.0 }}
+                  transition={{ delay: 0.6 + index * 0.3, duration: 0.6 }}
                   className="max-w-full bg-gray-600 rounded-lg p-4 mb-2.5 flex items-center justify-between cursor-pointer transition-all duration-300 border border-gray-500 hover:bg-gray-500 hover:border-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.2)] relative"
                 >
                   <div
@@ -200,7 +200,7 @@ const Routines: React.FC = () => {
                   <motion.button
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1.0 + index * 0.3, duration: 0.8 }}
+                    transition={{ delay: 1.0 + index * 0.3, duration: 0.6 }}
                     className="p-1 bg-transparent transition-transform duration-200 hover:scale-125 active:scale-90 ml-2"
                     onClick={() => toggleDeleteConfirm(routine.id)}
                   >
@@ -211,7 +211,7 @@ const Routines: React.FC = () => {
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.2 }}
                       className="absolute -top-14 right-0 sm:right-0 bg-gray-700/95 rounded-lg p-3 shadow-lg z-20 border border-gray-500 flex flex-col gap-2 w-44"
                       ref={deleteConfirmRef}
                     >

@@ -5,6 +5,8 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import axios, { AxiosError } from "axios";
 import FoodItem from "./FoodItem";
+import { motion } from "framer-motion";
+import ButtonToolTip from "./ButtonToolTip";
 
 interface Food {
   food_id: string;
@@ -195,11 +197,24 @@ const FoodSearchIA: React.FC = () => {
     [navigate, selectedType]
   );
 
+  const infoText = {
+    foodAIInfo:
+      "Utiliza Inteligencia Artificial para identificar alimentos en tus imágenes. Sube una foto de tu comida y el sistema reconocerá automáticamente los alimentos para que puedas agregarlos a tu registro diario.",
+  };
+
   return (
-    <div className="bg-[#3B4252] rounded-lg p-6 shadow-md flex-1 mt-4">
-      <h2 className="text-xl font-semibold mb-6 text-white">
-        Registro de Comida con IA
-      </h2>
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-[#3B4252] rounded-lg p-6 shadow-md flex-1 mt-4"
+    >
+      <div className="flex items-center gap-3 mb-6">
+        <h2 className="text-xl font-semibold text-white">
+          Registro de Comida con IA
+        </h2>
+        <ButtonToolTip content={infoText.foodAIInfo} />
+      </div>
 
       {/* Dropdown para seleccionar el tipo de comida */}
       <div className="mb-4">
@@ -227,7 +242,12 @@ const FoodSearchIA: React.FC = () => {
         onImageRemove={handleImageRemove}
       />
       {uploadedImage && (
-        <div className="mt-4 flex flex-col items-center space-y-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="mt-4 flex flex-col items-center space-y-4"
+        >
           <p className="text-gray-400 text-center text-xs">
             Imagen cargada:{" "}
             <span className="font-semibold">{uploadedImage.name}</span>
@@ -239,13 +259,25 @@ const FoodSearchIA: React.FC = () => {
           >
             {loading ? "Analizando..." : "Analizar"}
           </button>
-        </div>
+        </motion.div>
       )}
       {error && (
-        <p className="text-red-400 mt-2 text-xs text-center">{error}</p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="text-red-400 mt-2 text-xs text-center"
+        >
+          {error}
+        </motion.p>
       )}
       {result && result.foods && result.foods.food && result.foods.food[0] && (
-        <div className="mt-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mt-4"
+        >
           <h3 className="text-sm font-semibold mb-2 text-white">Resultado</h3>
           <div className="space-y-3">
             <FoodItem
@@ -254,9 +286,9 @@ const FoodSearchIA: React.FC = () => {
               onNavigate={handleFoodClick}
             />
           </div>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
