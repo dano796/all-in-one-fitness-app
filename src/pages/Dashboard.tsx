@@ -432,7 +432,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 <ButtonToolTip content={infoText.calorieIntake} />
               </div>
               <button
-                onClick={() => navigate("/comidas")}
+                onClick={() => navigate("/foodDashboard")}
                 className="text-sm text-[#ff9404] hover:text-[#e08503] transition-colors duration-300"
               >
                 Ver detalles
@@ -569,7 +569,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               </div>
               <button
                 onClick={() => navigate("/water")}
-                className="text-xs text-[#ff9404] hover:text-[#e08503] transition-colors duration-300"
+                className="text-sm text-[#ff9404] hover:text-[#e08503] transition-colors duration-300"
               >
                 Registrar
               </button>
@@ -674,11 +674,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
             <div className="flex justify-between items-center mt-4 text-xs text-gray-400">
               <div className="flex items-center">
-                <div className="w-3 h-3 rounded bg-[#ff9404] mr-1"></div>
+                <div className="w-3 h-3 rounded bg-[#ff9404] mr-2 mb-[0.5px]"></div>
                 <span>Por encima del objetivo</span>
               </div>
               <div className="flex items-center">
-                <div className="w-3 h-3 rounded bg-[#8884d8] mr-1"></div>
+                <div className="w-3 h-3 rounded bg-[#8884d8] mr-2 mb-[0.5px]"></div>
                 <span>Por debajo del objetivo</span>
               </div>
             </div>
