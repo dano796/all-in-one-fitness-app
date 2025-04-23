@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 import GalaxyBackground from "./GalaxyBackground";
 import { motion } from "framer-motion";
 import ButtonToolTip from "./ButtonToolTip";
+import Swal from "sweetalert2";
 
 const exercises = [
   "Peso Muerto",
@@ -122,7 +123,7 @@ const OneRepMaxCalculator: React.FC = () => {
         .format(new Date())
         .split("/")
         .reverse()
-        .join("-"); // Fecha actual en formato colombiano (YYYY-MM-DD)
+        .join("-");
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/1rm/save`,
         {
@@ -136,7 +137,22 @@ const OneRepMaxCalculator: React.FC = () => {
           exercise,
         }
       );
-      alert(response.data.message); // Puedes usar un modal más bonito si prefieres
+      await Swal.fire({
+        title: "¡Éxito!",
+        text:
+          response.data.message ||
+          "La repetición máxima ha sido guardada exitosamente.",
+        icon: "success",
+        iconColor: "#ff9400",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#ff9400",
+        customClass: {
+          popup: "custom-swal-background",
+          icon: "custom-swal-icon",
+          title: "custom-swal-title",
+          htmlContainer: "custom-swal-text",
+        },
+      });
       setError(null);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.error) {
