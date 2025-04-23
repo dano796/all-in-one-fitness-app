@@ -10,6 +10,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Cell,
 } from "recharts";
 import axios from "axios";
 import { User } from "@supabase/supabase-js";
@@ -17,6 +18,7 @@ import { supabase } from "../lib/supabaseClient";
 import GalaxyBackground from "../components/GalaxyBackground";
 import ReactApexChart from "react-apexcharts";
 import ButtonToolTip from "../components/ButtonToolTip";
+import DashboardSkeleton from "@/components/DashboardSkeleton";
 
 // Define interfaces for the data structure
 interface DailyBreakdown {
@@ -52,6 +54,8 @@ interface FoodsResponse {
 interface DashboardProps {
   user: User | null;
 }
+
+<DashboardSkeleton />;
 
 const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const navigate = useNavigate();
@@ -140,49 +144,41 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     const fetchDashboardData = async () => {
       if (!userEmail || !startDate || !endDate) return;
       setIsLoading(true);
+
       try {
-        // Fetch dashboard data
-        const dashboardResponse = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/dashboard`,
-          {
+        // Usar Promise.all para realizar todas las peticiones en paralelo
+        const [dashboardRes, foodsRes, goalRes, waterRes] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/dashboard`, {
             params: { email: userEmail, startDate, endDate },
-          }
-        );
+          }),
+          axios.get<FoodsResponse>(
+            `${import.meta.env.VITE_BACKEND_URL}/api/foods/user`,
+            { params: { email: userEmail, date: date } }
+          ),
+          axios.get(
+            `${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`,
+            { params: { email: userEmail } }
+          ),
+          axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/water/user`, {
+            params: { email: userEmail, date: date },
+          }),
+        ]);
 
-        // Fetch foods data for the selected date
-        const foodsResponse = await axios.get<FoodsResponse>(
-          `${import.meta.env.VITE_BACKEND_URL}/api/foods/user`,
-          { params: { email: userEmail, date: date } }
-        );
-
-        // Get calorie goal from backend
-        const calorieGoalResponse = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`,
-          { params: { email: userEmail } }
-        );
-
-        // Fetch water data for the selected date
-        const waterResponse = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/water/user`,
-          { params: { email: userEmail, date: date } }
-        );
-
-        const updatedDashboardData = { ...dashboardResponse.data };
+        const updatedDashboardData = { ...dashboardRes.data };
 
         // Update calorie goal if available
-        if (calorieGoalResponse.data.calorieGoal) {
-          updatedDashboardData.calorieGoal =
-            calorieGoalResponse.data.calorieGoal;
+        if (goalRes.data.calorieGoal) {
+          updatedDashboardData.calorieGoal = goalRes.data.calorieGoal;
         }
 
         // Update water intake data
-        if (waterResponse.data) {
+        if (waterRes.data) {
           updatedDashboardData.waterIntake =
-            (waterResponse.data.aguasllenadas || 0) * WATER_PER_UNIT;
-          setFilledWaterUnits(waterResponse.data.aguasllenadas || 0);
+            (waterRes.data.aguasllenadas || 0) * WATER_PER_UNIT;
+          setFilledWaterUnits(waterRes.data.aguasllenadas || 0);
         }
 
-        setFoodData(foodsResponse.data);
+        setFoodData(foodsRes.data);
         setDashboardData(updatedDashboardData);
         setError(null);
       } catch (error) {
@@ -359,15 +355,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       "Muestra la distribución de macronutrientes (carbohidratos, proteínas y grasas) en tu dieta del día actual, con porcentajes de cumplimiento respecto a tus objetivos.",
   };
 
-  if (isLoading) {
-    return (
-      <div className="relative min-h-screen flex items-center justify-center bg-[#282c3c]">
-        <GalaxyBackground />
-        <span className="text-white">Cargando...</span>
-      </div>
-    );
-  }
-
   return (
     <div className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-hidden -mt-12">
       <GalaxyBackground />
@@ -409,353 +396,355 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       </motion.div>
 
       {/* Contenedor Principal con Grid */}
-      <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 relative z-10">
-        {/* Columna Izquierda: Ingesta Calórica y Agua */}
-        <div className="space-y-6">
-          {/* Ingesta Calórica */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-[#3B4252] rounded-lg p-5"
-          >
+      {isLoading ? (
+        <DashboardSkeleton />
+      ) : (
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 relative z-10">
+          {/* Columna Izquierda: Ingesta Calórica y Agua */}
+          <div className="space-y-6">
+            {/* Ingesta Calórica */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="flex justify-between items-center mb-4"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="bg-[#3B4252] rounded-lg p-5"
             >
-              <div className="flex items-center space-x-2">
-                <h2 className="text-sm font-semibold text-white">
-                  Ingesta Calórica
-                </h2>
-                <ButtonToolTip content={infoText.calorieIntake} />
-              </div>
-              <button
-                onClick={() => navigate("/foodDashboard")}
-                className="text-sm text-[#ff9404] hover:text-[#e08503] transition-colors duration-300"
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="flex justify-between items-center mb-4"
               >
-                Ver detalles
-              </button>
-            </motion.div>
+                <div className="flex items-center space-x-2">
+                  <h2 className="text-sm font-semibold text-white">
+                    Ingesta Calórica
+                  </h2>
+                  <ButtonToolTip content={infoText.calorieIntake} />
+                </div>
+                <button
+                  onClick={() => navigate("/foodDashboard")}
+                  className="text-sm text-[#ff9404] hover:text-[#e08503] transition-colors duration-300"
+                >
+                  Ver detalles
+                </button>
+              </motion.div>
 
-            {error && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="text-red-400 mb-4 text-center"
-              >
-                {error}
-              </motion.p>
-            )}
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="text-red-400 mb-4 text-center"
+                >
+                  {error}
+                </motion.p>
+              )}
 
-            <div className="flex justify-center">
-              <div className="w-full max-w-md">
-                <ReactApexChart
-                  options={{
-                    chart: {
-                      height: 350,
-                      type: "radialBar",
-                      background: "#3B4252",
-                      fontFamily: "Inter, sans-serif",
-                    },
-                    colors: ["#FF0000", "#8884d8", "#1E90FF", "#ff9404"],
-                    labels: [
-                      "Calorías",
-                      "Carbohidratos",
-                      "Proteínas",
-                      "Grasas",
-                    ],
-                    plotOptions: {
-                      radialBar: {
-                        dataLabels: {
-                          name: {
-                            fontSize: "14px",
-                            color: "#fff",
-                          },
-                          value: {
-                            fontSize: "16px",
-                            color: "#fff",
-                          },
-                          total: {
-                            show: true,
-                            label: "Total Calorías",
-                            color: "#fff",
-                            formatter: function () {
-                              const totalCaloriesConsumed =
-                                dashboardData.calorieIntake.totalCalories;
-                              const totalCaloriesGoal =
-                                dashboardData.calorieGoal;
-                              const percentageCalories =
-                                (totalCaloriesConsumed / totalCaloriesGoal) *
-                                100;
-                              return `${Math.round(percentageCalories)}%`;
+              <div className="flex justify-center">
+                <div className="w-full max-w-md">
+                  <ReactApexChart
+                    options={{
+                      chart: {
+                        height: 350,
+                        type: "radialBar",
+                        background: "#3B4252",
+                        fontFamily: "Inter, sans-serif",
+                      },
+                      colors: ["#FF0000", "#8884d8", "#1E90FF", "#ff9404"],
+                      labels: [
+                        "Calorías",
+                        "Carbohidratos",
+                        "Proteínas",
+                        "Grasas",
+                      ],
+                      plotOptions: {
+                        radialBar: {
+                          dataLabels: {
+                            name: {
+                              fontSize: "14px",
+                              color: "#fff",
+                            },
+                            value: {
+                              fontSize: "16px",
+                              color: "#fff",
+                            },
+                            total: {
+                              show: true,
+                              label: "Total Calorías",
+                              color: "#fff",
+                              formatter: function () {
+                                const totalCaloriesConsumed =
+                                  dashboardData.calorieIntake.totalCalories;
+                                const totalCaloriesGoal =
+                                  dashboardData.calorieGoal;
+                                const percentageCalories =
+                                  (totalCaloriesConsumed / totalCaloriesGoal) *
+                                  100;
+                                return `${Math.round(percentageCalories)}%`;
+                              },
                             },
                           },
                         },
                       },
-                    },
-                    theme: {
-                      mode: "dark",
-                    },
-                  }}
-                  series={[
-                    Math.round(
-                      (dashboardData.calorieIntake.totalCalories /
-                        dashboardData.calorieGoal) *
-                        100
-                    ),
-                    carbsPercentage,
-                    proteinsPercentage,
-                    fatsPercentage,
-                  ]}
-                  type="radialBar"
-                  height={350}
-                />
+                      theme: {
+                        mode: "dark",
+                      },
+                    }}
+                    series={[
+                      Math.round(
+                        (dashboardData.calorieIntake.totalCalories /
+                          dashboardData.calorieGoal) *
+                          100
+                      ),
+                      carbsPercentage,
+                      proteinsPercentage,
+                      fatsPercentage,
+                    ]}
+                    type="radialBar"
+                    height={350}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4 text-center mb-4">
-              <div>
-                <p className="text-xs text-gray-400">Grasas</p>
-                <p className="text-sm text-[#ff9404] font-semibold">
-                  {formatValue(dashboardData.calorieIntake.totalFats)}/
-                  {fatsGoal}g
-                </p>
+              <div className="grid grid-cols-2 gap-4 text-center mb-4">
+                <div>
+                  <p className="text-xs text-gray-400">Grasas</p>
+                  <p className="text-sm text-[#ff9404] font-semibold">
+                    {formatValue(dashboardData.calorieIntake.totalFats)}/
+                    {fatsGoal}g
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400">Carbohidratos</p>
+                  <p className="text-sm text-[#8884d8] font-semibold">
+                    {formatValue(dashboardData.calorieIntake.totalCarbs)}/
+                    {carbsGoal}g
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400">Proteína</p>
+                  <p className="text-sm text-[#1E90FF] font-semibold">
+                    {formatValue(dashboardData.calorieIntake.totalProteins)}/
+                    {proteinsGoal}g
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400">Calorías</p>
+                  <p className="text-sm text-[#FF0000] font-semibold">
+                    {formatValue(dashboardData.calorieIntake.totalCalories)}/
+                    {dashboardData.calorieGoal} kcal
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-gray-400">Carbohidratos</p>
-                <p className="text-sm text-[#8884d8] font-semibold">
-                  {formatValue(dashboardData.calorieIntake.totalCarbs)}/
-                  {carbsGoal}g
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-400">Proteína</p>
-                <p className="text-sm text-[#1E90FF] font-semibold">
-                  {formatValue(dashboardData.calorieIntake.totalProteins)}/
-                  {proteinsGoal}g
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-400">Calorías</p>
-                <p className="text-sm text-[#FF0000] font-semibold">
-                  {formatValue(dashboardData.calorieIntake.totalCalories)}/
-                  {dashboardData.calorieGoal} kcal
-                </p>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
 
-          {/* Enhanced Water Intake */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.3 }}
-            className="bg-[#3B4252] rounded-lg p-5"
-          >
+            {/* Enhanced Water Intake */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="flex justify-between items-center mb-4"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.3 }}
+              className="bg-[#3B4252] rounded-lg p-5"
             >
-              <div className="flex items-center space-x-2">
-                <h2 className="text-sm font-semibold text-white">
-                  Ingesta de Agua
-                </h2>
-                <ButtonToolTip content={infoText.waterIntake} />
-              </div>
-              <button
-                onClick={() => navigate("/water")}
-                className="text-sm text-[#ff9404] hover:text-[#e08503] transition-colors duration-300"
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="flex justify-between items-center mb-4"
               >
-                Registrar
-              </button>
-            </motion.div>
-
-            <div className="bg-[#4B5563]/50 rounded-lg p-4 mb-4">
-              <p className="text-base font-semibold text-white">
-                Consumido:{" "}
-                <span className="text-[#ff9404]">
-                  {Math.round(dashboardData.waterIntake)} ml
-                </span>
-              </p>
-              <p className="text-sm text-gray-400">
-                {waterPercentage.toFixed(0)}% de tu meta
-              </p>
-            </div>
-
-            <div className="flex items-center justify-center mb-4">
-              <Droplets className="text-[#1E90FF] mr-2" size={24} />
-              <div className="text-center">
-                <p className="text-sm text-white">
-                  {Math.round(dashboardData.waterIntake)} ml / {waterGoal} ml
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 bg-gray-700 rounded-full h-4">
-              <div
-                className="bg-[#1E90FF] h-4 rounded-full transition-all duration-1000"
-                style={{
-                  width: `${waterPercentage}%`,
-                }}
-              ></div>
-            </div>
-
-            <p className="text-sm text-gray-400 mt-4 text-center">
-              {getWaterMessage()}
-            </p>
-          </motion.div>
-        </div>
-
-        {/* Columna Derecha: Gráficos */}
-        <div className="space-y-6">
-          {/* Ingesta Calórica - Resumen Semanal */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.4 }}
-            className="bg-[#3B4252] rounded-lg p-5"
-          >
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="flex items-center space-x-2 mb-4"
-            >
-              <h2 className="text-sm font-semibold text-white">
-                Ingesta Calórica - Resumen Semanal
-              </h2>
-              <ButtonToolTip content={infoText.weeklyCalories} />
-            </motion.div>
-
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={barData} style={{ backgroundColor: "#3B4252" }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#4B5563" />
-                <XAxis dataKey="date" stroke="#fff" />
-                <YAxis
-                  stroke="#fff"
-                  domain={[0, dashboardData.calorieGoal * 1.1]}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#3B4252",
-                    border: "1px solid #ff9404",
-                    borderRadius: "4px",
-                    color: "#fff",
-                  }}
-                  cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
-                />
-                <Bar
-                  dataKey="calories"
-                  fill="#8884d8"
-                  radius={[10, 10, 0, 0]}
-                  fillOpacity={0.8}
-                  isAnimationActive={true}
+                <div className="flex items-center space-x-2">
+                  <h2 className="text-sm font-semibold text-white">
+                    Ingesta de Agua
+                  </h2>
+                  <ButtonToolTip content={infoText.waterIntake} />
+                </div>
+                <button
+                  onClick={() => navigate("/water")}
+                  className="text-sm text-[#ff9404] hover:text-[#e08503] transition-colors duration-300"
                 >
-                  {barData.map((entry, index) => (
-                    <Bar
-                      key={`cell-${index}`}
-                      dataKey="calories"
-                      fill={
-                        entry.calories >= dashboardData.calorieGoal
-                          ? "#ff9404"
-                          : "#8884d8"
-                      }
-                      isAnimationActive={true}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                  Registrar
+                </button>
+              </motion.div>
 
-            <div className="flex justify-between items-center mt-4 text-xs text-gray-400">
-              <div className="flex items-center">
-                <div className="w-3 h-3 rounded bg-[#ff9404] mr-2 mb-[0.5px]"></div>
-                <span>Por encima del objetivo</span>
+              <div className="bg-[#4B5563]/50 rounded-lg p-4 mb-4">
+                <p className="text-base font-semibold text-white">
+                  Consumido:{" "}
+                  <span className="text-[#ff9404]">
+                    {Math.round(dashboardData.waterIntake)} ml
+                  </span>
+                </p>
+                <p className="text-sm text-gray-400">
+                  {waterPercentage.toFixed(0)}% de tu meta
+                </p>
               </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 rounded bg-[#8884d8] mr-2 mb-[0.5px]"></div>
-                <span>Por debajo del objetivo</span>
-              </div>
-            </div>
-          </motion.div>
 
-          {/* Distribución de Macronutrientes */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
-            className="bg-[#3B4252] rounded-lg p-5"
-          >
+              <div className="flex items-center justify-center mb-4">
+                <Droplets className="text-[#1E90FF] mr-2" size={24} />
+                <div className="text-center">
+                  <p className="text-sm text-white">
+                    {Math.round(dashboardData.waterIntake)} ml / {waterGoal} ml
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 bg-gray-700 rounded-full h-4">
+                <div
+                  className="bg-[#1E90FF] h-4 rounded-full transition-all duration-1000"
+                  style={{
+                    width: `${waterPercentage}%`,
+                  }}
+                ></div>
+              </div>
+
+              <p className="text-sm text-gray-400 mt-4 text-center">
+                {getWaterMessage()}
+              </p>
+            </motion.div>
+          </div>
+
+          {/* Columna Derecha: Gráficos */}
+          <div className="space-y-6">
+            {/* Ingesta Calórica - Resumen Semanal */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-              className="flex items-center space-x-2 mb-4"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.4 }}
+              className="bg-[#3B4252] rounded-lg p-5"
             >
-              <h2 className="text-sm font-semibold text-white">
-                Distribución de Macronutrientes
-              </h2>
-              <ButtonToolTip content={infoText.macronutrients} />
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="flex items-center space-x-2 mb-4"
+              >
+                <h2 className="text-sm font-semibold text-white">
+                  Ingesta Calórica - Resumen Semanal
+                </h2>
+                <ButtonToolTip content={infoText.weeklyCalories} />
+              </motion.div>
+
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={barData} style={{ backgroundColor: "#3B4252" }}>
+                  <CartesianGrid strokeDasharray="3" stroke="#4B5563" />
+                  <XAxis dataKey="date" stroke="#fff" />
+                  <YAxis
+                    stroke="#fff"
+                    domain={[0, Math.ceil(dashboardData.calorieGoal * 1.1)]}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#3B4252",
+                      border: "1px solid #ff9404",
+                      borderRadius: "4px",
+                      color: "#fff",
+                    }}
+                    cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+                  />
+                  <Bar
+                    dataKey="calories"
+                    radius={[10, 10, 0, 0]}
+                    isAnimationActive={true}
+                    fill="#8884d8"
+                  >
+                    {barData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={
+                          entry.calories >= dashboardData.calorieGoal
+                            ? "#ff9404"
+                            : "#8884d8"
+                        }
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+
+              <div className="flex justify-between items-center mt-4 text-xs text-gray-400">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded bg-[#ff9404] mr-2 mb-[0.5px]"></div>
+                  <span>Por encima del objetivo</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded bg-[#8884d8] mr-2 mb-[0.5px]"></div>
+                  <span>Por debajo del objetivo</span>
+                </div>
+              </div>
             </motion.div>
 
-            <div className="grid grid-cols-3 gap-4">
-              {/* Carbohidratos */}
-              <div className="text-center">
-                <div className="mx-auto w-20 h-20 rounded-full border-4 border-[#8884d8] flex items-center justify-center mb-2">
-                  <span className="text-lg font-bold text-[#8884d8]">
-                    {carbsPercentage}%
-                  </span>
-                </div>
-                <p className="text-xs text-gray-400">Carbohidratos</p>
-                <p className="text-sm text-[#8884d8] font-semibold">
-                  {formatValue(dashboardData.calorieIntake.totalCarbs)} g
-                </p>
-                <p className="text-xs text-gray-500">
-                  {Math.round(dashboardData.calorieIntake.totalCarbs * 4)} kcal
-                </p>
-              </div>
+            {/* Distribución de Macronutrientes */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
+              className="bg-[#3B4252] rounded-lg p-5"
+            >
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+                className="flex items-center space-x-2 mb-4"
+              >
+                <h2 className="text-sm font-semibold text-white">
+                  Distribución de Macronutrientes
+                </h2>
+                <ButtonToolTip content={infoText.macronutrients} />
+              </motion.div>
 
-              {/* Proteínas */}
-              <div className="text-center">
-                <div className="mx-auto w-20 h-20 rounded-full border-4 border-[#1E90FF] flex items-center justify-center mb-2">
-                  <span className="text-lg font-bold text-[#1E90FF]">
-                    {proteinsPercentage}%
-                  </span>
+              <div className="grid grid-cols-3 gap-4">
+                {/* Carbohidratos */}
+                <div className="text-center">
+                  <div className="mx-auto w-20 h-20 rounded-full border-4 border-[#8884d8] flex items-center justify-center mb-2">
+                    <span className="text-lg font-bold text-[#8884d8]">
+                      {carbsPercentage}%
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400">Carbohidratos</p>
+                  <p className="text-sm text-[#8884d8] font-semibold">
+                    {formatValue(dashboardData.calorieIntake.totalCarbs)} g
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {Math.round(dashboardData.calorieIntake.totalCarbs * 4)}{" "}
+                    kcal
+                  </p>
                 </div>
-                <p className="text-xs text-gray-400">Proteínas</p>
-                <p className="text-sm text-[#1E90FF] font-semibold">
-                  {formatValue(dashboardData.calorieIntake.totalProteins)} g
-                </p>
-                <p className="text-xs text-gray-500">
-                  {Math.round(dashboardData.calorieIntake.totalProteins * 4)}{" "}
-                  kcal
-                </p>
-              </div>
 
-              {/* Grasas */}
-              <div className="text-center">
-                <div className="mx-auto w-20 h-20 rounded-full border-4 border-[#ff9404] flex items-center justify-center mb-2">
-                  <span className="text-lg font-bold text-[#ff9404]">
-                    {fatsPercentage}%
-                  </span>
+                {/* Proteínas */}
+                <div className="text-center">
+                  <div className="mx-auto w-20 h-20 rounded-full border-4 border-[#1E90FF] flex items-center justify-center mb-2">
+                    <span className="text-lg font-bold text-[#1E90FF]">
+                      {proteinsPercentage}%
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400">Proteínas</p>
+                  <p className="text-sm text-[#1E90FF] font-semibold">
+                    {formatValue(dashboardData.calorieIntake.totalProteins)} g
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {Math.round(dashboardData.calorieIntake.totalProteins * 4)}{" "}
+                    kcal
+                  </p>
                 </div>
-                <p className="text-xs text-gray-400">Grasas</p>
-                <p className="text-sm text-[#ff9404] font-semibold">
-                  {formatValue(dashboardData.calorieIntake.totalFats)} g
-                </p>
-                <p className="text-xs text-gray-500">
-                  {Math.round(dashboardData.calorieIntake.totalFats * 9)} kcal
-                </p>
+
+                {/* Grasas */}
+                <div className="text-center">
+                  <div className="mx-auto w-20 h-20 rounded-full border-4 border-[#ff9404] flex items-center justify-center mb-2">
+                    <span className="text-lg font-bold text-[#ff9404]">
+                      {fatsPercentage}%
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400">Grasas</p>
+                  <p className="text-sm text-[#ff9404] font-semibold">
+                    {formatValue(dashboardData.calorieIntake.totalFats)} g
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {Math.round(dashboardData.calorieIntake.totalFats * 9)} kcal
+                  </p>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
