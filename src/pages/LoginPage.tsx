@@ -57,10 +57,12 @@ const LoginPage = () => {
           title: "¡Error!",
           text: result.error,
           icon: "error",
+          iconColor: "#ff9400",
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9400",
           customClass: {
             popup: "custom-swal-background",
+            icon: "custom-swal-icon",
             title: "custom-swal-title",
             htmlContainer: "custom-swal-text",
           },
@@ -78,8 +80,9 @@ const LoginPage = () => {
           title: "¡Éxito!",
           text: "Inicio de sesión exitoso.",
           icon: "success",
+          iconColor: "#ff9400",
           confirmButtonText: "Aceptar",
-          confirmButtonColor: "#ff9404",
+          confirmButtonColor: "#ff9400",
           customClass: {
             popup: "custom-swal-background",
             icon: "custom-swal-icon",
@@ -94,8 +97,15 @@ const LoginPage = () => {
         title: "¡Error!",
         text: "Ocurrió un error inesperado.",
         icon: "error",
+        iconColor: "#ff9400",
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
+        customClass: {
+          popup: "custom-swal-background",
+          icon: "custom-swal-icon",
+          title: "custom-swal-title",
+          htmlContainer: "custom-swal-text",
+        },
       });
     }
   };

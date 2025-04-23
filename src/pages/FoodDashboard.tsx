@@ -177,6 +177,20 @@ const FoodDashboard: React.FC = () => {
         setCustomCalorieGoal("");
         setCalorieGoalError(null);
         inputElement?.classList.remove("error");
+        await Swal.fire({
+          title: "¡Éxito!",
+          text: "El límite de calorías ha sido agregado exitosamente.",
+          icon: "success",
+          iconColor: "#ff9400",
+          confirmButtonText: "Aceptar",
+          confirmButtonColor: "#ff9400",
+          customClass: {
+            popup: "custom-swal-background",
+            icon: "custom-swal-icon",
+            title: "custom-swal-title",
+            htmlContainer: "custom-swal-text",
+          },
+        });
       } else {
         setCalorieGoalError(
           response.data.error || "Error al establecer el límite de calorías."
@@ -195,21 +209,19 @@ const FoodDashboard: React.FC = () => {
 
   const handleRemoveCalorieGoal = async () => {
     const result = await Swal.fire({
-      title: "Seguro de que quiere eliminar su límite?",
+      title: "Está seguro de que quiere eliminar su límite de calorías?",
       icon: "warning",
+      iconColor: "#ff9400",
       showCancelButton: true,
       confirmButtonColor: "#ff9404",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Sí",
-      cancelButtonText: "No",
+      confirmButtonText: "Aceptar",
+      cancelButtonText: "Cancelar",
       customClass: {
-        container: "dashboard-swal-container",
-        popup: "dashboard-swal-popup",
-        icon: "dashboard-swal-icon",
-        title: "dashboard-swal-title",
-        htmlContainer: "dashboard-swal-text",
-        confirmButton: "dashboard-swal-confirm-button",
-        cancelButton: "dashboard-swal-cancel-button",
+        popup: "custom-swal-background",
+        icon: "custom-swal-icon",
+        title: "custom-swal-title",
+        htmlContainer: "custom-swal-text",
       },
     });
     if (result.isConfirmed) {
@@ -225,14 +237,13 @@ const FoodDashboard: React.FC = () => {
             title: "Límite eliminado",
             text: "El límite de calorías ha sido eliminado exitosamente.",
             icon: "success",
+            iconColor: "#ff9400",
             confirmButtonColor: "#ff9404",
             customClass: {
-              container: "dashboard-swal-container",
-              popup: "dashboard-swal-popup",
-              icon: "dashboard-swal-icon",
-              title: "dashboard-swal-title",
-              htmlContainer: "dashboard-swal-text",
-              confirmButton: "dashboard-swal-confirm-button",
+              popup: "custom-swal-background",
+              icon: "custom-swal-icon",
+              title: "custom-swal-title",
+              htmlContainer: "custom-swal-text",
             },
           });
         } else {
@@ -362,7 +373,7 @@ const FoodDashboard: React.FC = () => {
     },
     {
       id: 4,
-      type: "Snacks",
+      type: "Merienda",
       calories: calculateCaloriesByType("Merienda"),
       maxCalories: mealCalorieLimits.Merienda,
       iconUrl: "https://img.icons8.com/emoji/48/red-apple.png",

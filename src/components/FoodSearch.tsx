@@ -84,6 +84,7 @@ const FoodSearch: React.FC = () => {
             confirmButtonColor: "#ff9404",
             customClass: {
               popup: "custom-swal-background",
+              icon: "custom-swal-icon",
               title: "custom-swal-title",
               htmlContainer: "custom-swal-text",
             },
@@ -96,14 +97,14 @@ const FoodSearch: React.FC = () => {
         );
         await Swal.fire({
           title: "¡Error!",
-          text:
-            axiosError.response?.data?.error ||
-            "Ocurrió un error al buscar alimentos.",
+          text: "No se pudo guardar el alimento. Por favor intente de nuevo.",
           icon: "error",
+          iconColor: "#ff9400",
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9400",
           customClass: {
             popup: "custom-swal-background",
+            icon: "custom-swal-icon",
             title: "custom-swal-title",
             htmlContainer: "custom-swal-text",
           },
@@ -167,6 +168,7 @@ const FoodSearch: React.FC = () => {
           title: "¡Éxito!",
           text: response.data.message,
           icon: "success",
+          iconColor: "#ff9400",
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9404",
           customClass: {
@@ -194,10 +196,12 @@ const FoodSearch: React.FC = () => {
           title: "¡Error!",
           text: errorMessage,
           icon: "error",
+          iconColor: "#ff9400",
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9400",
           customClass: {
             popup: "custom-swal-background",
+            icon: "custom-swal-icon",
             title: "custom-swal-title",
             htmlContainer: "custom-swal-text",
           },

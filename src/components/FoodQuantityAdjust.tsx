@@ -415,6 +415,7 @@ const FoodQuantityAdjust: React.FC = () => {
         title: "¡Éxito!",
         text: response.data.message,
         icon: "success",
+        iconColor: "#ff9400",
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9404",
         customClass: {
@@ -437,10 +438,12 @@ const FoodQuantityAdjust: React.FC = () => {
         title: "¡Error!",
         text: errorMessage,
         icon: "error",
+        iconColor: "#ff9400",
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
         customClass: {
           popup: "custom-swal-background",
+          icon: "custom-swal-icon",
           title: "custom-swal-title",
           htmlContainer: "custom-swal-text",
         },
