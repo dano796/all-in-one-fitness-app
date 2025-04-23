@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Dumbbell,
@@ -16,6 +16,7 @@ import {
   LineChart,
   Menu,
   Camera,
+  X,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { supabase } from "../lib/supabaseClient";
@@ -26,6 +27,7 @@ const Sidebar: React.FC = () => {
   const logout = useAuthStore((state) => state.logout);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -60,16 +62,48 @@ const Sidebar: React.FC = () => {
     }
   };
 
+  // Cerrar sidebar al hacer clic fuera de él
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node) &&
+        isMobileOpen
+      ) {
+        setIsMobileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobileOpen]);
+
   return (
     <>
+      {/* Overlay para bloquear interacciones cuando el sidebar está abierto en móvil */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
       <button
         onClick={toggleMobile}
         className="fixed z-50 top-4 left-4 sm:hidden bg-[#ff9404] text-white p-2 rounded-lg shadow-lg"
+        aria-label={isMobileOpen ? "Cerrar menú" : "Abrir menú"}
       >
-        <Menu className="h-6 w-6" />
+        {isMobileOpen ? (
+          <X className="h-6 w-6" />
+        ) : (
+          <Menu className="h-6 w-6" />
+        )}
       </button>
 
       <aside
+        ref={sidebarRef}
         className={`h-screen bg-[#1C1C1E] flex flex-col items-center py-4 sm:py-6 shadow-xl fixed top-0 z-40 transition-all duration-300 
         ${isExpanded ? "sm:w-56" : "sm:w-20"} 
         ${isMobileOpen ? "w-56 translate-x-0" : "w-20 -translate-x-full"} 
