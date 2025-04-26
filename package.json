@@ -37,6 +37,7 @@
     "react-icons": "^5.5.0",
     "react-particles": "^2.12.2",
     "react-router-dom": "^6.22.2",
+    "react-spinners": "^0.17.0",
     "react-spring": "^9.7.5",
     "recharts": "^2.15.2",
     "sweetalert2": "^11.6.13",

@@ -17,6 +17,7 @@ import {
   Menu,
   Camera,
   X,
+  Search,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { supabase } from "../lib/supabaseClient";
@@ -214,6 +215,16 @@ const Sidebar: React.FC = () => {
               showLabel={isExpanded || isMobileOpen}
               icon={
                 <Camera className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+              }
+              onClick={handleNavItemClick}
+            />
+
+            <DashboardNavItem
+              to="/search-recipes"
+              label="Buscar Recetas"
+              showLabel={isExpanded || isMobileOpen}
+              icon={
+                <Search className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
             />

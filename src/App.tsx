@@ -31,7 +31,8 @@ const Routines = lazy(() => import("./pages/Routines"));
 const RoutineDetails = lazy(() => import("./pages/RoutineDetails"));
 const RMProgressPage = lazy(() => import("./pages/RMProgressPage"));
 const Settings = lazy(() => import("./pages/Settings"));
-const FoodSearchIAPage = lazy(() => import("./pages/FoodSearchIAPage")); // Nueva importación
+const FoodSearchIAPage = lazy(() => import("./pages/FoodSearchIAPage"));
+const SearchRecipes = lazy(() => import("./components/SearchRecipes"));
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -42,6 +43,7 @@ import CalorieCalculatorLayout from "./layouts/CalorieCalculatorLayout";
 import OneRMCalculatorLayout from "./layouts/OneRMCalculatorLayout";
 import ExerciseList from "./components/ExerciseList";
 import FoodDashboard from "./pages/FoodDashboard";
+import RecipeSearchLayout from "./layouts/RecipeLayout";
 
 // Protected Route Component
 const ProtectedRoute = ({
@@ -126,10 +128,16 @@ const protectedRoutes = [
     component: Settings,
   },
   {
-    path: "/foodsearchia", // Nueva ruta para FoodSearchIA
+    path: "/foodsearchia",
     layout: DashboardLayout,
     component: FoodSearchIAPage,
   },
+  {
+    path : "/search-recipes",
+    layout: RecipeSearchLayout,
+    component: SearchRecipes,
+  },
+
 ];
 
 function App() {
@@ -225,4 +233,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 

@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import FoodItem from "./FoodItem"; // Importar el componente
+import FoodItem from "./FoodItem";
 
 interface Food {
   food_id: string;

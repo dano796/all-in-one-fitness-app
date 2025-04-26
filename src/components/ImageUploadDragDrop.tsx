@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from "react";
-import { UploadCloud, Trash2 } from "lucide-react"; // Añadimos el ícono de basura
+import { UploadCloud, Trash2 } from "lucide-react";
 
 interface ImageUploadDragDropProps {
   onImageUpload: (file: File) => void;
-  onImageRemove: () => void; // Nueva prop para manejar la eliminación
+  onImageRemove: () => void; 
 }
 
 const ImageUploadDragDrop: React.FC<ImageUploadDragDropProps> = ({
@@ -60,8 +60,8 @@ const ImageUploadDragDrop: React.FC<ImageUploadDragDropProps> = ({
   };
 
   const handleRemoveImage = () => {
-    setImagePreview(null); // Limpiamos la previsualización
-    onImageRemove(); // Llamamos a la función para limpiar el estado en el componente padre
+    setImagePreview(null); 
+    onImageRemove();
   };
 
   return (
