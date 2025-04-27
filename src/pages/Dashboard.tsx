@@ -290,42 +290,82 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   // Prepare data for the BarChart (ensure all days of the week are displayed)
   const prepareWeeklyData = () => {
+    // Guard clause to handle invalid or unset startDate
+    if (!startDate || !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+      console.warn("Invalid or unset startDate, returning empty weekDays");
+      return [];
+    }
+
     const weekDays: {
       fullDate: string;
       date: string;
       calories: number;
       meta: number;
     }[] = [];
-    const startDateObj = new Date(startDate);
 
-    // Create array with all days of the week
+    // Crear fecha de inicio de la semana (domingo)
+    const startDateObj = new Date(startDate + "T00:00:00");
+
+    // Check if startDateObj is a valid date
+    if (isNaN(startDateObj.getTime())) {
+      console.warn("Invalid startDateObj, returning empty weekDays");
+      return [];
+    }
+
+    // Definir los nombres de los días en español
+    const dayAbbreviations = ["DO", "LU", "MA", "MI", "JU", "VI", "SA"];
+
+    // Crear array con todos los días de la semana en el orden correcto
     for (let i = 0; i < 7; i++) {
       const currentDate = new Date(startDateObj);
       currentDate.setDate(startDateObj.getDate() + i);
-      const dateStr = currentDate.toLocaleDateString("en-CA", {
-        timeZone: TIMEZONE,
-      });
+
+      // Formatear la fecha en formato YYYY-MM-DD
+      const dateStr = currentDate.toISOString().split("T")[0];
 
       weekDays.push({
         fullDate: dateStr,
-        date: currentDate.toLocaleDateString("es-CO", { weekday: "short" }),
+        date: dayAbbreviations[i],
         calories: 0,
         meta: dashboardData.calorieGoal,
       });
     }
 
-    // Fill in actual calorie data where available
+    // Mapeo de datos reales de calorías diarias
+    const dailyCaloriesMap = new Map<string, number>();
+
+    // Crear un mapa con los datos del backend para un acceso más rápido
     dashboardData.calorieIntake.dailyBreakdown.forEach((day) => {
-      const index = weekDays.findIndex((d) => d.fullDate === day.date);
-      if (index !== -1) {
-        weekDays[index].calories = Number(formatValue(day.calories));
+      dailyCaloriesMap.set(day.date, Number(formatValue(day.calories)));
+    });
+
+    // Asignar valores de calorías a cada día
+    weekDays.forEach((day, index) => {
+      if (dailyCaloriesMap.has(day.fullDate)) {
+        // Si tenemos datos del backend para este día
+        day.calories = dailyCaloriesMap.get(day.fullDate) || 0;
+      } else if (day.fullDate === date && date === todayStr) {
+        // Si es el día actual y no tenemos datos del backend, usar la ingesta calórica actual
+        day.calories = Number(
+          formatValue(dashboardData.calorieIntake.totalCalories)
+        );
       }
+    });
+
+    // Agregar información de debugging en consola
+    console.log("Datos del gráfico:", {
+      startDate,
+      endDate,
+      todayStr,
+      selectedDate: date,
+      weekDays,
+      dailyBreakdown: dashboardData.calorieIntake.dailyBreakdown,
     });
 
     return weekDays;
   };
 
-  const barData = prepareWeeklyData();
+  const barData = startDate ? prepareWeeklyData() : [];
 
   // Calculate water intake percentage
   const waterGoal = TOTAL_WATER_UNITS * WATER_PER_UNIT;
@@ -538,7 +578,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               </div>
             </motion.div>
 
-            {/* Enhanced Water Intake */}
+            {/* Water Intake */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
@@ -631,11 +671,67 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     domain={[0, Math.ceil(dashboardData.calorieGoal * 1.1)]}
                   />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#3B4252",
-                      border: "1px solid #ff9404",
-                      borderRadius: "4px",
-                      color: "#fff",
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        const dayNames = {
+                          DO: "Domingo",
+                          LU: "Lunes",
+                          MA: "Martes",
+                          MI: "Miércoles",
+                          JU: "Jueves",
+                          VI: "Viernes",
+                          SA: "Sábado",
+                        };
+                        const dayName =
+                          dayNames[label as keyof typeof dayNames] || label;
+                        const fullDate = new Date(
+                          data.fullDate
+                        ).toLocaleDateString("es-CO", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        });
+
+                        const caloriesValue = payload[0].value as number;
+                        const percentage = Math.round(
+                          (caloriesValue / data.meta) * 100
+                        );
+                        const isOverGoal = caloriesValue > data.meta;
+
+                        return (
+                          <div className="custom-tooltip bg-[#282c3c] p-3 border border-[#ff9404] rounded-lg shadow-lg">
+                            <p className="font-bold text-white">{dayName}</p>
+                            <p className="text-gray-300 text-xs mb-2">
+                              {fullDate}
+                            </p>
+                            <p className="text-sm">
+                              <span className="text-white">Calorías:</span>{" "}
+                              <span
+                                className={`font-bold ${
+                                  isOverGoal
+                                    ? "text-orange-400"
+                                    : "text-blue-400"
+                                }`}
+                              >
+                                {caloriesValue.toFixed(0)}
+                              </span>
+                              <span className="text-white"> de </span>
+                              <span className="text-gray-300">{data.meta}</span>
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {isOverGoal
+                                ? `${percentage}% (exceso de ${(
+                                    caloriesValue - data.meta
+                                  ).toFixed(0)} cal)`
+                                : `${percentage}% (${(
+                                    data.meta - caloriesValue
+                                  ).toFixed(0)} cal restantes)`}
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
                     }}
                     cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
                   />
