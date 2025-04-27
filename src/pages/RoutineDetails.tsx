@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Plus, Trash2, CheckCircle, XCircle, X } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, CheckCircle, XCircle, X, ChevronDown, ChevronUp, Clock } from "lucide-react";
 import axios from "axios";
 import GalaxyBackground from "../components/GalaxyBackground";
 import { Progress } from "@/components/ui/progress";
@@ -24,7 +24,7 @@ interface Exercise {
   target: string;
   secondaryMuscles: string[];
   instructions: string[];
-  sets: { kg: string; reps: string; completed?: boolean }[];
+  series: { sets: { kg: string; reps: string; completed?: boolean }[] }[];
   restTimer?: string;
   note?: string;
 }
@@ -42,11 +42,20 @@ const RoutineDetails: React.FC = () => {
   const [isTimerModalOpen, setIsTimerModalOpen] = useState<boolean>(false);
   const [timerCompleted, setTimerCompleted] = useState<boolean>(false);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState<number>(0);
+  const [expandedExercises, setExpandedExercises] = useState<{ [key: string]: boolean }>({});
+  const [customTimer, setCustomTimer] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toLocaleDateString("en-CA") // Formato YYYY-MM-DD
+  );
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const timerSound = new Audio(timerEndSound);
 
   const queryParams = new URLSearchParams(location.search);
   const routineId = queryParams.get("id");
+  const userEmail = queryParams.get("email") || "";
+
+  const isToday = selectedDate === new Date().toLocaleDateString("en-CA");
 
   const fetchRoutineDetails = useCallback(async () => {
     if (!routineId) {
@@ -56,8 +65,14 @@ const RoutineDetails: React.FC = () => {
     }
 
     try {
+      // Limpiar editedExercises antes de cargar nuevos datos
+      setEditedExercises([]);
+
       const response = await axios.get<{ routine: Routine }>(
-        `${import.meta.env.VITE_BACKEND_URL}/api/routines/${routineId}`
+        `${import.meta.env.VITE_BACKEND_URL}/api/routines/${routineId}`,
+        {
+          params: { date: selectedDate }, // Filtrar por fecha para cargar historial
+        }
       );
       const fetchedRoutine = response.data.routine;
 
@@ -70,13 +85,24 @@ const RoutineDetails: React.FC = () => {
 
       if (!Array.isArray(exercises)) exercises = [];
 
-      exercises = exercises.map((exercise) => ({
-        ...exercise,
-        sets: exercise.sets.map((set) => ({
-          ...set,
-          completed: set.completed ?? false,
-        })),
-      }));
+      exercises = exercises.map((exercise) => {
+        return {
+          ...exercise,
+          series: exercise.series?.length
+            ? exercise.series.map((serie) => ({
+                sets: serie.sets?.length
+                  ? serie.sets.map((set) => ({
+                      ...set,
+                      kg: set.kg || "0",
+                      reps: set.reps || "0",
+                      completed: set.completed ?? false,
+                    }))
+                  : [],
+              }))
+            : [{ sets: [] }],
+          note: exercise.note || '',
+        };
+      });
 
       setRoutine(fetchedRoutine);
       setEditedExercises(exercises);
@@ -87,11 +113,24 @@ const RoutineDetails: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [routineId]);
+  }, [routineId, selectedDate]);
 
   useEffect(() => {
     fetchRoutineDetails();
   }, [fetchRoutineDetails]);
+
+  // Advertencia al salir si hay cambios sin guardar
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isToday && JSON.stringify(editedExercises) !== JSON.stringify(routine?.exercises)) {
+        e.preventDefault();
+        e.returnValue = "Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [editedExercises, routine, isToday]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -104,6 +143,10 @@ const RoutineDetails: React.FC = () => {
       setIsTimerModalOpen(false);
       setTimerCompleted(true);
       timerSound.play().catch((err) => console.error("Error al reproducir el sonido:", err));
+      setTimeout(() => {
+        timerSound.pause();
+        timerSound.currentTime = 0;
+      }, 2000);
     }
     return () => {
       if (interval) clearInterval(interval);
@@ -111,7 +154,7 @@ const RoutineDetails: React.FC = () => {
   }, [isTimerRunning, timer]);
 
   const startRestTimer = (restTimer: string) => {
-    const seconds = parseInt(restTimer) || 0;
+    const seconds = restTimer === "Otro" ? parseInt(customTimer) || 0 : parseInt(restTimer) || 0;
     setTimer(seconds);
     setInitialTimer(seconds);
     setIsTimerRunning(true);
@@ -128,59 +171,144 @@ const RoutineDetails: React.FC = () => {
     setTimerCompleted(false);
   };
 
-  const handleBackClick = () => navigate("/routines");
+  const handleBackClick = () => navigate(`/dashboard?email=${encodeURIComponent(userEmail)}`);
 
-  const handleAddSet = (exerciseIndex: number) => {
-    const updatedExercises = [...editedExercises];
-    updatedExercises[exerciseIndex].sets.push({ kg: "", reps: "", completed: false });
-    setEditedExercises(updatedExercises);
+  const saveRoutine = async (updatedExercises: Exercise[], includeFecha: boolean = false) => {
+    if (!routineId) return;
+    try {
+      const payload: { exercises: Exercise[]; fecha?: string } = {
+        exercises: updatedExercises,
+      };
+      if (includeFecha) {
+        payload.fecha = new Date().toISOString().split("T")[0]; // Enviar la fecha actual solo al "Finalizar"
+      }
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/routines/${routineId}`, payload);
+      setRoutine((prev) => (prev ? { ...prev, exercises: updatedExercises } : prev));
+    } catch (err) {
+      console.error("Error al guardar los cambios automáticamente:", err);
+      if (err.response?.status === 403) {
+        setError("No se pueden modificar sets de días anteriores.");
+      } else {
+        setError("Error al guardar los cambios.");
+      }
+    }
   };
 
-  const handleRemoveSet = (exerciseIndex: number, setIndex: number) => {
+  const handleAddSerie = (exerciseIndex: number) => {
     const updatedExercises = [...editedExercises];
-    updatedExercises[exerciseIndex].sets.splice(setIndex, 1);
+    updatedExercises[exerciseIndex].series.push({ sets: [] });
     setEditedExercises(updatedExercises);
+    saveRoutine(updatedExercises); // Guardar cambios estructurales
+  };
+
+  const handleRemoveSerie = (exerciseIndex: number, serieIndex: number) => {
+    const updatedExercises = [...editedExercises];
+    updatedExercises[exerciseIndex].series.splice(serieIndex, 1);
+    setEditedExercises(updatedExercises);
+    saveRoutine(updatedExercises); // Guardar cambios estructurales
+  };
+
+  const handleAddSet = (exerciseIndex: number, serieIndex: number) => {
+    const updatedExercises = [...editedExercises];
+    updatedExercises[exerciseIndex].series[serieIndex].sets.push({ kg: "", reps: "", completed: false });
+    setEditedExercises(updatedExercises);
+    saveRoutine(updatedExercises); // Guardar cambios estructurales
+  };
+
+  const handleRemoveSet = (exerciseIndex: number, serieIndex: number, setIndex: number) => {
+    const updatedExercises = [...editedExercises];
+    updatedExercises[exerciseIndex].series[serieIndex].sets.splice(setIndex, 1);
+    setEditedExercises(updatedExercises);
+    saveRoutine(updatedExercises); // Guardar cambios estructurales
   };
 
   const handleSetChange = (
     exerciseIndex: number,
+    serieIndex: number,
     setIndex: number,
     field: "kg" | "reps",
     value: string
   ) => {
     const updatedExercises = [...editedExercises];
-    updatedExercises[exerciseIndex].sets[setIndex][field] = value;
+    const updatedSeries = [...updatedExercises[exerciseIndex].series];
+    const updatedSets = [...updatedSeries[serieIndex].sets];
+    updatedSets[setIndex] = { ...updatedSets[setIndex], [field]: value };
+    updatedSeries[serieIndex] = { sets: updatedSets };
+    updatedExercises[exerciseIndex] = {
+      ...updatedExercises[exerciseIndex],
+      series: updatedSeries,
+    };
     setEditedExercises(updatedExercises);
+    // No guardar automáticamente, se guardará al "Finalizar"
   };
 
-  const handleToggleSetCompleted = (exerciseIndex: number, setIndex: number) => {
+  const handleSetBlur = (exerciseIndex: number, serieIndex: number, setIndex: number) => {
     const updatedExercises = [...editedExercises];
-    updatedExercises[exerciseIndex].sets[setIndex].completed =
-      !updatedExercises[exerciseIndex].sets[setIndex].completed;
+    const updatedSeries = [...updatedExercises[exerciseIndex].series];
+    const updatedSets = [...updatedSeries[serieIndex].sets];
+    updatedSets[setIndex] = {
+      ...updatedSets[setIndex],
+      kg: updatedSets[setIndex].kg || "0",
+      reps: updatedSets[setIndex].reps || "0",
+      completed: updatedSets[setIndex].completed ?? false,
+    };
+    updatedSeries[serieIndex] = { sets: updatedSets };
+    updatedExercises[exerciseIndex] = {
+      ...updatedExercises[exerciseIndex],
+      series: updatedSeries,
+    };
     setEditedExercises(updatedExercises);
+    // No guardar automáticamente, se guardará al "Finalizar"
+  };
+
+  const handleToggleSetCompleted = (exerciseIndex: number, serieIndex: number, setIndex: number) => {
+    const updatedExercises = [...editedExercises];
+    const updatedSeries = [...updatedExercises[exerciseIndex].series];
+    const updatedSets = [...updatedSeries[serieIndex].sets];
+    updatedSets[setIndex] = {
+      ...updatedSets[setIndex],
+      completed: !updatedSets[setIndex].completed,
+    };
+    updatedSeries[serieIndex] = { sets: updatedSets };
+    updatedExercises[exerciseIndex] = {
+      ...updatedExercises[exerciseIndex],
+      series: updatedSeries,
+    };
+    setEditedExercises(updatedExercises);
+    // No guardar automáticamente, se guardará al "Finalizar"
   };
 
   const handleNoteChange = (exerciseIndex: number, value: string) => {
     const updatedExercises = [...editedExercises];
     updatedExercises[exerciseIndex].note = value;
     setEditedExercises(updatedExercises);
+    // No guardar automáticamente, se guardará al "Finalizar"
   };
 
-  const handleSaveChanges = async () => {
-    if (!routineId) return;
-    try {
-      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/routines/${routineId}`, {
-        exercises: editedExercises,
-      });
-      setRoutine({ ...routine!, exercises: editedExercises });
-      navigate("/routines");
-    } catch (err) {
-      console.error("Error al guardar los cambios:", err);
-      setError("Error al guardar los cambios.");
-    }
+  const handleNoteBlur = (exerciseIndex: number) => {
+    // No guardar automáticamente, se guardará al "Finalizar"
   };
 
-  const handleDiscardWorkout = () => navigate("/routines");
+  const handleRestTimerChange = (exerciseIndex: number, value: string) => {
+    const updatedExercises = [...editedExercises];
+    updatedExercises[exerciseIndex].restTimer = value;
+    setEditedExercises(updatedExercises);
+    saveRoutine(updatedExercises); // Guardar cambios estructurales
+  };
+
+  const handleToggleExercise = (exerciseId: string) => {
+    setExpandedExercises((prev) => ({
+      ...prev,
+      [exerciseId]: !prev[exerciseId],
+    }));
+  };
+
+  const handleFinish = async () => {
+    await saveRoutine(editedExercises, true); // Incluir fecha para guardar en HistorialSets
+    navigate(`/dashboard?email=${encodeURIComponent(userEmail)}`);
+  };
+
+  const handleDiscardWorkout = () => navigate(`/dashboard?email=${encodeURIComponent(userEmail)}`);
 
   const handleAddExercise = () => {
     navigate("/ejercicios", {
@@ -188,16 +316,61 @@ const RoutineDetails: React.FC = () => {
     });
   };
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedDate = e.target.value;
+    setSelectedDate(selectedDate);
+  };
+
+  const handleDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.focus();
+      dateInputRef.current.showPicker();
+    }
+  };
+
+  const getDateLabel = () => {
+    const selectedDateObj = new Date(selectedDate + "T00:00:00");
+    const today = new Date(new Date().toLocaleDateString("en-CA") + "T00:00:00");
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    if (selectedDateObj.getTime() === today.getTime()) return "Hoy";
+    if (selectedDateObj.getTime() === yesterday.getTime()) return "Ayer";
+    return selectedDateObj.toLocaleDateString("es-CO", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
   const calculateProgress = () => {
-    const totalSets = editedExercises.reduce((total, exercise) => total + exercise.sets.length, 0);
+    const totalSets = editedExercises.reduce(
+      (total, exercise) =>
+        total + exercise.series.reduce((serieTotal, serie) => serieTotal + serie.sets.length, 0),
+      0
+    );
     const completedSets = editedExercises.reduce(
-      (total, exercise) => total + exercise.sets.filter((set) => set.completed).length,
+      (total, exercise) =>
+        total +
+        exercise.series.reduce(
+          (serieTotal, serie) =>
+            serieTotal + serie.sets.filter((set) => set.completed).length,
+          0
+        ),
       0
     );
     return totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
   };
 
+  const hasSetsForDate = () => {
+    return editedExercises.some((exercise) =>
+      exercise.series.some((serie) => serie.sets.length > 0)
+    );
+  };
+
   const timerProgress = initialTimer > 0 ? ((initialTimer - timer) / initialTimer) * 100 : 0;
+
+  // Clase común para los botones con el estilo del botón de fecha
+  const dateButtonStyle = "px-6 py-3 bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#3B4252] hover:to-[#4B5563] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300";
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen text-gray-400">Cargando...</div>;
@@ -223,13 +396,30 @@ const RoutineDetails: React.FC = () => {
         <button onClick={handleBackClick} className="text-white p-2 hover:text-[#ff9404] transition-colors">
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-xl font-bold text-center flex-1">Registro de Entrenamiento</h1>
-        <button
-          onClick={handleSaveChanges}
-          className="bg-[#ff9404] text-white py-2 px-4 rounded-lg font-semibold hover:bg-[#e08503] transition-colors"
-        >
-          Finalizar
-        </button>
+        <div className="flex-1 text-center">
+          <button
+            onClick={handleDatePicker}
+            className={dateButtonStyle}
+          >
+            {getDateLabel()}
+          </button>
+          <input
+            type="date"
+            ref={dateInputRef}
+            value={selectedDate}
+            onChange={handleDateChange}
+            max={new Date().toLocaleDateString("en-CA")}
+            className="absolute opacity-0 w-0 h-0 pointer-events-none"
+          />
+        </div>
+        {isToday && (
+          <button
+            onClick={handleFinish}
+            className={dateButtonStyle}
+          >
+            Finalizar
+          </button>
+        )}
       </motion.div>
 
       <motion.div
@@ -261,7 +451,20 @@ const RoutineDetails: React.FC = () => {
         <div className="text-center">
           <p className="text-sm text-gray-400">Series</p>
           <p className="text-base font-semibold">
-            {editedExercises.reduce((total, exercise) => total + exercise.sets.length, 0)}
+            {editedExercises.reduce(
+              (total, exercise) => total + exercise.series.length,
+              0
+            )}
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-sm text-gray-400">Sets</p>
+          <p className="text-base font-semibold">
+            {editedExercises.reduce(
+              (total, exercise) =>
+                total + exercise.series.reduce((serieTotal, serie) => serieTotal + serie.sets.length, 0),
+              0
+            )}
           </p>
         </div>
       </motion.div>
@@ -279,90 +482,195 @@ const RoutineDetails: React.FC = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 + exerciseIndex * 0.2, duration: 0.8 }}
-              className="bg-gray-700 rounded-xl p-4 mb-4 shadow-lg hover:-translate-y-0.5 transition-transform"
+              className="bg-[#3B4252] rounded-xl p-4 mb-4 shadow-lg hover:-translate-y-0.5 transition-transform"
             >
-              <div className="flex items-center gap-4 mb-2">
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-400 flex items-center justify-center">
-                  <img src={exercise.gifUrl} alt={exercise.name} className="w-full h-full object-cover" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold uppercase">{exercise.name}</h3>
-                  <p className="text-sm text-gray-400 uppercase">({exercise.equipment})</p>
-                </div>
-              </div>
-
-              <div className="my-3">
-                <input
-                  type="text"
-                  placeholder="Añadir notas..."
-                  value={exercise.note || ""}
-                  onChange={(e) => handleNoteChange(exerciseIndex, e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:border-[#ff9404] outline-none transition-colors"
-                />
-              </div>
-
-              {exercise.restTimer && (
-                <div className="flex gap-4 my-4">
-                  <button
-                    onClick={() => startRestTimer(exercise.restTimer!)}
-                    className="bg-[#ff9404] text-white py-2 px-4 rounded-lg font-semibold hover:bg-[#e08503] transition-colors"
-                  >
-                    Iniciar Temporizador ({exercise.restTimer})
-                  </button>
-                </div>
-              )}
-
-              <div className="mt-4">
-                <div className="flex justify-between py-2 border-b border-gray-600 mb-2">
-                  <span className="text-sm font-semibold text-gray-400 flex-1 text-center">SET</span>
-                  <span className="text-sm font-semibold text-gray-400 flex-1 text-center">PREVIO</span>
-                  <span className="text-sm font-semibold text-gray-400 flex-1 text-center">KG</span>
-                  <span className="text-sm font-semibold text-gray-400 flex-1 text-center">REPS</span>
-                  <span className="text-sm font-semibold text-gray-400 flex-1 text-center"></span>
-                </div>
-                {exercise.sets.map((set, setIndex) => (
-                  <div key={setIndex} className="flex items-center justify-between gap-2 mb-2">
-                    <span className="w-8 text-center text-base">{setIndex + 1}</span>
-                    <span className="w-16 text-center text-base">
-                      {set.kg && set.reps ? `${set.kg} kg x ${set.reps}` : "-"}
-                    </span>
-                    <input
-                      type="text"
-                      placeholder="kg"
-                      value={set.kg}
-                      onChange={(e) => handleSetChange(exerciseIndex, setIndex, "kg", e.target.value)}
-                      className="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white w-16 text-center focus:border-[#ff9404] outline-none transition-colors"
-                    />
-                    <input
-                      type="text"
-                      placeholder="reps"
-                      value={set.reps}
-                      onChange={(e) => handleSetChange(exerciseIndex, setIndex, "reps", e.target.value)}
-                      className="bg-gray-700 border border-gray-600 rounded-lg p-2 text-white w-16 text-center focus:border-[#ff9404] outline-none transition-colors"
-                    />
-                    <button
-                      onClick={() => handleToggleSetCompleted(exerciseIndex, setIndex)}
-                      className="p-1"
-                    >
-                      {set.completed ? (
-                        <CheckCircle className="w-5 h-5 text-[#ff9404]" />
-                      ) : (
-                        <CheckCircle className="w-5 h-5 text-gray-500" />
-                      )}
-                    </button>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-400 flex items-center justify-center">
+                    <img src={exercise.gifUrl} alt={exercise.name} className="w-full h-full object-cover" />
                   </div>
-                ))}
+                  <div>
+                    <h3 className="text-lg font-semibold uppercase">{exercise.name}</h3>
+                    <p className="text-sm text-gray-400 uppercase">({exercise.equipment})</p>
+                  </div>
+                </div>
                 <button
-                  onClick={() => handleAddSet(exerciseIndex)}
-                  className="w-full bg-transparent border border-[#ff9404] text-[#ff9404] py-2 px-4 rounded-lg hover:bg-[#ff9404] hover:text-black transition-colors text-center"
+                  onClick={() => handleToggleExercise(exercise.id)}
+                  className="bg-transparent border-none cursor-pointer p-1 transition-transform duration-200 hover:scale-125 active:scale-90"
                 >
-                  + Añadir Serie
+                  {expandedExercises[exercise.id] ? (
+                    <ChevronUp className="w-5 h-5 text-[#ff9404] hover:text-[#e08503] transition-colors duration-300" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-[#ff9404] hover:text-[#e08503] transition-colors duration-300" />
+                  )}
                 </button>
               </div>
+
+              {expandedExercises[exercise.id] && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  {isToday && (
+                    <>
+                      <div className="my-3">
+                        <input
+                          type="text"
+                          placeholder="Añadir notas..."
+                          value={exercise.note || ""}
+                          onChange={(e) => handleNoteChange(exerciseIndex, e.target.value)}
+                          onBlur={() => handleNoteBlur(exerciseIndex)}
+                          className="w-full bg-[#4B5563] border border-gray-600 rounded-lg p-2 text-white focus:border-[#ff9404] outline-none transition-colors"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-2 mb-4">
+                        <label className="text-base font-medium text-white">
+                          Temporizador de descanso:
+                        </label>
+                        <select
+                          value={exercise.restTimer || "Apagado"}
+                          onChange={(e) => handleRestTimerChange(exerciseIndex, e.target.value)}
+                          className="w-full max-w-[200px] p-3 rounded-lg border border-gray-600 bg-[#4B5563] text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-[#4B5563] focus:scale-102"
+                        >
+                          <option value="Apagado">Apagado</option>
+                          <option value="30">30 segundos</option>
+                          <option value="60">60 segundos</option>
+                          <option value="90">90 segundos</option>
+                          <option value="Otro">Otro</option>
+                        </select>
+                        {exercise.restTimer === "Otro" && (
+                          <input
+                            type="number"
+                            placeholder="Segundos"
+                            value={customTimer}
+                            onChange={(e) => setCustomTimer(e.target.value)}
+                            className="mt-2 w-full max-w-[200px] p-3 rounded-lg border border-gray-600 bg-[#4B5563] text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-[#4B5563] focus:scale-102"
+                          />
+                        )}
+                      </div>
+
+                      {exercise.restTimer && exercise.restTimer !== "Apagado" && (
+                        <div className="flex gap-4 my-4">
+                          <button
+                            onClick={() => startRestTimer(exercise.restTimer!)}
+                            className="text-[#ff9404] hover:text-[#e08503] transition-colors"
+                          >
+                            <Clock className="w-6 h-6" />
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {(isToday || hasSetsForDate()) && (
+                    <div className="mt-4">
+                      {exercise.series.map((serie, serieIndex) => (
+                        <div key={serieIndex} className="mb-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <h4 className="text-base font-semibold text-white">Serie {serieIndex + 1}</h4>
+                            {isToday && exercise.series.length > 1 && (
+                              <button
+                                onClick={() => handleRemoveSerie(exerciseIndex, serieIndex)}
+                                className="text-red-500 hover:text-red-600 transition-colors"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+                            )}
+                          </div>
+                          {serie.sets.length > 0 && (
+                            <div className="flex justify-between py-2 border-b border-gray-600 mb-2">
+                              <span className="text-sm font-semibold text-gray-400 flex-1 text-center">SET</span>
+                              <span className="text-sm font-semibold text-gray-400 flex-1 text-center">PREVIO</span>
+                              <span className="text-sm font-semibold text-gray-400 flex-1 text-center">KG</span>
+                              <span className="text-sm font-semibold text-gray-400 flex-1 text-center">REPS</span>
+                              <span className="text-sm font-semibold text-gray-400 flex-1 text-center"></span>
+                              {isToday && <span className="text-sm font-semibold text-gray-400 flex-1 text-center"></span>}
+                            </div>
+                          )}
+                          {serie.sets.map((set, setIndex) => (
+                            <div key={setIndex} className="flex items-center justify-between gap-2 mb-2">
+                              <span className="w-8 text-center text-base">{setIndex + 1}</span>
+                              <span className="w-16 text-center text-base">
+                                {set.kg && set.reps ? `${set.kg} kg x ${set.reps}` : "-"}
+                              </span>
+                              <input
+                                type="text"
+                                placeholder="kg"
+                                value={set.kg}
+                                onChange={(e) =>
+                                  handleSetChange(exerciseIndex, serieIndex, setIndex, "kg", e.target.value)
+                                }
+                                onBlur={() => handleSetBlur(exerciseIndex, serieIndex, setIndex)}
+                                className="bg-[#4B5563] border border-gray-600 rounded-lg p-2 text-white w-16 text-center focus:border-[#ff9404] outline-none transition-colors"
+                                disabled={!isToday}
+                              />
+                              <input
+                                type="text"
+                                placeholder="reps"
+                                value={set.reps}
+                                onChange={(e) =>
+                                  handleSetChange(exerciseIndex, serieIndex, setIndex, "reps", e.target.value)
+                                }
+                                onBlur={() => handleSetBlur(exerciseIndex, serieIndex, setIndex)}
+                                className="bg-[#4B5563] border border-gray-600 rounded-lg p-2 text-white w-16 text-center focus:border-[#ff9404] outline-none transition-colors"
+                                disabled={!isToday}
+                              />
+                              <button
+                                onClick={() => handleToggleSetCompleted(exerciseIndex, serieIndex, setIndex)}
+                                className="p-1"
+                                disabled={!isToday}
+                              >
+                                {set.completed ? (
+                                  <CheckCircle className="w-5 h-5 text-[#ff9404]" />
+                                ) : (
+                                  <CheckCircle className="w-5 h-5 text-gray-500" />
+                                )}
+                              </button>
+                              {isToday && (
+                                <button
+                                  onClick={() => handleRemoveSet(exerciseIndex, serieIndex, setIndex)}
+                                  className="text-red-500 hover:text-red-600 transition-colors"
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          {isToday && (
+                            <button
+                              onClick={() => handleAddSet(exerciseIndex, serieIndex)}
+                              className={`w-full ${dateButtonStyle} mt-2`}
+                            >
+                              + Añadir Set
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {isToday && (
+                        <button
+                          onClick={() => handleAddSerie(exerciseIndex)}
+                          className={`w-full ${dateButtonStyle} mt-2`}
+                        >
+                          + Añadir Serie
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              )}
             </motion.div>
           ))
         ) : (
           <p className="text-center text-gray-400 text-base mt-8">No hay ejercicios en esta rutina.</p>
+        )}
+        {editedExercises.length > 0 && !hasSetsForDate() && (
+          <p className="text-center text-gray-400 text-base mt-4">
+            No hay sets registrados para esta fecha.
+          </p>
         )}
       </motion.div>
 
@@ -372,19 +680,25 @@ const RoutineDetails: React.FC = () => {
         transition={{ duration: 1.0, ease: "easeOut", delay: 1.2 }}
         className="mt-8 flex flex-col gap-4"
       >
-        <button
-          onClick={handleAddExercise}
-          className="bg-[#ff9404] text-white py-3 px-4 rounded-lg font-semibold hover:bg-[#e08503] transition-colors text-center"
-        >
-          + Añadir Ejercicio
-        </button>
-        <div className="flex gap-4">
-          <button className="flex-1 bg-gray-700 text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-600 transition-colors text-center">
-            Configuración
+        {isToday && (
+          <button
+            onClick={handleAddExercise}
+            className={`w-full ${dateButtonStyle}`}
+          >
+            + Añadir Ejercicio
           </button>
+        )}
+        <div className="flex gap-4">
+          {isToday && (
+            <button
+              className={`flex-1 ${dateButtonStyle}`}
+            >
+              Configuración
+            </button>
+          )}
           <button
             onClick={handleDiscardWorkout}
-            className="flex-1 bg-gray-700 text-red-500 py-3 px-4 rounded-lg font-semibold hover:bg-red-500 hover:text-white transition-colors text-center"
+            className={`flex-1 ${dateButtonStyle}`}
           >
             Descartar Entrenamiento
           </button>
@@ -392,7 +706,7 @@ const RoutineDetails: React.FC = () => {
       </motion.div>
 
       <AnimatePresence>
-        {isTimerModalOpen && (
+        {isTimerModalOpen && isToday && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -433,13 +747,13 @@ const RoutineDetails: React.FC = () => {
               <div className="flex gap-4 justify-center">
                 <button
                   onClick={toggleTimer}
-                  className="bg-[#ff9404] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#e08503] transition-colors hover:scale-105"
+                  className={dateButtonStyle}
                 >
                   {isTimerRunning ? "Pausar" : "Reanudar"}
                 </button>
                 <button
                   onClick={() => startRestTimer(editedExercises[currentExerciseIndex]?.restTimer || "0")}
-                  className="bg-[#ff9404] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#e08503] transition-colors hover:scale-105"
+                  className={dateButtonStyle}
                 >
                   Reiniciar
                 </button>
@@ -450,7 +764,7 @@ const RoutineDetails: React.FC = () => {
       </AnimatePresence>
 
       <AnimatePresence>
-        {timerCompleted && (
+        {timerCompleted && isToday && (
           <motion.div
             className="fixed inset-0 pointer-events-none z-0"
             initial={{ opacity: 0 }}

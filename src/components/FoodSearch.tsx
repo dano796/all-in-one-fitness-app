@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios, { AxiosError } from "axios";
 import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaSearch } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion"; // Agregamos framer-motion
+import { ClipLoader } from "react-spinners"; // Agregamos ClipLoader
 import FoodItem from "./FoodItem";
 
 interface Food {
@@ -219,42 +221,107 @@ const FoodSearch: React.FC = () => {
   );
 
   return (
-    <div className="mt-0">
-      <div className="ml-0 mr-2 mt-0">
-        <Link to="/dashboard" className="inline-block">
-          <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10">
-            <FaArrowLeft className="mr-1 text-base" />
-            Volver
-          </button>
-        </Link>
-      </div>
+    <div className="relative min-h-screen bg-[#282c3c] overflow-hidden">
+      {/* Contenido principal */}
+      <div className="relative z-10 p-4 mt-8 sm:p-6 space-y-4 sm:space-y-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+            >
+              <Link to="/dashboard">
+                <button
+                  className="flex items-center py-2 px-3 sm:px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300"
+                  aria-label="Volver al dashboard"
+                >
+                  <FaArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  Volver
+                </button>
+              </Link>
+            </motion.div>
+          </div>
 
-      <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-9">
-        <h2 className="text-sm font-semibold mb-2 text-white">Buscar Alimentos</h2>
-        <div className="flex items-center space-x-4">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ingresa un alimento (ejemplo: manzana)"
-            disabled={loading}
-            className="w-full px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 transition-all duration-300 focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 placeholder:text-gray-500 [.error&]:border-[#ff4444] disabled:bg-[#3B4252] disabled:cursor-not-allowed disabled:opacity-70 sm:text-sm sm:px-2.5 sm:py-1.5 text-xs px-2 py-1"
-          />
-          <button
-            onClick={handleSearch}
-            disabled={loading}
-            className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="bg-[#3B4252] rounded-lg p-4 sm:p-5 shadow-md w-full mt-3 sm:mt-4"
           >
-            {loading ? "Buscando..." : "Buscar"}
-          </button>
+            <h2 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">
+              Buscar Alimentos
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ingresa un alimento (ejemplo: manzana)"
+                disabled={loading}
+                className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-600 rounded-lg bg-[#2D3242] text-white placeholder-gray-400 focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 text-sm sm:text-base"
+                aria-label="Buscar alimentos"
+              />
+              <button
+                onClick={handleSearch}
+                disabled={loading}
+                className="flex items-center justify-center py-2 px-4 sm:px-6 bg-gradient-to-br from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-lg shadow-md hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Iniciar búsqueda"
+              >
+                {loading ? (
+                  <ClipLoader color="#ffffff" size={16} />
+                ) : (
+                  <>
+                    <FaSearch className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                    Buscar
+                  </>
+                )}
+              </button>
+            </div>
+            {error && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-red-400 mt-2 sm:mt-3 text-xs sm:text-sm"
+              >
+                {error}
+              </motion.p>
+            )}
+          </motion.div>
         </div>
-        {error && <p className="text-red-400 mt-2 text-xs">{error}</p>}
+
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex justify-center my-6 sm:my-8"
+          >
+            <ClipLoader color="#ff9404" size={40} />
+          </motion.div>
+        )}
+
+        {hasSearched && !loading && foods.length === 0 && !error && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-gray-300 text-center my-6 sm:my-8 max-w-5xl mx-auto text-sm sm:text-base px-2 sm:px-4"
+          >
+            No se encontraron resultados
+          </motion.div>
+        )}
 
         {foods.length > 0 && (
-          <div className="mt-4">
-            <h3 className="text-sm font-semibold mb-2 text-white">Resultados</h3>
-            <div className="space-y-3 max-h-[18rem] overflow-y-auto [scrollbar-width:thin] scrollbar-thin scrollbar-track-[#3B4252] scrollbar-thumb-[#6B7280] hover:scrollbar-thumb-[#9CA3AF]">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-[#3B4252] rounded-lg p-4 sm:p-5 shadow-md max-w-5xl mx-auto px-2 sm:px-4"
+          >
+            <h3 className="text-lg sm:text-xl font-semibold text-white mx-2 mb-3 sm:mb-4">
+              Resultados
+            </h3>
+            <div className="space-y-3 max-h-[50vh] overflow-y-auto ml-2 pr-2 [scrollbar-width:thin] scrollbar-thin scrollbar-track-[#2D3242] scrollbar-thumb-[#6B7280] hover:scrollbar-thumb-[#9CA3AF]">
               {foods.map((food) => (
                 <FoodItem
                   key={food.food_id}
@@ -267,12 +334,7 @@ const FoodSearch: React.FC = () => {
                 />
               ))}
             </div>
-          </div>
-        )}
-        {!loading && hasSearched && foods.length === 0 && !error && (
-          <p className="text-gray-300 text-center text-xs mt-2">
-            No se encontraron resultados
-          </p>
+          </motion.div>
         )}
       </div>
     </div>

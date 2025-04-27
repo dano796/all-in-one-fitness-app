@@ -6,7 +6,8 @@ interface DashboardNavItemProps {
   label: string;
   icon: React.ReactNode;
   showLabel: boolean;
-  onClick?: () => void; // New optional onClick prop
+  onClick?: () => void;
+  isActive?: boolean;
 }
 
 const DashboardNavItem: React.FC<DashboardNavItemProps> = ({
@@ -15,14 +16,19 @@ const DashboardNavItem: React.FC<DashboardNavItemProps> = ({
   icon,
   showLabel,
   onClick,
+  isActive = false,
 }) => {
   return (
     <Link
       to={to}
-      className={`flex items-center text-white hover:text-[#ff9404] transition-all duration-300 ${
+      className={`flex items-center w-full transition-all duration-300 ${
         showLabel ? "justify-start pl-6" : "justify-center"
-      } w-full`}
-      onClick={onClick} // Add the onClick handler
+      } ${
+        isActive
+          ? "text-[#ff9404]" // Solo cambia el color del texto/icono
+          : "text-white hover:text-[#ff9404]" // Estilos originales para item no activo
+      }`}
+      onClick={onClick}
     >
       {icon}
       {showLabel && <span className="ml-3">{label}</span>}

@@ -1,13 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  FaArrowLeft,
-  FaPlus,
-  FaChevronDown,
-  FaChevronUp,
-  FaMinus,
-} from "react-icons/fa";
+import { FaArrowLeft, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { supabase } from "../lib/supabaseClient";
 import { motion } from "framer-motion";
 import GalaxyBackground from "../components/GalaxyBackground";
@@ -21,7 +15,7 @@ interface Exercise {
   target: string;
   secondaryMuscles: string[];
   instructions: string[];
-  sets?: { kg: string; reps: string }[];
+  series?: { sets: { kg: string; reps: string; completed?: boolean }[] }[];
   restTimer?: string;
   note?: string;
 }
@@ -45,9 +39,7 @@ const ExerciseList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedBodyPart, setSelectedBodyPart] = useState<string>("");
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
-    null
-  );
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [newRoutine, setNewRoutine] = useState<{
     day: string;
     name: string;
@@ -58,12 +50,9 @@ const ExerciseList: React.FC = () => {
     exercises: existingExercises,
   });
   const [userEmail, setUserEmail] = useState<string>("");
-  const [expandedExercises, setExpandedExercises] = useState<{
-    [key: string]: boolean;
-  }>({});
+  const [expandedExercises, setExpandedExercises] = useState<{ [key: string]: boolean }>({});
 
-  const backendUrl =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   const bodyParts = [
     { value: "back", label: "Espalda" },
@@ -90,10 +79,7 @@ const ExerciseList: React.FC = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
         setError("Debes iniciar sesión para crear una rutina.");
         navigate("/login");
@@ -117,13 +103,10 @@ const ExerciseList: React.FC = () => {
     setSelectedExercise(null);
 
     try {
-      const response = await axios.get<Exercise[]>(
-        `${backendUrl}/api/exercises`,
-        {
-          params: { bodyPart: selectedBodyPart, t: Date.now() },
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await axios.get<Exercise[]>(`${backendUrl}/api/exercises`, {
+        params: { bodyPart: selectedBodyPart, t: Date.now() },
+        headers: { "Content-Type": "application/json" },
+      });
       setExercises(response.data);
       if (response.data.length > 0) {
         setSelectedExercise(response.data[0]);
@@ -155,7 +138,7 @@ const ExerciseList: React.FC = () => {
         ...prev.exercises,
         {
           ...exercise,
-          sets: [{ kg: "", reps: "" }],
+          series: [{ sets: [] }], // Inicializamos con una serie vacía
           restTimer: "Apagado",
           note: "",
         },
@@ -177,70 +160,6 @@ const ExerciseList: React.FC = () => {
       delete newExpanded[exerciseId];
       return newExpanded;
     });
-  };
-
-  const handleAddSet = (exerciseId: string) => {
-    setNewRoutine((prev) => ({
-      ...prev,
-      exercises: prev.exercises.map((ex) =>
-        ex.id === exerciseId
-          ? { ...ex, sets: [...(ex.sets || []), { kg: "", reps: "" }] }
-          : ex
-      ),
-    }));
-  };
-
-  const handleRemoveSet = (exerciseId: string, setIndex: number) => {
-    setNewRoutine((prev) => ({
-      ...prev,
-      exercises: prev.exercises.map((ex) =>
-        ex.id === exerciseId
-          ? {
-              ...ex,
-              sets: (ex.sets || []).filter((_, idx) => idx !== setIndex),
-            }
-          : ex
-      ),
-    }));
-  };
-
-  const handleUpdateSet = (
-    exerciseId: string,
-    setIndex: number,
-    field: "kg" | "reps",
-    value: string
-  ) => {
-    setNewRoutine((prev) => ({
-      ...prev,
-      exercises: prev.exercises.map((ex) =>
-        ex.id === exerciseId
-          ? {
-              ...ex,
-              sets: (ex.sets || []).map((set, idx) =>
-                idx === setIndex ? { ...set, [field]: value } : set
-              ),
-            }
-          : ex
-      ),
-    }));
-  };
-
-  const handleUpdateRestTimer = (exerciseId: string, value: string) => {
-    setNewRoutine((prev) => ({
-      ...prev,
-      exercises: prev.exercises.map((ex) =>
-        ex.id === exerciseId ? { ...ex, restTimer: value } : ex
-      ),
-    }));
-  };
-
-  const handleUpdateNote = (exerciseId: string, value: string) => {
-    setNewRoutine((prev) => ({
-      ...prev,
-      exercises: prev.exercises.map((ex) =>
-        ex.id === exerciseId ? { ...ex, note: value } : ex
-      ),
-    }));
   };
 
   const handleToggleExercise = (exerciseId: string) => {
@@ -267,14 +186,8 @@ const ExerciseList: React.FC = () => {
         setError("Error al actualizar la rutina");
       }
     } else {
-      if (
-        !newRoutine.day ||
-        !newRoutine.name ||
-        newRoutine.exercises.length === 0
-      ) {
-        setError(
-          "Por favor, completa todos los campos y agrega al menos un ejercicio."
-        );
+      if (!newRoutine.day || !newRoutine.name || newRoutine.exercises.length === 0) {
+        setError("Por favor, completa todos los campos y agrega al menos un ejercicio.");
         return;
       }
 
@@ -469,49 +382,41 @@ const ExerciseList: React.FC = () => {
                   {error}
                 </motion.p>
               )}
-              {!loading &&
-                !error &&
-                selectedBodyPart &&
-                exercises.length > 0 && (
-                  <div className="flex flex-col gap-3 flex-1 overflow-y-auto custom-scroll">
-                    {exercises.map((exercise, index) => (
-                      <motion.div
-                        key={exercise.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 1.0 + index * 0.3, duration: 1.0 }}
-                        onClick={() => handleExerciseClick(exercise)}
-                        className={`p-4 rounded-lg bg-gray-700 cursor-pointer flex items-center gap-4 transition-colors duration-200 hover:bg-gray-600 ${
-                          selectedExercise?.id === exercise.id
-                            ? "bg-[#ff9404]"
-                            : ""
-                        }`}
-                      >
-                        <img
-                          src={exercise.gifUrl}
-                          alt={exercise.name}
-                          className="w-12 h-12 object-contain rounded-lg"
-                        />
-                        <p className="text-base font-medium text-white">
-                          {exercise.name}
-                        </p>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              {!loading &&
-                !error &&
-                selectedBodyPart &&
-                exercises.length === 0 && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                    className="text-gray-400 text-center text-base flex-1 flex items-center justify-center"
-                  >
-                    No se encontraron ejercicios para esta parte del cuerpo.
-                  </motion.p>
-                )}
+              {!loading && !error && selectedBodyPart && exercises.length > 0 && (
+                <div className="flex flex-col gap-3 flex-1 overflow-y-auto custom-scroll">
+                  {exercises.map((exercise, index) => (
+                    <motion.div
+                      key={exercise.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 1.0 + index * 0.3, duration: 1.0 }}
+                      onClick={() => handleExerciseClick(exercise)}
+                      className={`p-4 rounded-lg bg-gray-700 cursor-pointer flex items-center gap-4 transition-colors duration-200 hover:bg-gray-600 ${
+                        selectedExercise?.id === exercise.id ? "bg-[#ff9404]" : ""
+                      }`}
+                    >
+                      <img
+                        src={exercise.gifUrl}
+                        alt={exercise.name}
+                        className="w-12 h-12 object-contain rounded-lg"
+                      />
+                      <p className="text-base font-medium text-white">
+                        {exercise.name}
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+              {!loading && !error && selectedBodyPart && exercises.length === 0 && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="text-gray-400 text-center text-base flex-1 flex items-center justify-center"
+                >
+                  No se encontraron ejercicios para esta parte del cuerpo.
+                </motion.p>
+              )}
               {!selectedBodyPart && (
                 <motion.p
                   initial={{ opacity: 0 }}
@@ -519,8 +424,7 @@ const ExerciseList: React.FC = () => {
                   transition={{ delay: 0.6 }}
                   className="text-gray-400 text-center text-base flex-1 flex items-center justify-center"
                 >
-                  Por favor, selecciona una parte del cuerpo para ver los
-                  ejercicios.
+                  Por favor, selecciona una parte del cuerpo para ver los ejercicios.
                 </motion.p>
               )}
             </div>
@@ -548,9 +452,7 @@ const ExerciseList: React.FC = () => {
                   </div>
                   <div className="flex-1 text-white overflow-y-auto custom-scroll">
                     <p className="mb-3 text-base">
-                      <strong className="text-[#ff9404]">
-                        Parte del cuerpo:
-                      </strong>{" "}
+                      <strong className="text-[#ff9404]">Parte del cuerpo:</strong>{" "}
                       {selectedExercise.bodyPart}
                     </p>
                     <p className="mb-3 text-base">
@@ -562,22 +464,18 @@ const ExerciseList: React.FC = () => {
                       {selectedExercise.target}
                     </p>
                     <p className="mb-3 text-base">
-                      <strong className="text-[#ff9404]">
-                        Músculos secundarios:
-                      </strong>{" "}
+                      <strong className="text-[#ff9404]">Músculos secundarios:</strong>{" "}
                       {selectedExercise.secondaryMuscles.join(", ")}
                     </p>
                     <p className="mb-3 text-base">
                       <strong className="text-[#ff9404]">Instrucciones:</strong>
                     </p>
                     <ul className="list-disc pl-6 text-base">
-                      {selectedExercise.instructions.map(
-                        (instruction, index) => (
-                          <li key={index} className="mb-2">
-                            {instruction}
-                          </li>
-                        )
-                      )}
+                      {selectedExercise.instructions.map((instruction, index) => (
+                        <li key={index} className="mb-2">
+                          {instruction}
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 </div>
@@ -646,9 +544,7 @@ const ExerciseList: React.FC = () => {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 1.2 + index * 0.3, duration: 0.8 }}
-                        onClick={() =>
-                          handleRemoveExerciseFromRoutine(exercise.id)
-                        }
+                        onClick={() => handleRemoveExerciseFromRoutine(exercise.id)}
                         className="bg-transparent border-none cursor-pointer p-1 transition-transform duration-200 hover:scale-125 active:scale-90"
                       >
                         <span className="text-red-500 text-xl hover:text-red-600 transition-colors duration-300">
@@ -665,114 +561,11 @@ const ExerciseList: React.FC = () => {
                       transition={{ duration: 0.3 }}
                       className="overflow-hidden"
                     >
-                      <div className="flex flex-col gap-2">
-                        <label className="text-base font-medium text-white ml-4">
-                          Nota:
-                        </label>
-                        <input
-                          type="text"
-                          value={exercise.note || ""}
-                          onChange={(e) =>
-                            handleUpdateNote(exercise.id, e.target.value)
-                          }
-                          placeholder="Agregar nota"
-                          className="w-full max-w-[300px] p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white ml-4 transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2 mt-2">
-                        <label className="text-base font-medium text-white ml-4">
-                          Temporizador de descanso:
-                        </label>
-                        <select
-                          value={exercise.restTimer || "Apagado"}
-                          onChange={(e) =>
-                            handleUpdateRestTimer(exercise.id, e.target.value)
-                          }
-                          className="w-full max-w-[200px] p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white ml-4 transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
-                        >
-                          <option value="Apagado">Apagado</option>
-                          <option value="30 segundos">30 segundos</option>
-                          <option value="60 segundos">60 segundos</option>
-                          <option value="90 segundos">90 segundos</option>
-                        </select>
-                      </div>
-                      <div className="mt-2">
-                        <div className="grid grid-cols-[1fr_2fr_2fr] items-center text-base font-medium text-white mb-2 text-center">
-                          <span>SET</span>
-                          <span>KG</span>
-                          <span>REPS</span>
-                        </div>
-                        {(exercise.sets || []).map((set, setIndex) => (
-                          <div
-                            key={setIndex}
-                            className="grid grid-cols-[1fr_2fr_2fr] items-center gap-3 mt-2"
-                          >
-                            <span className="text-base text-center text-white">
-                              {setIndex + 1}
-                            </span>
-                            <div className="flex flex-col items-center">
-                              <input
-                                type="text"
-                                value={set.kg}
-                                onChange={(e) =>
-                                  handleUpdateSet(
-                                    exercise.id,
-                                    setIndex,
-                                    "kg",
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="KG"
-                                className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
-                              />
-                            </div>
-                            <div className="flex flex-col items-center">
-                              <input
-                                type="text"
-                                value={set.reps}
-                                onChange={(e) =>
-                                  handleUpdateSet(
-                                    exercise.id,
-                                    setIndex,
-                                    "reps",
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="REPS"
-                                className="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-base text-white transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:bg-gray-800 focus:scale-102"
-                              />
-                            </div>
-                          </div>
-                        ))}
-                        <div className="flex justify-start gap-4 mt-3 items-center">
-                          <motion.button
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{
-                              delay: 1.4 + index * 0.3,
-                              duration: 0.8,
-                            }}
-                            onClick={() => handleAddSet(exercise.id)}
-                            className="bg-transparent border-none text-[#ff9404] text-base cursor-pointer flex items-center gap-2 hover:text-[#e08503] transition-colors duration-300"
-                          >
-                            <FaPlus className="w-5 h-5" />
-                            Agregar serie
-                          </motion.button>
-                          {(exercise.sets || []).length > 1 && (
-                            <button
-                              onClick={() =>
-                                handleRemoveSet(
-                                  exercise.id,
-                                  (exercise.sets || []).length - 1
-                                )
-                              }
-                              className="bg-transparent border-none text-red-500 text-base cursor-pointer flex items-center gap-2 hover:text-red-600 transition-colors duration-300"
-                            >
-                              <FaMinus className="w-5 h-5" />
-                              Eliminar serie
-                            </button>
-                          )}
-                        </div>
+                      <div className="text-gray-400 text-base">
+                        <p><strong>Nota:</strong> {exercise.note || "Sin nota"}</p>
+                        <p><strong>Temporizador de descanso:</strong> {exercise.restTimer || "Apagado"}</p>
+                        <p><strong>Series:</strong> {exercise.series?.length || 0}</p>
+                        <p><strong>Sets:</strong> {exercise.series?.reduce((total, serie) => total + (serie.sets?.length || 0), 0) || 0}</p>
                       </div>
                     </motion.div>
                   )}

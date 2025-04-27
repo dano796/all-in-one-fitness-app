@@ -1,23 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom"; // Agregamos useLocation
+import { GiGymBag } from "react-icons/gi";
+import { MdOutlineSpaceDashboard } from "react-icons/md";
+import { MdNoFood } from "react-icons/md";
+import { FaGlassWater } from "react-icons/fa6";
+import { IoFootstepsSharp } from "react-icons/io5";
+import { BiSolidFoodMenu } from "react-icons/bi";
+import { GiProgression } from "react-icons/gi";
 import {
   Dumbbell,
-  Home,
-  Calendar,
-  Droplets,
-  Activity,
   Settings,
   LogOut,
-  Utensils,
   Calculator,
   Weight,
   ChevronRight,
   ChevronLeft,
-  LineChart,
   Menu,
   Camera,
   X,
-  Search,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { supabase } from "../lib/supabaseClient";
@@ -25,6 +25,7 @@ import DashboardNavItem from "./DashboardNavItem";
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // Hook para obtener la ruta actual
   const logout = useAuthStore((state) => state.logout);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -141,45 +142,50 @@ const Sidebar: React.FC = () => {
               label="Dashboard"
               showLabel={isExpanded || isMobileOpen}
               icon={
-                <Home className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+                <MdOutlineSpaceDashboard  className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
+              isActive={location.pathname === "/dashboard"} // Verificamos si la ruta es activa
             />
             <DashboardNavItem
               to="/routines"
               label="Rutinas"
               showLabel={isExpanded || isMobileOpen}
               icon={
-                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+                <GiGymBag className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
+              isActive={location.pathname === "/routines"}
             />
             <DashboardNavItem
               to="/foodDashboard"
               label="Ingesta Calórica"
               showLabel={isExpanded || isMobileOpen}
               icon={
-                <Utensils className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+                <MdNoFood  className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
+              isActive={location.pathname === "/foodDashboard"}
             />
             <DashboardNavItem
               to="/water"
               label="Hidratación"
               showLabel={isExpanded || isMobileOpen}
               icon={
-                <Droplets className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+                <FaGlassWater  className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
+              isActive={location.pathname === "/water"}
             />
             <DashboardNavItem
               to="/activity"
               label="Actividad"
               showLabel={isExpanded || isMobileOpen}
               icon={
-                <Activity className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+                <IoFootstepsSharp  className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
+              isActive={location.pathname === "/activity"}
             />
             <DashboardNavItem
               to="/calorie-calculator"
@@ -189,6 +195,7 @@ const Sidebar: React.FC = () => {
                 <Calculator className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
+              isActive={location.pathname === "/calorie-calculator"}
             />
             <DashboardNavItem
               to="/onerm-calculator"
@@ -198,17 +205,18 @@ const Sidebar: React.FC = () => {
                 <Weight className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
+              isActive={location.pathname === "/onerm-calculator"}
             />
             <DashboardNavItem
               to="/rm-progress"
               label="Progreso RM"
               showLabel={isExpanded || isMobileOpen}
               icon={
-                <LineChart className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+                <GiProgression  className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
+              isActive={location.pathname === "/rm-progress"}
             />
-
             <DashboardNavItem
               to="/foodsearchia"
               label="Registro con IA"
@@ -217,16 +225,17 @@ const Sidebar: React.FC = () => {
                 <Camera className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
+              isActive={location.pathname === "/foodsearchia"}
             />
-
             <DashboardNavItem
               to="/search-recipes"
               label="Buscar Recetas"
               showLabel={isExpanded || isMobileOpen}
               icon={
-                <Search className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
+                <BiSolidFoodMenu className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
+              isActive={location.pathname === "/search-recipes"}
             />
           </nav>
 
@@ -239,6 +248,7 @@ const Sidebar: React.FC = () => {
                 <Settings className="h-5 w-5 sm:h-6 sm:w-6 hover:text-[#ff9404] transition-all duration-300" />
               }
               onClick={handleNavItemClick}
+              isActive={location.pathname === "/settings"}
             />
             <div
               className={`flex ${
