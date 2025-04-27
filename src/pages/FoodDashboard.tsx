@@ -12,7 +12,7 @@ import {
   ArcElement,
 } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
-import { Plus } from "lucide-react";
+import { Plus, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import axios, { AxiosError } from "axios";
@@ -390,6 +390,10 @@ const FoodDashboard: React.FC = () => {
     });
   };
 
+  const handleCameraClick = (type: string) => {
+    navigate(`/foodsearchia?type=${type.toLowerCase()}&date=${date}`);
+  };
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;
     setDate(selectedDate);
@@ -751,18 +755,32 @@ const FoodDashboard: React.FC = () => {
                   </div>
                 </div>
                 {foodsData.isToday && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1 + index * 0.1, duration: 0.5 }}
-                    className="p-0.5 hover:scale-120 active:scale-90 transition-transform duration-200"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddFoodClick(meal.type);
-                    }}
-                  >
-                    <Plus className="h-4 w-4 text-white hover:text-[#ff9404] transition-colors duration-300" />
-                  </motion.button>
+                  <div className="flex space-x-2">
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 1 + index * 0.1, duration: 0.5 }}
+                      className="p-0.5 hover:scale-120 active:scale-90 transition-transform duration-200"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCameraClick(meal.type);
+                      }}
+                    >
+                      <Camera className="h-4 w-4 text-white hover:text-[#ff9404] transition-colors duration-300" />
+                    </motion.button>
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 1 + index * 0.1, duration: 0.5 }}
+                      className="p-0.5 hover:scale-120 active:scale-90 transition-transform duration-200"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddFoodClick(meal.type);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 text-white hover:text-[#ff9404] transition-colors duration-300" />
+                    </motion.button>
+                  </div>
                 )}
               </motion.div>
             );
