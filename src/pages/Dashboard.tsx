@@ -290,9 +290,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   // Prepare data for the BarChart (ensure all days of the week are displayed)
   const prepareWeeklyData = () => {
-    // Guard clause to handle invalid or unset startDate
-    if (!startDate || !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
-      console.warn("Invalid or unset startDate, returning empty weekDays");
+    // Guard clause to handle invalid or unset date
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      console.warn("Invalid or unset date, returning empty weekDays");
       return [];
     }
 
@@ -303,29 +303,30 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       meta: number;
     }[] = [];
 
-    // Crear fecha de inicio de la semana (domingo)
-    const startDateObj = new Date(startDate + "T00:00:00");
+    // Crear fecha base (la fecha seleccionada)
+    const selectedDateObj = new Date(date + "T00:00:00");
 
-    // Check if startDateObj is a valid date
-    if (isNaN(startDateObj.getTime())) {
-      console.warn("Invalid startDateObj, returning empty weekDays");
+    // Check if selectedDateObj is a valid date
+    if (isNaN(selectedDateObj.getTime())) {
+      console.warn("Invalid selectedDateObj, returning empty weekDays");
       return [];
     }
 
     // Definir los nombres de los días en español
     const dayAbbreviations = ["DO", "LU", "MA", "MI", "JU", "VI", "SA"];
 
-    // Crear array con todos los días de la semana en el orden correcto
-    for (let i = 0; i < 7; i++) {
-      const currentDate = new Date(startDateObj);
-      currentDate.setDate(startDateObj.getDate() + i);
+    // Crear array con los últimos 7 días (el día seleccionado y 6 días anteriores)
+    for (let i = 6; i >= 0; i--) {
+      const currentDate = new Date(selectedDateObj);
+      currentDate.setDate(selectedDateObj.getDate() - i); // Restamos días para ir hacia atrás
 
       // Formatear la fecha en formato YYYY-MM-DD
       const dateStr = currentDate.toISOString().split("T")[0];
+      const dayIndex = currentDate.getDay(); // 0 = domingo, 1 = lunes, etc.
 
       weekDays.push({
         fullDate: dateStr,
-        date: dayAbbreviations[i],
+        date: dayAbbreviations[dayIndex],
         calories: 0,
         meta: dashboardData.calorieGoal,
       });
@@ -340,7 +341,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     });
 
     // Asignar valores de calorías a cada día
-    weekDays.forEach((day, index) => {
+    weekDays.forEach((day) => {
       if (dailyCaloriesMap.has(day.fullDate)) {
         // Si tenemos datos del backend para este día
         day.calories = dailyCaloriesMap.get(day.fullDate) || 0;
@@ -354,8 +355,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
     // Agregar información de debugging en consola
     console.log("Datos del gráfico:", {
-      startDate,
-      endDate,
       todayStr,
       selectedDate: date,
       weekDays,
@@ -365,7 +364,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     return weekDays;
   };
 
-  const barData = startDate ? prepareWeeklyData() : [];
+  const barData = date ? prepareWeeklyData() : [];
 
   // Calculate water intake percentage
   const waterGoal = TOTAL_WATER_UNITS * WATER_PER_UNIT;
@@ -578,7 +577,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               </div>
             </motion.div>
 
-            {/* Water Intake */}
+            {/* Enhanced Water Intake */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
@@ -686,7 +685,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         const dayName =
                           dayNames[label as keyof typeof dayNames] || label;
                         const fullDate = new Date(
-                          data.fullDate
+                          data.fullDate + "T12:00:00"
                         ).toLocaleDateString("es-CO", {
                           year: "numeric",
                           month: "long",
