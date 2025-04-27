@@ -8,20 +8,29 @@ import FoodItem from "./FoodItem";
 import { motion } from "framer-motion";
 import ButtonToolTip from "./ButtonToolTip";
 
+interface FoodSearchIAProps {
+  initialType?: string;
+  date?: string;
+}
+
 interface Food {
   food_id: string;
   food_name: string;
   food_description: string;
 }
 
-const FoodSearchIA: React.FC = () => {
+const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [loadingAdd, setLoadingAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<string>("Desayuno"); // Estado para el tipo de comida
+  const [selectedType, setSelectedType] = useState<string>(
+    initialType
+      ? initialType.charAt(0).toUpperCase() + initialType.slice(1)
+      : "Desayuno"
+  );
 
   const navigate = useNavigate();
 

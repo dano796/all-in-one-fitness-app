@@ -2,10 +2,16 @@ import React from "react";
 import FoodSearchIA from "../components/FoodSearchIA";
 import GalaxyBackground from "../components/GalaxyBackground";
 import { FaArrowLeft } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const FoodSearchIAPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const foodType = searchParams.get("type") || "desayuno";
+  const date =
+    searchParams.get("date") ||
+    new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
+
   return (
     <div className="relative min-h-screen w-full bg-[#282c3c] overflow-hidden">
       <div className="absolute inset-0 z-0">
@@ -29,7 +35,7 @@ const FoodSearchIAPage: React.FC = () => {
 
         <div className="w-full px-4 py-4 sm:py-6">
           <div className="max-w-4xl mx-auto">
-            <FoodSearchIA />
+            <FoodSearchIA initialType={foodType} date={date} />
           </div>
         </div>
       </div>
