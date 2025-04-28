@@ -10,6 +10,7 @@ import { supabase } from "./lib/supabaseClient";
 import Loader from "./components/Loader";
 import { User } from "@supabase/supabase-js";
 import { ThemeProvider } from "./pages/ThemeContext";
+import ChatBot from "./components/ChatBot"; // Importa el componente del chatbot
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -226,6 +227,7 @@ function App() {
           <div className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
             {renderRoutes()}
             {isLoading && <Loader />}
+            <ChatBot /> {/* Añade el componente del chatbot aquí */}
           </div>
         </Suspense>
       </ThemeProvider>
