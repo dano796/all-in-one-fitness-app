@@ -111,16 +111,16 @@ const RegisteredFoods: React.FC = () => {
       );
       await Swal.fire({
         title: "¡Éxito!",
-        text: response.data.message,
+        text: "El alimento ha sido eliminado correctamente.",
         icon: "success",
-        iconColor: "#ff9400",
         confirmButtonText: "Aceptar",
-        confirmButtonColor: "#ff9404",
+        confirmButtonColor: "#ff9400",
+        background: isDarkMode ? "#282c3c" : "#ffffff",
         customClass: {
-          popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
+          popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
           icon: "custom-swal-icon",
-          title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-          htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
+          title: isDarkMode ? "text-white" : "text-gray-900",
+          htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
         },
       });
       setSelectedFood(null);
@@ -138,10 +138,14 @@ const RegisteredFoods: React.FC = () => {
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
         customClass: {
-          popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
+          popup: isDarkMode
+            ? "custom-swal-background"
+            : "custom-swal-background-light",
           icon: "custom-swal-icon",
           title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-          htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
+          htmlContainer: isDarkMode
+            ? "custom-swal-text"
+            : "custom-swal-text-light",
         },
       });
     }
@@ -185,7 +189,8 @@ const RegisteredFoods: React.FC = () => {
                     type="radio"
                     name="registeredFoodSelection"
                     checked={
-                      selectedFood?.index === index && selectedFood.type === type
+                      selectedFood?.index === index &&
+                      selectedFood.type === type
                     }
                     onChange={() => {
                       setSelectedFood({

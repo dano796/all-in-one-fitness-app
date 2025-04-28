@@ -9,7 +9,9 @@ const WaterDashboard: React.FC = () => {
 
   return (
     <WaterLayout>
-      <div className={`space-y-6 ${isDarkMode ? "bg-[#282c3c]" : "bg-white"}`}>
+      <div
+        className={`space-y-6 ${isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"}`}
+      >
         <WaterTracker />
       </div>
     </WaterLayout>

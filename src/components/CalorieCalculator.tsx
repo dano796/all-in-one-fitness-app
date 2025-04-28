@@ -53,16 +53,27 @@ const GoalCard: React.FC<{
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className={`p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-opacity-80 ${
+      className={`p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-[#F8F9FA] ${
         isDarkMode
-          ? `bg-[#282c3c] ${isSelected ? "border-2 border-[#ff9404]" : "border border-gray-600"} hover:bg-[#2f3447]`
-          : `bg-white ${isSelected ? "border-2 border-[#ff9404]" : "border border-gray-300"} hover:bg-gray-50`
+          ? `bg-[#282c3c] ${
+              isSelected
+                ? "border-2 border-[#ff9404]"
+                : "border border-gray-600"
+            } hover:bg-[#2f3447]`
+          : `bg-white ${
+              isSelected
+                ? "border-2 border-[#ff9404]"
+                : "border border-gray-300"
+            } hover:bg-gray-50`
       }`}
       onClick={onClick}
     >
       <p className="font-medium text-[#ff9404]">{goalLabels[goal]}</p>
-      <p className={`text-lg ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>
-        {calorieValue} kcal/day ({Math.round((calorieValue / baseCalories) * 100)}
+      <p
+        className={`text-lg ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}
+      >
+        {calorieValue} kcal/day (
+        {Math.round((calorieValue / baseCalories) * 100)}
         %)
       </p>
     </motion.div>
@@ -206,17 +217,27 @@ const CalorieCalculator: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-6 relative w-full transition-colors duration-300 ${isDarkMode ? "bg-[#282c3c]" : "bg-white-100"}`}>
+    <div
+      className={`min-h-screen flex items-center justify-center p-6 relative w-full transition-colors duration-300 ${
+        isDarkMode ? "bg-[#282c3c]" : "bg-white-100"
+      }`}
+    >
       <GalaxyBackground />
       <Toaster position="top-center" reverseOrder={false} />
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className={`max-w-2xl w-full rounded-xl shadow-md p-8 relative z-10 ${isDarkMode ? "bg-[#3B4252]" : "bg-white"}`}
+        className={`max-w-2xl w-full rounded-xl shadow-md p-8 relative z-10 ${
+          isDarkMode ? "bg-[#3B4252]" : "bg-white"
+        }`}
       >
         <div className="flex items-center justify-center gap-3 mb-8">
-          <h2 className={`text-4xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+          <h2
+            className={`text-4xl font-bold ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Calculadora de Calorías
           </h2>
           <ButtonToolTip content={infoText.calorieCalculatorInfo} />
@@ -226,7 +247,9 @@ const CalorieCalculator: React.FC = () => {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={`mb-4 text-center text-sm ${isDarkMode ? "text-red-400" : "text-red-600"}`}
+            className={`mb-4 text-center text-sm ${
+              isDarkMode ? "text-red-400" : "text-red-600"
+            }`}
           >
             {error}
           </motion.p>
@@ -240,7 +263,11 @@ const CalorieCalculator: React.FC = () => {
           className="space-y-6"
         >
           <div>
-            <label className={`block text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"} mb-1`}>
+            <label
+              className={`block text-sm font-medium ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              } mb-1`}
+            >
               Edad (15-80)
             </label>
             <input
@@ -251,18 +278,26 @@ const CalorieCalculator: React.FC = () => {
               className={`w-full px-2.5 py-1.5 text-sm border rounded-md text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5 ${
                 isDarkMode
                   ? "bg-[#2D3242] text-gray-200 border-gray-500 focus:bg-[#2D3242]"
-                  : "bg-white text-gray-900 border-gray-300 focus:bg-white"
+                  : "bg-white text-gray-900 border-gray-300 focus:bg-[#F8F9FA]"
               }`}
               placeholder="Enter your age"
             />
           </div>
 
           <div>
-            <label className={`block text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"} mb-1`}>
+            <label
+              className={`block text-sm font-medium ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              } mb-1`}
+            >
               Género
             </label>
             <div className="flex space-x-6">
-              <label className={`flex items-center ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>
+              <label
+                className={`flex items-center ${
+                  isDarkMode ? "text-gray-200" : "text-gray-900"
+                }`}
+              >
                 <input
                   type="radio"
                   value="male"
@@ -274,7 +309,11 @@ const CalorieCalculator: React.FC = () => {
                 />
                 Masculino
               </label>
-              <label className={`flex items-center ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}>
+              <label
+                className={`flex items-center ${
+                  isDarkMode ? "text-gray-200" : "text-gray-900"
+                }`}
+              >
                 <input
                   type="radio"
                   value="female"
@@ -290,7 +329,11 @@ const CalorieCalculator: React.FC = () => {
           </div>
 
           <div>
-            <label className={`block text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"} mb-1`}>
+            <label
+              className={`block text-sm font-medium ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              } mb-1`}
+            >
               Altura (cm)
             </label>
             <input
@@ -301,14 +344,18 @@ const CalorieCalculator: React.FC = () => {
               className={`w-full px-2.5 py-1.5 text-sm border rounded-md text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5 ${
                 isDarkMode
                   ? "bg-[#2D3242] text-gray-200 border-gray-500 focus:bg-[#2D3242]"
-                  : "bg-white text-gray-900 border-gray-300 focus:bg-white"
+                  : "bg-white text-gray-900 border-gray-300 focus:bg-[#F8F9FA]"
               }`}
               placeholder="Enter your height"
             />
           </div>
 
           <div>
-            <label className={`block text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"} mb-1`}>
+            <label
+              className={`block text-sm font-medium ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              } mb-1`}
+            >
               Peso (kg)
             </label>
             <input
@@ -319,14 +366,18 @@ const CalorieCalculator: React.FC = () => {
               className={`w-full px-2.5 py-1.5 text-sm border rounded-md text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5 ${
                 isDarkMode
                   ? "bg-[#2D3242] text-gray-200 border-gray-500 focus:bg-[#2D3242]"
-                  : "bg-white text-gray-900 border-gray-300 focus:bg-white"
+                  : "bg-white text-gray-900 border-gray-300 focus:bg-[#F8F9FA]"
               }`}
               placeholder="Enter your weight"
             />
           </div>
 
           <div>
-            <label className={`block text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"} mb-1`}>
+            <label
+              className={`block text-sm font-medium ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              } mb-1`}
+            >
               Nivel de Actividad
             </label>
             <select
@@ -402,12 +453,20 @@ const CalorieCalculator: React.FC = () => {
               transition={{ duration: 0.5 }}
               className="mt-8"
             >
-              <h2 className={`mt-12 text-3xl font-bold text-center ${isDarkMode ? "text-white" : "text-gray-900"} mb-6`}>
+              <h2
+                className={`mt-12 text-3xl font-bold text-center ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                } mb-6`}
+              >
                 Calorías Diarias Estimadas
               </h2>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
-                  <h3 className={`text-lg font-semibold mb-4 text-center ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <h3
+                    className={`text-lg font-semibold mb-4 text-center ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     Pérdida de Peso Estimada
                   </h3>
                   <div className="space-y-4">
@@ -426,7 +485,11 @@ const CalorieCalculator: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <h3 className={`text-lg font-semibold mb-4 text-center ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <h3
+                    className={`text-lg font-semibold mb-4 text-center ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     Ganancia de Peso Estimada
                   </h3>
                   <div className="space-y-4">

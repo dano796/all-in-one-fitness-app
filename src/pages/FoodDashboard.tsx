@@ -76,7 +76,9 @@ const FoodDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
   const TIMEZONE = "America/Bogota";
-  const todayStr = new Date().toLocaleDateString("en-CA", { timeZone: TIMEZONE });
+  const todayStr = new Date().toLocaleDateString("en-CA", {
+    timeZone: TIMEZONE,
+  });
   const [date, setDate] = React.useState<string>(todayStr);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -86,7 +88,9 @@ const FoodDashboard: React.FC = () => {
     isToday: false,
   });
   const [error, setError] = useState<string | null>(null);
-  const [totalCaloriesGoal, setTotalCaloriesGoal] = useState<number | null>(null);
+  const [totalCaloriesGoal, setTotalCaloriesGoal] = useState<number | null>(
+    null
+  );
   const [customCalorieGoal, setCustomCalorieGoal] = useState<string>("");
   const [calorieGoalError, setCalorieGoalError] = useState<string | null>(null);
   const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
@@ -106,7 +110,10 @@ const FoodDashboard: React.FC = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
         setError("Debes iniciar sesión para ver el dashboard.");
         navigate("/login");
@@ -114,9 +121,12 @@ const FoodDashboard: React.FC = () => {
         const email = user.email || "";
         setUserEmail(email);
         try {
-          const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`, {
-            params: { email },
-          });
+          const response = await axios.get(
+            `${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`,
+            {
+              params: { email },
+            }
+          );
           if (response.data.calorieGoal) {
             setTotalCaloriesGoal(response.data.calorieGoal);
           }
@@ -132,14 +142,20 @@ const FoodDashboard: React.FC = () => {
   const fetchFoods = async () => {
     if (!userEmail || !date) return;
     try {
-      const response = await axios.get<FoodsResponse>(`${import.meta.env.VITE_BACKEND_URL}/api/foods/user`, {
-        params: { email: userEmail, date: date },
-      });
+      const response = await axios.get<FoodsResponse>(
+        `${import.meta.env.VITE_BACKEND_URL}/api/foods/user`,
+        {
+          params: { email: userEmail, date: date },
+        }
+      );
       setFoodsData(response.data);
       setError(null);
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
-      setError(axiosError.response?.data?.error || "Error al consultar las comidas registradas");
+      setError(
+        axiosError.response?.data?.error ||
+          "Error al consultar las comidas registradas"
+      );
     }
   };
 
@@ -151,15 +167,20 @@ const FoodDashboard: React.FC = () => {
     const goal = parseInt(customCalorieGoal, 10);
     const inputElement = document.getElementById("customCalorieGoal");
     if (isNaN(goal) || goal < 2000) {
-      setCalorieGoalError("El límite de calorías debe ser un número mayor o igual a 2000.");
+      setCalorieGoalError(
+        "El límite de calorías debe ser un número mayor o igual a 2000."
+      );
       inputElement?.classList.add("error");
       return;
     }
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/set-calorie-goal`, {
-        email: userEmail,
-        calorieGoal: goal,
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/set-calorie-goal`,
+        {
+          email: userEmail,
+          calorieGoal: goal,
+        }
+      );
       if (response.data.success) {
         setTotalCaloriesGoal(goal);
         setCustomCalorieGoal("");
@@ -173,20 +194,27 @@ const FoodDashboard: React.FC = () => {
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9400",
           customClass: {
-            popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
+            popup: isDarkMode
+              ? "custom-swal-background"
+              : "custom-swal-background-light",
             icon: "custom-swal-icon",
             title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-            htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
+            htmlContainer: isDarkMode
+              ? "custom-swal-text"
+              : "custom-swal-text-light",
           },
         });
       } else {
-        setCalorieGoalError(response.data.error || "Error al establecer el límite de calorías.");
+        setCalorieGoalError(
+          response.data.error || "Error al establecer el límite de calorías."
+        );
         inputElement?.classList.add("error");
       }
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
       setCalorieGoalError(
-        axiosError.response?.data?.error || "Error al conectar con el servidor. Intenta de nuevo."
+        axiosError.response?.data?.error ||
+          "Error al conectar con el servidor. Intenta de nuevo."
       );
       inputElement?.classList.add("error");
     }
@@ -203,18 +231,25 @@ const FoodDashboard: React.FC = () => {
       confirmButtonText: "Aceptar",
       cancelButtonText: "Cancelar",
       customClass: {
-        popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
+        popup: isDarkMode
+          ? "custom-swal-background"
+          : "custom-swal-background-light",
         icon: "custom-swal-icon",
         title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-        htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
+        htmlContainer: isDarkMode
+          ? "custom-swal-text"
+          : "custom-swal-text-light",
       },
     });
     if (result.isConfirmed) {
       try {
-        const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/set-calorie-goal`, {
-          email: userEmail,
-          calorieGoal: 0,
-        });
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/set-calorie-goal`,
+          {
+            email: userEmail,
+            calorieGoal: 0,
+          }
+        );
         if (response.data.success) {
           setTotalCaloriesGoal(null);
           setCalorieGoalError(null);
@@ -225,19 +260,28 @@ const FoodDashboard: React.FC = () => {
             iconColor: "#ff9400",
             confirmButtonColor: "#ff9404",
             customClass: {
-              popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
+              popup: isDarkMode
+                ? "custom-swal-background"
+                : "custom-swal-background-light",
               icon: "custom-swal-icon",
-              title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-              htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
+              title: isDarkMode
+                ? "custom-swal-title"
+                : "custom-swal-title-light",
+              htmlContainer: isDarkMode
+                ? "custom-swal-text"
+                : "custom-swal-text-light",
             },
           });
         } else {
-          setCalorieGoalError(response.data.error || "Error al eliminar el límite de calorías.");
+          setCalorieGoalError(
+            response.data.error || "Error al eliminar el límite de calorías."
+          );
         }
       } catch (err) {
         const axiosError = err as AxiosError<{ error?: string }>;
         setCalorieGoalError(
-          axiosError.response?.data?.error || "Error al conectar con el servidor. Intenta de nuevo."
+          axiosError.response?.data?.error ||
+            "Error al conectar con el servidor. Intenta de nuevo."
         );
       }
     }
@@ -282,10 +326,13 @@ const FoodDashboard: React.FC = () => {
     };
   };
 
-  const { totalCalories, totalCarbs, totalProtein, totalFat } = calculateTotalNutrition();
+  const { totalCalories, totalCarbs, totalProtein, totalFat } =
+    calculateTotalNutrition();
   const consumedCalories = totalCalories;
   const burnedCalories = 0;
-  const remainingCalories = totalCaloriesGoal ? totalCaloriesGoal - consumedCalories : 0;
+  const remainingCalories = totalCaloriesGoal
+    ? totalCaloriesGoal - consumedCalories
+    : 0;
 
   const mealCalorieLimits = totalCaloriesGoal
     ? {
@@ -296,9 +343,15 @@ const FoodDashboard: React.FC = () => {
       }
     : { Desayuno: 0, Almuerzo: 0, Merienda: 0, Cena: 0 };
 
-  const carbGoal = totalCaloriesGoal ? Math.round((totalCaloriesGoal * 0.4) / 4) : 0;
-  const proteinGoal = totalCaloriesGoal ? Math.round((totalCaloriesGoal * 0.3) / 4) : 0;
-  const fatGoal = totalCaloriesGoal ? Math.round((totalCaloriesGoal * 0.3) / 9) : 0;
+  const carbGoal = totalCaloriesGoal
+    ? Math.round((totalCaloriesGoal * 0.4) / 4)
+    : 0;
+  const proteinGoal = totalCaloriesGoal
+    ? Math.round((totalCaloriesGoal * 0.3) / 4)
+    : 0;
+  const fatGoal = totalCaloriesGoal
+    ? Math.round((totalCaloriesGoal * 0.3) / 9)
+    : 0;
 
   const caloriesData = {
     datasets: [
@@ -405,7 +458,11 @@ const FoodDashboard: React.FC = () => {
   };
 
   return (
-    <div className={`relative p-4 space-y-6 ${isDarkMode ? "bg-[#282c3c]" : "bg-white-100"} min-h-screen overflow-hidden -mt-12 transition-colors duration-300`}>
+    <div
+      className={`relative p-4 space-y-6 ${
+        isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
+      } min-h-screen overflow-hidden -mt-12 transition-colors duration-300`}
+    >
       <GalaxyBackground />
 
       <motion.div
@@ -418,7 +475,9 @@ const FoodDashboard: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.4 }}
-          className={`mb-2 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
+          className={`mb-2 text-xs ${
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          }`}
         >
           Semana {getWeek()}
         </motion.div>
@@ -432,7 +491,7 @@ const FoodDashboard: React.FC = () => {
             className={`min-w-[120px] px-6 py-3 font-semibold rounded-lg border hover:scale-105 active:scale-95 transition-all duration-300 ${
               isDarkMode
                 ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#3B4252] hover:to-[#4B5563] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)]"
-                : "bg-white text-gray-900 border-gray-300 shadow-md hover:bg-gray-50 hover:shadow-lg"
+                : "bg-white text-gray-900 border-gray-300 shadow-md hover:bg-gray-100 hover:shadow-lg"
             }`}
           >
             {getDateLabel()}
@@ -452,7 +511,9 @@ const FoodDashboard: React.FC = () => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className={`max-w-[700px] mx-auto rounded-lg p-5 relative z-10 ${isDarkMode ? "bg-[#3B4252]" : "bg-white"} shadow-md`}
+        className={`max-w-[700px] mx-auto rounded-lg p-5 relative z-10 ${
+          isDarkMode ? "bg-[#3B4252]" : "bg-white"
+        } shadow-md`}
       >
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -461,7 +522,13 @@ const FoodDashboard: React.FC = () => {
           className="flex justify-between items-center mb-4"
         >
           <div className="flex items-center">
-            <h2 className={`text-sm font-semibold mr-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}>Resumen</h2>
+            <h2
+              className={`text-sm font-semibold mr-2 ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
+              Resumen
+            </h2>
             <ButtonToolTip content={infoText.dashboardSummary} />
           </div>
           {totalCaloriesGoal ? (
@@ -471,7 +538,9 @@ const FoodDashboard: React.FC = () => {
               transition={{ delay: 0.6 }}
               onClick={handleRemoveCalorieGoal}
               className={`text-sm cursor-pointer transition-colors duration-300 ${
-                isDarkMode ? "text-white hover:text-[#ff4444]" : "text-gray-900 hover:text-red-600"
+                isDarkMode
+                  ? "text-white hover:text-[#ff4444]"
+                  : "text-gray-900 hover:text-red-600"
               }`}
             >
               Eliminar límite
@@ -506,7 +575,13 @@ const FoodDashboard: React.FC = () => {
                 Agregar
               </button>
               <div className="flex items-center">
-                <p className={`text-sm mx-1 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>o</p>
+                <p
+                  className={`text-sm mx-1 ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  o
+                </p>
                 <p
                   onClick={() => navigate("/calorie-calculator")}
                   className={`text-sm cursor-pointer transition-all duration-300 ${
@@ -567,10 +642,20 @@ const FoodDashboard: React.FC = () => {
                     transition={{ delay: 0.9, duration: 0.5 }}
                     className="absolute -left-[135px] top-1/2 -translate-y-1/2 text-center flex flex-col items-center"
                   >
-                    <div className={`text-lg font-bold sm:text-xl ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                    <div
+                      className={`text-lg font-bold sm:text-xl ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
                       {consumedCalories}
                     </div>
-                    <div className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Consumido</div>
+                    <div
+                      className={`text-xs ${
+                        isDarkMode ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Consumido
+                    </div>
                   </motion.div>
                 )}
                 <motion.div
@@ -579,10 +664,18 @@ const FoodDashboard: React.FC = () => {
                   transition={{ delay: 1.1, duration: 0.5 }}
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center flex flex-col items-center w-0 sm:w-0"
                 >
-                  <div className={`text-3xl font-bold leading-none min-w-[60px] text-center ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <div
+                    className={`text-3xl font-bold leading-none min-w-[60px] text-center ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     {remainingCalories > 0 ? remainingCalories : 0}
                   </div>
-                  <div className={`text-xs leading-none ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
+                  <div
+                    className={`text-xs leading-none ${
+                      isDarkMode ? "text-gray-500" : "text-gray-500"
+                    }`}
+                  >
                     Restante
                   </div>
                 </motion.div>
@@ -593,10 +686,20 @@ const FoodDashboard: React.FC = () => {
                     transition={{ delay: 1.2, duration: 0.5 }}
                     className="absolute -right-[135px] top-1/2 -translate-y-1/2 text-center flex flex-col items-center"
                   >
-                    <div className={`text-lg font-bold sm:text-xl ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                    <div
+                      className={`text-lg font-bold sm:text-xl ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
                       {burnedCalories}
                     </div>
-                    <div className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Quemado</div>
+                    <div
+                      className={`text-xs ${
+                        isDarkMode ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
+                      Quemado
+                    </div>
                   </motion.div>
                 )}
               </div>
@@ -612,12 +715,36 @@ const FoodDashboard: React.FC = () => {
             className="flex justify-between mb-6"
           >
             <div className="text-center flex-1">
-              <div className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{consumedCalories}</div>
-              <div className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Consumido</div>
+              <div
+                className={`text-lg font-bold ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                {consumedCalories}
+              </div>
+              <div
+                className={`text-xs ${
+                  isDarkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                Consumido
+              </div>
             </div>
             <div className="text-center flex-1">
-              <div className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{burnedCalories}</div>
-              <div className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Quemado</div>
+              <div
+                className={`text-lg font-bold ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                {burnedCalories}
+              </div>
+              <div
+                className={`text-xs ${
+                  isDarkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                Quemado
+              </div>
             </div>
           </motion.div>
         )}
@@ -625,7 +752,9 @@ const FoodDashboard: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {progressData.map((item, index) => {
             const progressValue =
-              item.value > 0 && item.max > 0 ? Math.min((item.value / item.max) * 100, 100) : 0;
+              item.value > 0 && item.max > 0
+                ? Math.min((item.value / item.max) * 100, 100)
+                : 0;
             return (
               <motion.div
                 key={item.name}
@@ -634,11 +763,21 @@ const FoodDashboard: React.FC = () => {
                 transition={{ delay: 0.6 + index * 0.1, duration: 0.4 }}
                 className="text-center"
               >
-                <div className={`text-xs mb-1 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{item.name}</div>
+                <div
+                  className={`text-xs mb-1 ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  {item.name}
+                </div>
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: "100%" }}
-                  transition={{ delay: 0.6 + index * 0.1, duration: 0.4, ease: "easeOut" }}
+                  transition={{
+                    delay: 0.6 + index * 0.1,
+                    duration: 0.4,
+                    ease: "easeOut",
+                  }}
                 >
                   <Progress
                     value={progressValue}
@@ -652,7 +791,9 @@ const FoodDashboard: React.FC = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.7 + index * 0.1, duration: 0.4 }}
-                  className={`text-xs mt-1 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
+                  className={`text-xs mt-1 ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
                 >
                   {item.value}/{item.max} g
                 </motion.div>
@@ -674,7 +815,13 @@ const FoodDashboard: React.FC = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.9, duration: 0.4 }}
         >
-          <h2 className={`text-sm font-semibold mr-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}>Nutrición</h2>
+          <h2
+            className={`text-sm font-semibold mr-2 ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Nutrición
+          </h2>
           <ButtonToolTip content={infoText.nutrition} />
         </motion.div>
         <div className="space-y-2 mt-2">
@@ -684,7 +831,9 @@ const FoodDashboard: React.FC = () => {
                 ? Math.min((meal.calories / meal.maxCalories) * 100, 100)
                 : 0;
             const circumference = 2 * Math.PI * 15;
-            const strokeDasharray = `${(progressPercentage / 100) * circumference} ${circumference}`;
+            const strokeDasharray = `${
+              (progressPercentage / 100) * circumference
+            } ${circumference}`;
             return (
               <motion.div
                 key={meal.id}
@@ -694,15 +843,21 @@ const FoodDashboard: React.FC = () => {
                 className={`max-w-full rounded-lg p-2.5 flex items-center justify-between cursor-pointer transition duration-200 ${
                   isDarkMode
                     ? "bg-[#3B4252] hover:bg-[#4B5563]"
-                    : "bg-white hover:bg-gray-50 shadow-sm"
+                    : "bg-white hover:bg-gray-100 shadow-sm"
                 }`}
                 onClick={() => handleMealClick(meal.type)}
               >
                 <div className="flex items-center space-x-3 flex-1">
                   <div className="relative w-10 h-10 flex items-center justify-center">
-                    <svg className="transform -rotate-90 w-10 h-10" width="40" height="40">
+                    <svg
+                      className="transform -rotate-90 w-10 h-10"
+                      width="40"
+                      height="40"
+                    >
                       <circle
-                        className={`fill-none stroke-1 ${isDarkMode ? "stroke-[#4B5563]" : "stroke-gray-200"}`}
+                        className={`fill-none stroke-1 ${
+                          isDarkMode ? "stroke-[#4B5563]" : "stroke-gray-200"
+                        }`}
                         cx="20"
                         cy="20"
                         r="15"
@@ -716,7 +871,11 @@ const FoodDashboard: React.FC = () => {
                           strokeDasharray={circumference}
                           initial={{ strokeDasharray: `0 ${circumference}` }}
                           animate={{ strokeDasharray }}
-                          transition={{ delay: 1.2 + index * 0.2, duration: 0.5, ease: "easeOut" }}
+                          transition={{
+                            delay: 1.2 + index * 0.2,
+                            duration: 0.5,
+                            ease: "easeOut",
+                          }}
                         />
                       )}
                     </svg>
@@ -727,10 +886,18 @@ const FoodDashboard: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <h3 className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                    <h3
+                      className={`text-sm font-semibold ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
                       {meal.type}
                     </h3>
-                    <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                    <p
+                      className={`text-xs ${
+                        isDarkMode ? "text-gray-400" : "text-gray-600"
+                      }`}
+                    >
                       {meal.calories}/{meal.maxCalories} kcal
                     </p>
                   </div>
@@ -749,7 +916,9 @@ const FoodDashboard: React.FC = () => {
                     >
                       <Camera
                         className={`h-4 w-4 transition-colors duration-300 ${
-                          isDarkMode ? "text-white hover:text-[#ff9404]" : "text-gray-600 hover:text-orange-500"
+                          isDarkMode
+                            ? "text-white hover:text-[#ff9404]"
+                            : "text-gray-600 hover:text-orange-500"
                         }`}
                       />
                     </motion.button>
@@ -765,7 +934,9 @@ const FoodDashboard: React.FC = () => {
                     >
                       <Plus
                         className={`h-4 w-4 transition-colors duration-300 ${
-                          isDarkMode ? "text-white hover:text-[#ff9404]" : "text-gray-600 hover:text-orange-500"
+                          isDarkMode
+                            ? "text-white hover:text-[#ff9404]"
+                            : "text-gray-600 hover:text-orange-500"
                         }`}
                       />
                     </motion.button>

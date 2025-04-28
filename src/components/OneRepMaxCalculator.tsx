@@ -148,11 +148,12 @@ const OneRepMaxCalculator: React.FC = () => {
         iconColor: "#ff9400",
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
+        background: isDarkMode ? "#282c3c" : "#ffffff",
         customClass: {
-          popup: `custom-swal-background ${isDarkMode ? "bg-[#282c3c]" : "bg-white"}`,
+          popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
           icon: "custom-swal-icon",
-          title: `custom-swal-title ${isDarkMode ? "text-white" : "text-gray-900"}`,
-          htmlContainer: `custom-swal-text ${isDarkMode ? "text-gray-400" : "text-gray-600"}`,
+          title: isDarkMode ? "text-white" : "text-gray-900",
+          htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
         },
       });
       setError(null);
@@ -177,7 +178,7 @@ const OneRepMaxCalculator: React.FC = () => {
       <GalaxyBackground />
       <div
         className={`container mx-auto px-4 py-16 ${
-          isDarkMode ? "bg-[#282c3c] text-white" : "bg-white text-gray-900"
+          isDarkMode ? "bg-[#282c3c] text-white" : "bg-[#F8F9FA] text-gray-900"
         }`}
       >
         <div className="max-w-2xl mx-auto w-full relative z-10">
@@ -186,7 +187,7 @@ const OneRepMaxCalculator: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className={`rounded-xl p-6 shadow-md mb-8 ${
-              isDarkMode ? "bg-[#3B4252]" : "bg-gray-100"
+              isDarkMode ? "bg-[#3B4252]" : "bg-white"
             }`}
           >
             <div className="flex items-center justify-center gap-3 mb-8">
@@ -218,7 +219,7 @@ const OneRepMaxCalculator: React.FC = () => {
                     className={`w-full px-2.5 py-1.5 text-sm border rounded-md text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:scale-102 transition-all duration-300 placeholder:text-center [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none pr-12 sm:text-sm sm:px-2.5 sm:py-1.5 ${
                       isDarkMode
                         ? "border-gray-500 bg-[#2D3242] text-gray-200 placeholder:text-gray-500 focus:bg-[#2D3242]"
-                        : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:bg-white"
+                        : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:bg-[#F8F9FA]"
                     }`}
                     placeholder="Ingresa el peso"
                   />
@@ -249,8 +250,8 @@ const OneRepMaxCalculator: React.FC = () => {
                   className={`w-full px-2.5 py-1.5 text-sm border rounded-md text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:scale-102 transition-all duration-300 placeholder:text-center [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none sm:text-sm sm:px-2.5 sm:py-1.5 ${
                     isDarkMode
                       ? "border-gray-500 bg-[#2D3242] text-gray-200 placeholder:text-gray-500 focus:bg-[#2D3242]"
-                      : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:bg-white"
-                    }`}
+                      : "border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 focus:bg-[#F8F9FA]"
+                  }`}
                   placeholder="Ingresa el número de repeticiones"
                 />
               </div>
@@ -271,13 +272,15 @@ const OneRepMaxCalculator: React.FC = () => {
                   className={`w-full px-2.5 py-1.5 text-sm border rounded-md text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:scale-102 transition-all duration-300 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.5em_1.5em] sm:text-sm sm:px-2.5 sm:py-1.5 sm:pr-7 pr-6 ${
                     isDarkMode
                       ? "border-gray-500 bg-[#2D3242] text-gray-200 [background-image:url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')]"
-                      : "border-gray-300 bg-white text-gray-900 [background-image:url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%236B7280%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')]"
+                      : "border-gray-300 bg-white focus:bg-[#F8F9FA] text-gray-900 [background-image:url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%236B7280%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')]"
                   }`}
                 >
                   <option
                     value=""
                     className={`${
-                      isDarkMode ? "bg-[#2D3242] text-gray-200" : "bg-white text-gray-900"
+                      isDarkMode
+                        ? "bg-[#2D3242] text-gray-200"
+                        : "bg-white text-gray-900"
                     }`}
                   >
                     Selecciona RPE
@@ -287,7 +290,9 @@ const OneRepMaxCalculator: React.FC = () => {
                       key={value}
                       value={value}
                       className={`${
-                        isDarkMode ? "bg-[#2D3242] text-gray-200" : "bg-white text-gray-900"
+                        isDarkMode
+                          ? "bg-[#2D3242] text-gray-200"
+                          : "bg-white text-gray-900"
                       }`}
                     >
                       {value}
@@ -312,7 +317,7 @@ const OneRepMaxCalculator: React.FC = () => {
                   className={`w-full px-2.5 py-1.5 text-sm border rounded-md text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:scale-102 transition-all duration-300 appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[length:1.5em_1.5em] sm:text-sm sm:px-2.5 sm:py-1.5 sm:pr-7 pr-6 ${
                     isDarkMode
                       ? "border-gray-500 bg-[#2D3242] text-gray-200 [background-image:url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')]"
-                      : "border-gray-300 bg-white text-gray-900 [background-image:url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%236B7280%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')]"
+                      : "border-gray-300 bg-white focus:bg-[#F8F9FA] text-gray-900 [background-image:url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%236B7280%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')]"
                   }`}
                 >
                   {exercises.map((ex) => (
@@ -320,7 +325,9 @@ const OneRepMaxCalculator: React.FC = () => {
                       key={ex}
                       value={ex}
                       className={`${
-                        isDarkMode ? "bg-[#2D3242] text-gray-200" : "bg-white text-gray-900"
+                        isDarkMode
+                          ? "bg-[#2D3242] text-gray-200"
+                          : "bg-white text-gray-900"
                       }`}
                     >
                       {ex}
@@ -332,7 +339,7 @@ const OneRepMaxCalculator: React.FC = () => {
               <div className="flex space-x-4">
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 text-sm bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white border-none rounded-md hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.5)] hover:scale-102 transition-all duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed sm:text-sm sm:px-4 sm:py-2"
+                  className="w-full px-4 py-2 text-sm font-semibold bg-gradient-to-br from-[#ff9404] to-[#FF6B35] text-white border-none rounded-md hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.5)] hover:scale-102 transition-all duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed sm:text-sm sm:px-4 sm:py-2"
                   disabled={isButtonDisabled}
                 >
                   Calcular 1RM
@@ -340,7 +347,7 @@ const OneRepMaxCalculator: React.FC = () => {
                 <button
                   type="button"
                   onClick={saveOneRepMax}
-                  className="w-full px-4 py-2 text-sm bg-gradient-to-br from-[#4CAF50] to-[#388E3C] text-white border-none rounded-md hover:bg-gradient-to-br hover:from-[#388E3C] hover:to-[#4CAF50] hover:shadow-[0_0_10px_rgba(76,175,80,0.5)] hover:scale-102 transition-all duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed sm:text-sm sm:px-4 sm:py-2"
+                  className="w-full px-4 py-2 text-sm font-semibold bg-gradient-to-br from-[#4CAF50] to-[#2d8f32] text-white border-none rounded-md hover:bg-gradient-to-br hover:from-[#388E3C] hover:to-[#4CAF50] hover:shadow-[0_0_10px_rgba(76,175,80,0.5)] hover:scale-102 transition-all duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed sm:text-sm sm:px-4 sm:py-2"
                   disabled={isButtonDisabled || oneRepMax === null}
                 >
                   Guardar 1RM
@@ -360,55 +367,104 @@ const OneRepMaxCalculator: React.FC = () => {
                   </h2>
                   <div className="mt-8">
                     <h3
-                      className={`text-lg font-medium mb-4 text-center ${
+                      className={`text-xl font-semibold mb-4 text-center ${
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >
                       Máximo de Repeticiones Estimado
                     </h3>
-                    <div className="space-y-4">
-                      <div
-                        className={`p-4 rounded-lg flex justify-between ${
-                          isDarkMode ? "bg-[#282c3c]" : "bg-gray-100"
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
+                          isDarkMode
+                            ? `bg-[#282c3c] border border-gray-600 hover:bg-[#2f3447]`
+                            : `bg-white border border-gray-300 hover:bg-gray-50`
                         }`}
                       >
                         <p className="font-medium text-[#ff9404]">2 Reps</p>
                         <p
-                          className={`text-lg ${
-                            isDarkMode ? "text-gray-200" : "text-gray-600"
+                          className={`text-2xl font-bold ${
+                            isDarkMode ? "text-gray-200" : "text-gray-900"
                           }`}
                         >
-                          {Math.round(oneRepMax * 0.96)} {unit} (96%)
+                          {Math.round(oneRepMax * 0.96)} {unit}{" "}
+                          <span className="text-sm font-normal text-gray-500">
+                            (96%)
+                          </span>
                         </p>
-                      </div>
-                      <div
-                        className={`p-4 rounded-lg flex justify-between ${
-                          isDarkMode ? "bg-[#282c3c]" : "bg-gray-100"
+                      </motion.div>
+
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
+                          isDarkMode
+                            ? `bg-[#282c3c] border border-gray-600 hover:bg-[#2f3447]`
+                            : `bg-white border border-gray-300 hover:bg-gray-50`
                         }`}
                       >
                         <p className="font-medium text-[#ff9404]">3 Reps</p>
                         <p
-                          className={`text-lg ${
-                            isDarkMode ? "text-gray-200" : "text-gray-600"
+                          className={`text-2xl font-bold ${
+                            isDarkMode ? "text-gray-200" : "text-gray-900"
                           }`}
                         >
-                          {Math.round(oneRepMax * 0.92)} {unit} (92%)
+                          {Math.round(oneRepMax * 0.92)} {unit}{" "}
+                          <span className="text-sm font-normal text-gray-500">
+                            (92%)
+                          </span>
                         </p>
-                      </div>
-                      <div
-                        className={`p-4 rounded-lg flex justify-between ${
-                          isDarkMode ? "bg-[#282c3c]" : "bg-gray-100"
+                      </motion.div>
+
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
+                          isDarkMode
+                            ? `bg-[#282c3c] border border-gray-600 hover:bg-[#2f3447]`
+                            : `bg-white border border-gray-300 hover:bg-gray-50`
                         }`}
                       >
                         <p className="font-medium text-[#ff9404]">4 Reps</p>
                         <p
-                          className={`text-lg ${
-                            isDarkMode ? "text-gray-200" : "text-gray-600"
+                          className={`text-2xl font-bold ${
+                            isDarkMode ? "text-gray-200" : "text-gray-900"
                           }`}
                         >
-                          {Math.round(oneRepMax * 0.9)} {unit} (90%)
+                          {Math.round(oneRepMax * 0.9)} {unit}{" "}
+                          <span className="text-sm font-normal text-gray-500">
+                            (90%)
+                          </span>
                         </p>
-                      </div>
+                      </motion.div>
+
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
+                          isDarkMode
+                            ? `bg-[#282c3c] border border-gray-600 hover:bg-[#2f3447]`
+                            : `bg-white border border-gray-300 hover:bg-gray-50`
+                        }`}
+                      >
+                        <p className="font-medium text-[#ff9404]">5 Reps</p>
+                        <p
+                          className={`text-2xl font-bold ${
+                            isDarkMode ? "text-gray-200" : "text-gray-900"
+                          }`}
+                        >
+                          {Math.round(oneRepMax * 0.87)} {unit}{" "}
+                          <span className="text-sm font-normal text-gray-500">
+                            (87%)
+                          </span>
+                        </p>
+                      </motion.div>
                     </div>
                   </div>
                 </div>

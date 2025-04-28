@@ -47,7 +47,12 @@ const ResetPassword = () => {
       hasNumber,
       hasSpecialChar,
       isLongEnough,
-      isValid: hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar && isLongEnough,
+      isValid:
+        hasUpperCase &&
+        hasLowerCase &&
+        hasNumber &&
+        hasSpecialChar &&
+        isLongEnough,
     };
   };
 
@@ -56,7 +61,9 @@ const ResetPassword = () => {
     const { accessToken, type, refreshToken } = params;
 
     if (type !== "recovery" || !accessToken || !refreshToken) {
-      setMessage("El enlace de recuperación es inválido o no contiene un token válido.");
+      setMessage(
+        "El enlace de recuperación es inválido o no contiene un token válido."
+      );
       setIsLoading(false);
       setTimeout(() => {
         navigate("/login", { replace: true });
@@ -112,7 +119,10 @@ const ResetPassword = () => {
       setIsLoading(false);
       return;
     } else if (!validatePassword(password).isValid) {
-      setErrors((prev) => ({ ...prev, password: "La contraseña no cumple con los requisitos" }));
+      setErrors((prev) => ({
+        ...prev,
+        password: "La contraseña no cumple con los requisitos",
+      }));
       setIsLoading(false);
       return;
     }
@@ -122,13 +132,17 @@ const ResetPassword = () => {
       setIsLoading(false);
       return;
     } else if (password !== confirmPassword) {
-      setErrors((prev) => ({ ...prev, confirmPassword: "Las contraseñas no coinciden" }));
+      setErrors((prev) => ({
+        ...prev,
+        confirmPassword: "Las contraseñas no coinciden",
+      }));
       setIsLoading(false);
       return;
     }
 
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const { data: userData, error: userError } =
+        await supabase.auth.getUser();
 
       if (userError || !userData.user) {
         setMessage("No se pudo obtener la información del usuario.");
@@ -153,7 +167,9 @@ const ResetPassword = () => {
         return;
       }
 
-      const backendUrl = `${import.meta.env.VITE_BACKEND_URL}/api/update-password`;
+      const backendUrl = `${
+        import.meta.env.VITE_BACKEND_URL
+      }/api/update-password`;
       const response = await fetch(backendUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -164,9 +180,14 @@ const ResetPassword = () => {
         let result;
         try {
           result = await response.json();
-          setMessage(result.error || `Error al actualizar la contraseña en la base de datos (código ${response.status}).`);
+          setMessage(
+            result.error ||
+              `Error al actualizar la contraseña en la base de datos (código ${response.status}).`
+          );
         } catch (jsonErr) {
-          setMessage(`Error del servidor al actualizar la contraseña (código ${response.status}).`);
+          setMessage(
+            `Error del servidor al actualizar la contraseña (código ${response.status}).`
+          );
         }
         setIsLoading(false);
         return;
@@ -178,18 +199,22 @@ const ResetPassword = () => {
         icon: "success",
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
+        background: isDarkMode ? "#282c3c" : "#ffffff",
         customClass: {
-          popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
+          popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
           icon: "custom-swal-icon",
-          title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-          htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
+          title: isDarkMode ? "text-white" : "text-gray-900",
+          htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
         },
       });
 
       await supabase.auth.signOut();
       navigate("/login", { replace: true });
     } catch (err) {
-      setMessage(err.message || "Ocurrió un error inesperado al actualizar la contraseña.");
+      setMessage(
+        (err instanceof Error ? err.message : "Ocurrió un error inesperado") ||
+          "Ocurrió un error inesperado al actualizar la contraseña."
+      );
       setIsLoading(false);
     }
   };
@@ -199,7 +224,9 @@ const ResetPassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const toggleConfirmPasswordVisibility = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const toggleConfirmPasswordVisibility = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault();
     setShowConfirmPassword(!showConfirmPassword);
   };
@@ -211,12 +238,22 @@ const ResetPassword = () => {
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
-    if (passwordContainerRef.current && e.relatedTarget instanceof Node && passwordContainerRef.current.contains(e.relatedTarget)) return;
+    if (
+      passwordContainerRef.current &&
+      e.relatedTarget instanceof Node &&
+      passwordContainerRef.current.contains(e.relatedTarget)
+    )
+      return;
     setIsPasswordFocused(false);
   };
 
   const handleConfirmPasswordBlur = (e: React.FocusEvent<HTMLDivElement>) => {
-    if (confirmPasswordContainerRef.current && e.relatedTarget instanceof Node && confirmPasswordContainerRef.current.contains(e.relatedTarget)) return;
+    if (
+      confirmPasswordContainerRef.current &&
+      e.relatedTarget instanceof Node &&
+      confirmPasswordContainerRef.current.contains(e.relatedTarget)
+    )
+      return;
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -226,17 +263,39 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className={`container mx-auto px-4 py-16 transition-colors duration-300 ${isDarkMode ? "bg-[#282c3c] text-white" : "bg-white-100 text-gray-900"}`}>
+    <div
+      className={`container mx-auto px-4 py-16 transition-colors duration-300 ${
+        isDarkMode ? "bg-[#282c3c] text-white" : "bg-white-100 text-gray-900"
+      }`}
+    >
       <div className="max-w-md mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center">
           Restablecer Contraseña
         </h1>
 
         {isLoading ? (
-          <p className={`text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Procesando enlace de recuperación...</p>
+          <p
+            className={`text-center ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            Procesando enlace de recuperación...
+          </p>
         ) : (
-          <div className={`rounded-xl p-8 shadow-sm ${isDarkMode ? "bg-[#3B4252]" : "bg-white"}`}>
-            {message && <p className={`text-center mb-4 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>{message}</p>}
+          <div
+            className={`rounded-xl p-8 shadow-sm ${
+              isDarkMode ? "bg-[#3B4252]" : "bg-white"
+            }`}
+          >
+            {message && (
+              <p
+                className={`text-center mb-4 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                {message}
+              </p>
+            )}
             {!message.includes("Error") &&
               !message.includes("inválido") &&
               !message.includes("verificar") && (
@@ -244,11 +303,19 @@ const ResetPassword = () => {
                   <div>
                     <label
                       htmlFor="password"
-                      className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"} mb-1`}
+                      className={`block text-sm font-medium ${
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                      } mb-1`}
                     >
                       Nueva Contraseña
                     </label>
-                    <div className="relative" ref={passwordContainerRef} onFocus={handleFocus} onBlur={handleBlur} tabIndex={-1}>
+                    <div
+                      className="relative"
+                      ref={passwordContainerRef}
+                      onFocus={handleFocus}
+                      onBlur={handleBlur}
+                      tabIndex={-1}
+                    >
                       <input
                         type={showPassword ? "text" : "password"}
                         id="password"
@@ -257,8 +324,16 @@ const ResetPassword = () => {
                         required
                         className={`w-full px-4 py-2 rounded-lg border pr-10 focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 transition-colors duration-300 ${
                           isDarkMode
-                            ? `bg-[#282c3c] text-white ${errors.password ? "border-red-500" : "border-gray-600"}`
-                            : `bg-white text-gray-900 ${errors.password ? "border-red-500" : "border-gray-300"}`
+                            ? `bg-[#282c3c] text-white ${
+                                errors.password
+                                  ? "border-red-500"
+                                  : "border-gray-600"
+                              }`
+                            : `bg-white text-gray-900 ${
+                                errors.password
+                                  ? "border-red-500"
+                                  : "border-gray-300"
+                              }`
                         }`}
                         placeholder="••••••••"
                       />
@@ -269,82 +344,237 @@ const ResetPassword = () => {
                         style={{ top: "50%", transform: "translateY(-50%)" }}
                       >
                         {showPassword ? (
-                          <EyeOff size={20} className={`hover:text-[#ff9400] ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />
+                          <EyeOff
+                            size={20}
+                            className={`hover:text-[#ff9400] ${
+                              isDarkMode ? "text-gray-400" : "text-gray-500"
+                            }`}
+                          />
                         ) : (
-                          <Eye size={20} className={`hover:text-[#ff9400] ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />
+                          <Eye
+                            size={20}
+                            className={`hover:text-[#ff9400] ${
+                              isDarkMode ? "text-gray-400" : "text-gray-500"
+                            }`}
+                          />
                         )}
                       </button>
                       <div
                         className={`absolute top-full left-0 mt-2 text-sm w-full transition-all duration-300 ease-in-out z-10 ${
-                          isPasswordFocused ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
+                          isPasswordFocused
+                            ? "opacity-100 translate-y-0"
+                            : "opacity-0 -translate-y-2 pointer-events-none"
                         }`}
                       >
-                        <ul className={`list-none pl-2 space-y-1 p-4 rounded-lg shadow-md ${isDarkMode ? "bg-[#3B4252]" : "bg-white"}`}>
+                        <ul
+                          className={`list-none pl-2 space-y-1 p-4 rounded-lg shadow-md ${
+                            isDarkMode ? "bg-[#3B4252]" : "bg-white"
+                          }`}
+                        >
                           <li className="flex items-center">
                             <span
-                              className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${isDarkMode ? "border-gray-500" : "border-gray-400"} ${
-                                validatePassword(password).hasUpperCase ? isDarkMode ? "bg-gray-300 border-gray-300" : "bg-gray-200 border-gray-200" : "bg-transparent"
+                              className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${
+                                isDarkMode
+                                  ? "border-gray-500"
+                                  : "border-gray-400"
+                              } ${
+                                validatePassword(password).hasUpperCase
+                                  ? isDarkMode
+                                    ? "bg-gray-300 border-gray-300"
+                                    : "bg-gray-200 border-gray-200"
+                                  : "bg-transparent"
                               }`}
                             >
-                              {validatePassword(password).hasUpperCase && <FaCheck className={`${isDarkMode ? "text-black" : "text-gray-900"} text-[8px]`} />}
+                              {validatePassword(password).hasUpperCase && (
+                                <FaCheck
+                                  className={`${
+                                    isDarkMode ? "text-black" : "text-gray-900"
+                                  } text-[8px]`}
+                                />
+                              )}
                             </span>
-                            <span className={validatePassword(password).hasUpperCase ? isDarkMode ? "text-gray-300" : "text-gray-700" : isDarkMode ? "text-gray-400" : "text-gray-500"}>Letra Mayúscula</span>
+                            <span
+                              className={
+                                validatePassword(password).hasUpperCase
+                                  ? isDarkMode
+                                    ? "text-gray-300"
+                                    : "text-gray-700"
+                                  : isDarkMode
+                                  ? "text-gray-400"
+                                  : "text-gray-500"
+                              }
+                            >
+                              Letra Mayúscula
+                            </span>
                           </li>
                           <li className="flex items-center">
                             <span
-                              className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${isDarkMode ? "border-gray-500" : "border-gray-400"} ${
-                                validatePassword(password).hasLowerCase ? isDarkMode ? "bg-gray-300 border-gray-300" : "bg-gray-200 border-gray-200" : "bg-transparent"
+                              className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${
+                                isDarkMode
+                                  ? "border-gray-500"
+                                  : "border-gray-400"
+                              } ${
+                                validatePassword(password).hasLowerCase
+                                  ? isDarkMode
+                                    ? "bg-gray-300 border-gray-300"
+                                    : "bg-gray-200 border-gray-200"
+                                  : "bg-transparent"
                               }`}
                             >
-                              {validatePassword(password).hasLowerCase && <FaCheck className={`${isDarkMode ? "text-black" : "text-gray-900"} text-[8px]`} />}
+                              {validatePassword(password).hasLowerCase && (
+                                <FaCheck
+                                  className={`${
+                                    isDarkMode ? "text-black" : "text-gray-900"
+                                  } text-[8px]`}
+                                />
+                              )}
                             </span>
-                            <span className={validatePassword(password).hasLowerCase ? isDarkMode ? "text-gray-300" : "text-gray-700" : isDarkMode ? "text-gray-400" : "text-gray-500"}>Letra Minúscula</span>
+                            <span
+                              className={
+                                validatePassword(password).hasLowerCase
+                                  ? isDarkMode
+                                    ? "text-gray-300"
+                                    : "text-gray-700"
+                                  : isDarkMode
+                                  ? "text-gray-400"
+                                  : "text-gray-500"
+                              }
+                            >
+                              Letra Minúscula
+                            </span>
                           </li>
                           <li className="flex items-center">
                             <span
-                              className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${isDarkMode ? "border-gray-500" : "border-gray-400"} ${
-                                validatePassword(password).hasNumber ? isDarkMode ? "bg-gray-300 border-gray-300" : "bg-gray-200 border-gray-200" : "bg-transparent"
+                              className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${
+                                isDarkMode
+                                  ? "border-gray-500"
+                                  : "border-gray-400"
+                              } ${
+                                validatePassword(password).hasNumber
+                                  ? isDarkMode
+                                    ? "bg-gray-300 border-gray-300"
+                                    : "bg-gray-200 border-gray-200"
+                                  : "bg-transparent"
                               }`}
                             >
-                              {validatePassword(password).hasNumber && <FaCheck className={`${isDarkMode ? "text-black" : "text-gray-900"} text-[8px]`} />}
+                              {validatePassword(password).hasNumber && (
+                                <FaCheck
+                                  className={`${
+                                    isDarkMode ? "text-black" : "text-gray-900"
+                                  } text-[8px]`}
+                                />
+                              )}
                             </span>
-                            <span className={validatePassword(password).hasNumber ? isDarkMode ? "text-gray-300" : "text-gray-700" : isDarkMode ? "text-gray-400" : "text-gray-500"}>Número</span>
+                            <span
+                              className={
+                                validatePassword(password).hasNumber
+                                  ? isDarkMode
+                                    ? "text-gray-300"
+                                    : "text-gray-700"
+                                  : isDarkMode
+                                  ? "text-gray-400"
+                                  : "text-gray-500"
+                              }
+                            >
+                              Número
+                            </span>
                           </li>
                           <li className="flex items-center">
                             <span
-                              className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${isDarkMode ? "border-gray-500" : "border-gray-400"} ${
-                                validatePassword(password).hasSpecialChar ? isDarkMode ? "bg-gray-300 border-gray-300" : "bg-gray-200 border-gray-200" : "bg-transparent"
+                              className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${
+                                isDarkMode
+                                  ? "border-gray-500"
+                                  : "border-gray-400"
+                              } ${
+                                validatePassword(password).hasSpecialChar
+                                  ? isDarkMode
+                                    ? "bg-gray-300 border-gray-300"
+                                    : "bg-gray-200 border-gray-200"
+                                  : "bg-transparent"
                               }`}
                             >
-                              {validatePassword(password).hasSpecialChar && <FaCheck className={`${isDarkMode ? "text-black" : "text-gray-900"} text-[8px]`} />}
+                              {validatePassword(password).hasSpecialChar && (
+                                <FaCheck
+                                  className={`${
+                                    isDarkMode ? "text-black" : "text-gray-900"
+                                  } text-[8px]`}
+                                />
+                              )}
                             </span>
-                            <span className={validatePassword(password).hasSpecialChar ? isDarkMode ? "text-gray-300" : "text-gray-700" : isDarkMode ? "text-gray-400" : "text-gray-500"}>Carácter Especial (e.g. !@#$%)</span>
+                            <span
+                              className={
+                                validatePassword(password).hasSpecialChar
+                                  ? isDarkMode
+                                    ? "text-gray-300"
+                                    : "text-gray-700"
+                                  : isDarkMode
+                                  ? "text-gray-400"
+                                  : "text-gray-500"
+                              }
+                            >
+                              Carácter Especial (e.g. !@#$%)
+                            </span>
                           </li>
                           <li className="flex items-center">
                             <span
-                              className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${isDarkMode ? "border-gray-500" : "border-gray-400"} ${
-                                validatePassword(password).isLongEnough ? isDarkMode ? "bg-gray-300 border-gray-300" : "bg-gray-200 border-gray-200" : "bg-transparent"
+                              className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${
+                                isDarkMode
+                                  ? "border-gray-500"
+                                  : "border-gray-400"
+                              } ${
+                                validatePassword(password).isLongEnough
+                                  ? isDarkMode
+                                    ? "bg-gray-300 border-gray-300"
+                                    : "bg-gray-200 border-gray-200"
+                                  : "bg-transparent"
                               }`}
                             >
-                              {validatePassword(password).isLongEnough && <FaCheck className={`${isDarkMode ? "text-black" : "text-gray-900"} text-[8px]`} />}
+                              {validatePassword(password).isLongEnough && (
+                                <FaCheck
+                                  className={`${
+                                    isDarkMode ? "text-black" : "text-gray-900"
+                                  } text-[8px]`}
+                                />
+                              )}
                             </span>
-                            <span className={validatePassword(password).isLongEnough ? isDarkMode ? "text-gray-300" : "text-gray-700" : isDarkMode ? "text-gray-400" : "text-gray-500"}>8 Caracteres o Más</span>
+                            <span
+                              className={
+                                validatePassword(password).isLongEnough
+                                  ? isDarkMode
+                                    ? "text-gray-300"
+                                    : "text-gray-700"
+                                  : isDarkMode
+                                  ? "text-gray-400"
+                                  : "text-gray-500"
+                              }
+                            >
+                              8 Caracteres o Más
+                            </span>
                           </li>
                         </ul>
                       </div>
                     </div>
                     {errors.password && errors.password !== "required" && (
-                      <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.password}
+                      </p>
                     )}
                   </div>
                   <div>
                     <label
                       htmlFor="confirmPassword"
-                      className={`block text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"} mb-1`}
+                      className={`block text-sm font-medium ${
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                      } mb-1`}
                     >
                       Confirmar Contraseña
                     </label>
-                    <div className="relative" ref={confirmPasswordContainerRef} onBlur={handleConfirmPasswordBlur} tabIndex={-1}>
+                    <div
+                      className="relative"
+                      ref={confirmPasswordContainerRef}
+                      onBlur={handleConfirmPasswordBlur}
+                      tabIndex={-1}
+                    >
                       <input
                         type={showConfirmPassword ? "text" : "password"}
                         id="confirmPassword"
@@ -353,8 +583,16 @@ const ResetPassword = () => {
                         required
                         className={`w-full px-4 py-2 rounded-lg border pr-10 focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 transition-colors duration-300 ${
                           isDarkMode
-                            ? `bg-[#282c3c] text-white ${errors.confirmPassword ? "border-red-500" : "border-gray-600"}`
-                            : `bg-white text-gray-900 ${errors.confirmPassword ? "border-red-500" : "border-gray-300"}`
+                            ? `bg-[#282c3c] text-white ${
+                                errors.confirmPassword
+                                  ? "border-red-500"
+                                  : "border-gray-600"
+                              }`
+                            : `bg-white text-gray-900 ${
+                                errors.confirmPassword
+                                  ? "border-red-500"
+                                  : "border-gray-300"
+                              }`
                         }`}
                         placeholder="••••••••"
                       />
@@ -365,15 +603,28 @@ const ResetPassword = () => {
                         style={{ top: "50%", transform: "translateY(-50%)" }}
                       >
                         {showConfirmPassword ? (
-                          <EyeOff size={20} className={`hover:text-[#ff9400] ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />
+                          <EyeOff
+                            size={20}
+                            className={`hover:text-[#ff9400] ${
+                              isDarkMode ? "text-gray-400" : "text-gray-500"
+                            }`}
+                          />
                         ) : (
-                          <Eye size={20} className={`hover:text-[#ff9400] ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />
+                          <Eye
+                            size={20}
+                            className={`hover:text-[#ff9400] ${
+                              isDarkMode ? "text-gray-400" : "text-gray-500"
+                            }`}
+                          />
                         )}
                       </button>
                     </div>
-                    {errors.confirmPassword && errors.confirmPassword !== "required" && (
-                      <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
-                    )}
+                    {errors.confirmPassword &&
+                      errors.confirmPassword !== "required" && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.confirmPassword}
+                        </p>
+                      )}
                   </div>
                   <button
                     type="submit"
@@ -388,7 +639,11 @@ const ResetPassword = () => {
                   </button>
                 </form>
               )}
-            <p className={`mt-4 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+            <p
+              className={`mt-4 text-center ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
               ¿Volver al inicio de sesión?{" "}
               <a href="/login" className="text-[#ff9400] hover:underline">
                 Inicia sesión aquí

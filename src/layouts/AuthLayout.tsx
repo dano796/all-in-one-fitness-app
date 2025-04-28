@@ -9,7 +9,11 @@ const AuthLayout: React.FC = () => {
   const { isDarkMode } = useTheme();
 
   return (
-    <div className={`min-h-screen flex flex-col transition-colors duration-300 ${isDarkMode ? "bg-[#282c3c]" : "bg-white-100"}`}>
+    <div
+      className={`min-h-screen flex flex-col transition-colors duration-300 ${
+        isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
+      }`}
+    >
       <Navbar />
       <main className="flex-1">
         <Outlet />

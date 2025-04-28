@@ -31,7 +31,9 @@ ChartJS.register(
 
 const RMProgressPage: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const [selectedExercise, setSelectedExercise] = useState<string>(exercises[0]);
+  const [selectedExercise, setSelectedExercise] = useState<string>(
+    exercises[0]
+  );
   const [unit, setUnit] = useState<"kg" | "lb">("kg");
   const [chartData, setChartData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -224,17 +226,27 @@ const RMProgressPage: React.FC = () => {
   };
 
   return (
-    <div className={`relative z-0 min-h-screen w-full mt-4 sm:mt-0 transition-colors duration-300 ${isDarkMode ? "bg-[#282c3c]" : "bg-gray-100"}`}>
+    <div
+      className={`relative z-0 min-h-screen w-full mt-4 sm:mt-0 transition-colors duration-300 ${
+        isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
+      }`}
+    >
       <GalaxyBackground />
       <div className="w-full px-4 py-8 md:py-12">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className={`max-w-4xl mx-auto p-5 sm:p-4 md:p-6 rounded-lg shadow-md relative z-10 ${isDarkMode ? "bg-[#3B4252]" : "bg-white"}`}
+          className={`max-w-4xl mx-auto p-5 sm:p-4 md:p-6 rounded-lg shadow-md relative z-10 ${
+            isDarkMode ? "bg-[#3B4252]" : "bg-white"
+          }`}
         >
           <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
-            <h2 className={`text-xl sm:text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+            <h2
+              className={`text-xl sm:text-2xl font-bold ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
               Progreso de 1RM
             </h2>
             <ButtonToolTip content={infoText.progressRM} />
@@ -243,7 +255,9 @@ const RMProgressPage: React.FC = () => {
           <div className="mb-4 md:mb-6">
             <label
               htmlFor="exercise-select"
-              className={`block text-sm sm:text-sm font-medium ${isDarkMode ? "text-white" : "text-gray-700"} mb-1`}
+              className={`block text-sm sm:text-sm font-medium ${
+                isDarkMode ? "text-white" : "text-gray-700"
+              } mb-1`}
             >
               Selecciona un ejercicio:
             </label>
@@ -262,7 +276,11 @@ const RMProgressPage: React.FC = () => {
                   <option
                     key={ex}
                     value={ex}
-                    className={`${isDarkMode ? "bg-[#2D3242] text-white" : "bg-white text-gray-900"}`}
+                    className={`${
+                      isDarkMode
+                        ? "bg-[#2D3242] text-white"
+                        : "bg-white text-gray-900"
+                    }`}
                   >
                     {ex}
                   </option>
@@ -283,9 +301,13 @@ const RMProgressPage: React.FC = () => {
           </div>
 
           {error && (
-            <div className={`text-center p-3 sm:p-4 md:p-6 text-sm sm:text-base rounded-md mb-4 ${
-              isDarkMode ? "text-red-400 bg-red-400/10" : "text-red-600 bg-red-100"
-            }`}>
+            <div
+              className={`text-center p-3 sm:p-4 md:p-6 text-sm sm:text-base rounded-md mb-4 ${
+                isDarkMode
+                  ? "text-red-400 bg-red-400/10"
+                  : "text-red-600 bg-red-100"
+              }`}
+            >
               {error}
             </div>
           )}
@@ -293,7 +315,11 @@ const RMProgressPage: React.FC = () => {
           <div className="h-64 sm:h-72 md:h-96 w-full">
             {loading ? (
               <div className="flex items-center justify-center h-full">
-                <div className={`text-sm sm:text-base text-center ${isDarkMode ? "text-white" : "text-gray-600"}`}>
+                <div
+                  className={`text-sm sm:text-base text-center ${
+                    isDarkMode ? "text-white" : "text-gray-600"
+                  }`}
+                >
                   <svg
                     className="animate-spin h-8 w-8 text-[#ff9404] mx-auto mb-2"
                     xmlns="http://www.w3.org/2000/svg"
@@ -321,14 +347,22 @@ const RMProgressPage: React.FC = () => {
               <Line data={chartData} options={options} />
             ) : (
               <div className="flex items-center justify-center h-full">
-                <p className={`text-sm sm:text-base text-center ${isDarkMode ? "text-white" : "text-gray-600"} px-4`}>
+                <p
+                  className={`text-sm sm:text-base text-center ${
+                    isDarkMode ? "text-white" : "text-gray-600"
+                  } px-4`}
+                >
                   No hay datos disponibles para este ejercicio.
                 </p>
               </div>
             )}
           </div>
 
-          <div className={`mt-4 text-center text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+          <div
+            className={`mt-4 text-center text-xs ${
+              isDarkMode ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
             <p>
               Visualiza tu progreso a lo largo del tiempo para optimizar tus
               entrenamientos.

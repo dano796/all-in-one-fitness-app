@@ -158,16 +158,16 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
 
         await Swal.fire({
           title: "¡Éxito!",
-          text: response.data.message,
+          text: "La comida ha sido registrada exitosamente.",
           icon: "success",
-          iconColor: "#ff9400",
           confirmButtonText: "Aceptar",
-          confirmButtonColor: "#ff9404",
+          confirmButtonColor: "#ff9400",
+          background: isDarkMode ? "#282c3c" : "#ffffff",
           customClass: {
-            popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
+            popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
             icon: "custom-swal-icon",
-            title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-            htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
+            title: isDarkMode ? "text-white" : "text-gray-900",
+            htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
           },
         });
 
@@ -190,10 +190,14 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9404",
           customClass: {
-            popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
+            popup: isDarkMode
+              ? "custom-swal-background"
+              : "custom-swal-background-light",
             icon: "custom-swal-icon",
             title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-            htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
+            htmlContainer: isDarkMode
+              ? "custom-swal-text"
+              : "custom-swal-text-light",
           },
         });
       } finally {
@@ -227,7 +231,11 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
       }`}
     >
       <div className="flex items-center gap-3 mb-6">
-        <h2 className={`text-xl font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+        <h2
+          className={`text-xl font-semibold ${
+            isDarkMode ? "text-white" : "text-gray-900"
+          }`}
+        >
           Registro de Comida con IA
         </h2>
         <ButtonToolTip content={infoText.foodAIInfo} />
@@ -237,7 +245,9 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
       <div className="mb-4">
         <label
           htmlFor="meal-type"
-          className={`text-base font-medium mr-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}
+          className={`text-base font-medium mr-2 ${
+            isDarkMode ? "text-white" : "text-gray-900"
+          }`}
         >
           Selecciona el tipo de comida:
         </label>
@@ -248,7 +258,7 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
           className={`px-2.5 py-1.5 text-sm border rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#ff9404]/20 ${
             isDarkMode
               ? "border-gray-500 bg-[#2D3242] text-gray-200 focus:border-[#ff9404]"
-              : "border-gray-300 bg-white text-gray-900 focus:border-[#ff9404]"
+              : "border-gray-300 bg-white hover:bg-[#F8F9FA] text-gray-900 focus:border-[#ff9404]"
           }`}
         >
           <option value="Desayuno">Desayuno</option>
@@ -269,7 +279,11 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
           transition={{ duration: 0.3 }}
           className="mt-4 flex flex-col items-center space-y-4"
         >
-          <p className={`text-center text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+          <p
+            className={`text-center text-xs ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             Imagen cargada:{" "}
             <span className="font-semibold">{uploadedImage.name}</span>
           </p>
@@ -303,7 +317,11 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
           transition={{ duration: 0.4 }}
           className="mt-4"
         >
-          <h3 className={`text-sm font-semibold mb-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+          <h3
+            className={`text-sm font-semibold mb-2 ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Resultado
           </h3>
           <div className="space-y-3">

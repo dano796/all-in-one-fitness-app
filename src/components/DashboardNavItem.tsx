@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTheme } from "../pages/ThemeContext";
 
 interface DashboardNavItemProps {
   to: string;
@@ -18,6 +19,8 @@ const DashboardNavItem: React.FC<DashboardNavItemProps> = ({
   onClick,
   isActive = false,
 }) => {
+  const { isDarkMode } = useTheme();
+
   return (
     <Link
       to={to}
@@ -26,7 +29,9 @@ const DashboardNavItem: React.FC<DashboardNavItemProps> = ({
       } ${
         isActive
           ? "text-[#ff9404]" // Solo cambia el color del texto/icono
-          : "text-white hover:text-[#ff9404]" // Estilos originales para item no activo
+          : isDarkMode
+          ? "text-white hover:text-[#ff9404]" // Estilo para dark mode
+          : "text-[#212529] hover:text-[#ff9404]" // Estilo para light mode con nuevo color
       }`}
       onClick={onClick}
     >

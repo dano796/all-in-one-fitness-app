@@ -20,12 +20,21 @@ const theme = extendTheme({
       800: '#460505',
       900: '#1d0000',
     },
+    light: {
+      primary: '#F8F9FA',
+      secondary: '#E9ECEF',
+      text: {
+        primary: '#212529',
+        secondary: '#6C757D',
+      },
+      accent: '#ff9404'
+    },
   },
   styles: {
     global: (props: any) => ({
       body: {
-        bg: props.colorMode === 'dark' ? 'gray.900' : 'white',
-        color: props.colorMode === 'dark' ? 'white' : 'gray.900',
+        bg: props.colorMode === 'dark' ? 'gray.900' : 'light.primary',
+        color: props.colorMode === 'dark' ? 'white' : 'light.text.primary',
       },
     }),
   },

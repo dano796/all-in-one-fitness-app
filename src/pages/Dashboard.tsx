@@ -115,7 +115,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       start.setDate(start.getDate() - dayOfWeek);
       const end = new Date(start);
       end.setDate(end.getDate() + 6);
-      const startStr = start.toLocaleDateString("en-CA", { timeZone: TIMEZONE });
+      const startStr = start.toLocaleDateString("en-CA", {
+        timeZone: TIMEZONE,
+      });
       const endStr = end.toLocaleDateString("en-CA", { timeZone: TIMEZONE });
       setStartDate(startStr);
       setEndDate(endStr);
@@ -136,12 +138,18 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/dashboard`, {
             params: { email: userEmail, startDate, endDate },
           }),
-          axios.get<FoodsResponse>(`${import.meta.env.VITE_BACKEND_URL}/api/foods/user`, {
-            params: { email: userEmail, date: date },
-          }),
-          axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`, {
-            params: { email: userEmail },
-          }),
+          axios.get<FoodsResponse>(
+            `${import.meta.env.VITE_BACKEND_URL}/api/foods/user`,
+            {
+              params: { email: userEmail, date: date },
+            }
+          ),
+          axios.get(
+            `${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`,
+            {
+              params: { email: userEmail },
+            }
+          ),
           axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/water/user`, {
             params: { email: userEmail, date: date },
           }),
@@ -152,7 +160,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           updatedDashboardData.calorieGoal = goalRes.data.calorieGoal;
         }
         if (waterRes.data) {
-          updatedDashboardData.waterIntake = (waterRes.data.aguasllenadas || 0) * WATER_PER_UNIT;
+          updatedDashboardData.waterIntake =
+            (waterRes.data.aguasllenadas || 0) * WATER_PER_UNIT;
           setFilledWaterUnits(waterRes.data.aguasllenadas || 0);
         }
         setFoodData(foodsRes.data);
@@ -266,7 +275,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       return [];
     }
 
-    const weekDays: { fullDate: string; date: string; calories: number; meta: number }[] = [];
+    const weekDays: {
+      fullDate: string;
+      date: string;
+      calories: number;
+      meta: number;
+    }[] = [];
     const selectedDateObj = new Date(date + "T00:00:00");
 
     if (isNaN(selectedDateObj.getTime())) {
@@ -297,7 +311,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       if (dailyCaloriesMap.has(day.fullDate)) {
         day.calories = dailyCaloriesMap.get(day.fullDate) || 0;
       } else if (day.fullDate === date && date === todayStr) {
-        day.calories = Number(formatValue(dashboardData.calorieIntake.totalCalories));
+        day.calories = Number(
+          formatValue(dashboardData.calorieIntake.totalCalories)
+        );
       }
     });
 
@@ -313,7 +329,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   const barData = date ? prepareWeeklyData() : [];
   const waterGoal = TOTAL_WATER_UNITS * WATER_PER_UNIT;
-  const waterPercentage = Math.min((dashboardData.waterIntake / waterGoal) * 100, 100);
+  const waterPercentage = Math.min(
+    (dashboardData.waterIntake / waterGoal) * 100,
+    100
+  );
 
   const getWaterMessage = () => {
     if (filledWaterUnits === TOTAL_WATER_UNITS) {
@@ -335,7 +354,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   };
 
   return (
-    <div className={`relative p-4 space-y-6 ${isDarkMode ? "bg-[#282c3c]" : "bg-white-100"} min-h-screen overflow-hidden -mt-12 transition-colors duration-300`}>
+    <div
+      className={`relative p-4 space-y-6 ${
+        isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
+      } min-h-screen overflow-hidden -mt-12 transition-colors duration-300`}
+    >
       <GalaxyBackground />
 
       <motion.div
@@ -348,7 +371,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className={`mb-2 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
+          className={`mb-2 text-xs ${
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          }`}
         >
           Semana {getWeek()}
         </motion.div>
@@ -387,7 +412,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className={`rounded-lg p-5 ${isDarkMode ? "bg-[#3B4252]" : "bg-white"} shadow-md`}
+              className={`rounded-lg p-5 ${
+                isDarkMode ? "bg-[#3B4252]" : "bg-white"
+              } shadow-md`}
             >
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -396,14 +423,22 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 className="flex justify-between items-center mb-4"
               >
                 <div className="flex items-center space-x-2">
-                  <h2 className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <h2
+                    className={`text-sm font-semibold ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     Ingesta Calórica
                   </h2>
                   <ButtonToolTip content={infoText.calorieIntake} />
                 </div>
                 <button
                   onClick={() => navigate("/foodDashboard")}
-                  className={`text-sm ${isDarkMode ? "text-[#ff9404] hover:text-[#e08503]" : "text-orange-500 hover:text-orange-600"} transition-colors duration-300`}
+                  className={`text-sm ${
+                    isDarkMode
+                      ? "text-[#ff9404] hover:text-[#e08503]"
+                      : "text-orange-500 hover:text-orange-600"
+                  } transition-colors duration-300`}
                 >
                   Ver detalles
                 </button>
@@ -431,20 +466,35 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         fontFamily: "Inter, sans-serif",
                       },
                       colors: ["#FF0000", "#8884d8", "#1E90FF", "#ff9404"],
-                      labels: ["Calorías", "Carbohidratos", "Proteínas", "Grasas"],
+                      labels: [
+                        "Calorías",
+                        "Carbohidratos",
+                        "Proteínas",
+                        "Grasas",
+                      ],
                       plotOptions: {
                         radialBar: {
                           dataLabels: {
-                            name: { fontSize: "14px", color: isDarkMode ? "#fff" : "#1f2937" },
-                            value: { fontSize: "16px", color: isDarkMode ? "#fff" : "#1f2937" },
+                            name: {
+                              fontSize: "14px",
+                              color: isDarkMode ? "#fff" : "#1f2937",
+                            },
+                            value: {
+                              fontSize: "16px",
+                              color: isDarkMode ? "#fff" : "#1f2937",
+                            },
                             total: {
                               show: true,
                               label: "Total Calorías",
                               color: isDarkMode ? "#fff" : "#1f2937",
                               formatter: function () {
-                                const totalCaloriesConsumed = dashboardData.calorieIntake.totalCalories;
-                                const totalCaloriesGoal = dashboardData.calorieGoal;
-                                const percentageCalories = (totalCaloriesConsumed / totalCaloriesGoal) * 100;
+                                const totalCaloriesConsumed =
+                                  dashboardData.calorieIntake.totalCalories;
+                                const totalCaloriesGoal =
+                                  dashboardData.calorieGoal;
+                                const percentageCalories =
+                                  (totalCaloriesConsumed / totalCaloriesGoal) *
+                                  100;
                                 return `${Math.round(percentageCalories)}%`;
                               },
                             },
@@ -454,7 +504,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                       theme: { mode: isDarkMode ? "dark" : "light" },
                     }}
                     series={[
-                      Math.round((dashboardData.calorieIntake.totalCalories / dashboardData.calorieGoal) * 100),
+                      Math.round(
+                        (dashboardData.calorieIntake.totalCalories /
+                          dashboardData.calorieGoal) *
+                          100
+                      ),
                       carbsPercentage,
                       proteinsPercentage,
                       fatsPercentage,
@@ -467,27 +521,55 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
               <div className="grid grid-cols-2 gap-4 text-center mb-4">
                 <div>
-                  <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Grasas</p>
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Grasas
+                  </p>
                   <p className="text-sm text-[#ff9404] font-semibold">
-                    {formatValue(dashboardData.calorieIntake.totalFats)}/{fatsGoal}g
+                    {formatValue(dashboardData.calorieIntake.totalFats)}/
+                    {fatsGoal}g
                   </p>
                 </div>
                 <div>
-                  <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Carbohidratos</p>
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Carbohidratos
+                  </p>
                   <p className="text-sm text-[#8884d8] font-semibold">
-                    {formatValue(dashboardData.calorieIntake.totalCarbs)}/{carbsGoal}g
+                    {formatValue(dashboardData.calorieIntake.totalCarbs)}/
+                    {carbsGoal}g
                   </p>
                 </div>
                 <div>
-                  <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Proteína</p>
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Proteína
+                  </p>
                   <p className="text-sm text-[#1E90FF] font-semibold">
-                    {formatValue(dashboardData.calorieIntake.totalProteins)}/{proteinsGoal}g
+                    {formatValue(dashboardData.calorieIntake.totalProteins)}/
+                    {proteinsGoal}g
                   </p>
                 </div>
                 <div>
-                  <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Calorías</p>
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Calorías
+                  </p>
                   <p className="text-sm text-[#FF0000] font-semibold">
-                    {formatValue(dashboardData.calorieIntake.totalCalories)}/{dashboardData.calorieGoal} kcal
+                    {formatValue(dashboardData.calorieIntake.totalCalories)}/
+                    {dashboardData.calorieGoal} kcal
                   </p>
                 </div>
               </div>
@@ -497,7 +579,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut", delay: 0.3 }}
-              className={`rounded-lg p-5 ${isDarkMode ? "bg-[#3B4252]" : "bg-white"} shadow-md`}
+              className={`rounded-lg p-5 ${
+                isDarkMode ? "bg-[#3B4252]" : "bg-white"
+              } shadow-md`}
             >
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -506,24 +590,47 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 className="flex justify-between items-center mb-4"
               >
                 <div className="flex items-center space-x-2">
-                  <h2 className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <h2
+                    className={`text-sm font-semibold ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     Ingesta de Agua
                   </h2>
                   <ButtonToolTip content={infoText.waterIntake} />
                 </div>
                 <button
                   onClick={() => navigate("/water")}
-                  className={`text-sm ${isDarkMode ? "text-[#ff9404] hover:text-[#e08503]" : "text-orange-500 hover:text-orange-600"} transition-colors duration-300`}
+                  className={`text-sm ${
+                    isDarkMode
+                      ? "text-[#ff9404] hover:text-[#e08503]"
+                      : "text-orange-500 hover:text-orange-600"
+                  } transition-colors duration-300`}
                 >
                   Registrar
                 </button>
               </motion.div>
 
-              <div className={`rounded-lg p-4 mb-4 ${isDarkMode ? "bg-[#4B5563]/50" : "bg-gray-50"}`}>
-                <p className={`text-base font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                  Consumido: <span className="text-[#ff9404]">{Math.round(dashboardData.waterIntake)} ml</span>
+              <div
+                className={`rounded-lg p-4 mb-4 ${
+                  isDarkMode ? "bg-[#4B5563]/50" : "bg-gray-50"
+                }`}
+              >
+                <p
+                  className={`text-base font-semibold ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  Consumido:{" "}
+                  <span className="text-[#ff9404]">
+                    {Math.round(dashboardData.waterIntake)} ml
+                  </span>
                 </p>
-                <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                <p
+                  className={`text-sm ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   {waterPercentage.toFixed(0)}% de tu meta
                 </p>
               </div>
@@ -531,20 +638,32 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               <div className="flex items-center justify-center mb-4">
                 <Droplets className="text-[#1E90FF] mr-2" size={24} />
                 <div className="text-center">
-                  <p className={`text-sm ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <p
+                    className={`text-sm ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     {Math.round(dashboardData.waterIntake)} ml / {waterGoal} ml
                   </p>
                 </div>
               </div>
 
-              <div className={`mt-4 rounded-full h-4 ${isDarkMode ? "bg-gray-700" : "bg-gray-200"}`}>
+              <div
+                className={`mt-4 rounded-full h-4 ${
+                  isDarkMode ? "bg-gray-700" : "bg-gray-200"
+                }`}
+              >
                 <div
                   className="bg-[#1E90FF] h-4 rounded-full transition-all duration-1000"
                   style={{ width: `${waterPercentage}%` }}
                 ></div>
               </div>
 
-              <p className={`text-sm mt-4 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+              <p
+                className={`text-sm mt-4 text-center ${
+                  isDarkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
                 {getWaterMessage()}
               </p>
             </motion.div>
@@ -555,7 +674,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut", delay: 0.4 }}
-              className={`rounded-lg p-5 ${isDarkMode ? "bg-[#3B4252]" : "bg-white"} shadow-md`}
+              className={`rounded-lg p-5 ${
+                isDarkMode ? "bg-[#3B4252]" : "bg-white"
+              } shadow-md`}
             >
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -563,16 +684,31 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 transition={{ delay: 0.5, duration: 0.5 }}
                 className="flex items-center space-x-2 mb-4"
               >
-                <h2 className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                <h2
+                  className={`text-sm font-semibold ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   Ingesta Calórica - Resumen Semanal
                 </h2>
                 <ButtonToolTip content={infoText.weeklyCalories} />
               </motion.div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={barData} style={{ backgroundColor: isDarkMode ? "#3B4252" : "#ffffff" }}>
-                  <CartesianGrid strokeDasharray="3" stroke={isDarkMode ? "#4B5563" : "#e5e7eb"} />
-                  <XAxis dataKey="date" stroke={isDarkMode ? "#fff" : "#1f2937"} />
+                <BarChart
+                  data={barData}
+                  style={{
+                    backgroundColor: isDarkMode ? "#3B4252" : "#ffffff",
+                  }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3"
+                    stroke={isDarkMode ? "#4B5563" : "#e5e7eb"}
+                  />
+                  <XAxis
+                    dataKey="date"
+                    stroke={isDarkMode ? "#fff" : "#1f2937"}
+                  />
                   <YAxis
                     stroke={isDarkMode ? "#fff" : "#1f2937"}
                     domain={[0, Math.ceil(dashboardData.calorieGoal * 1.1)]}
@@ -590,53 +726,124 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                           VI: "Viernes",
                           SA: "Sábado",
                         };
-                        const dayName = dayNames[label as keyof typeof dayNames] || label;
-                        const fullDate = new Date(data.fullDate + "T12:00:00").toLocaleDateString("es-CO", {
+                        const dayName =
+                          dayNames[label as keyof typeof dayNames] || label;
+                        const fullDate = new Date(
+                          data.fullDate + "T12:00:00"
+                        ).toLocaleDateString("es-CO", {
                           year: "numeric",
                           month: "long",
                           day: "numeric",
                         });
 
                         const caloriesValue = payload[0].value as number;
-                        const percentage = Math.round((caloriesValue / data.meta) * 100);
+                        const percentage = Math.round(
+                          (caloriesValue / data.meta) * 100
+                        );
                         const isOverGoal = caloriesValue > data.meta;
 
                         return (
-                          <div className={`custom-tooltip p-3 border border-[#ff9404] rounded-lg shadow-lg ${isDarkMode ? "bg-[#282c3c]" : "bg-white"}`}>
-                            <p className={`font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{dayName}</p>
-                            <p className={`text-xs mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>{fullDate}</p>
+                          <div
+                            className={`custom-tooltip p-3 border border-[#ff9404] rounded-lg shadow-lg ${
+                              isDarkMode ? "bg-[#282c3c]" : "bg-white"
+                            }`}
+                          >
+                            <p
+                              className={`font-bold ${
+                                isDarkMode ? "text-white" : "text-gray-900"
+                              }`}
+                            >
+                              {dayName}
+                            </p>
+                            <p
+                              className={`text-xs mb-2 ${
+                                isDarkMode ? "text-gray-300" : "text-gray-600"
+                              }`}
+                            >
+                              {fullDate}
+                            </p>
                             <p className="text-sm">
-                              <span className={isDarkMode ? "text-white" : "text-gray-900"}>Calorías:</span>{" "}
-                              <span className={`font-bold ${isOverGoal ? "text-orange-400" : "text-blue-400"}`}>
+                              <span
+                                className={
+                                  isDarkMode ? "text-white" : "text-gray-900"
+                                }
+                              >
+                                Calorías:
+                              </span>{" "}
+                              <span
+                                className={`font-bold ${
+                                  isOverGoal
+                                    ? "text-orange-400"
+                                    : "text-blue-400"
+                                }`}
+                              >
                                 {caloriesValue.toFixed(0)}
                               </span>
-                              <span className={isDarkMode ? "text-white" : "text-gray-900"}> de </span>
-                              <span className={isDarkMode ? "text-gray-300" : "text-gray-600"}>{data.meta}</span>
+                              <span
+                                className={
+                                  isDarkMode ? "text-white" : "text-gray-900"
+                                }
+                              >
+                                {" "}
+                                de{" "}
+                              </span>
+                              <span
+                                className={
+                                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                                }
+                              >
+                                {data.meta}
+                              </span>
                             </p>
-                            <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                            <p
+                              className={`text-xs ${
+                                isDarkMode ? "text-gray-400" : "text-gray-500"
+                              }`}
+                            >
                               {isOverGoal
-                                ? `${percentage}% (exceso de ${(caloriesValue - data.meta).toFixed(0)} cal)`
-                                : `${percentage}% (${(data.meta - caloriesValue).toFixed(0)} cal restantes)`}
+                                ? `${percentage}% (exceso de ${(
+                                    caloriesValue - data.meta
+                                  ).toFixed(0)} cal)`
+                                : `${percentage}% (${(
+                                    data.meta - caloriesValue
+                                  ).toFixed(0)} cal restantes)`}
                             </p>
                           </div>
                         );
                       }
                       return null;
                     }}
-                    cursor={{ fill: isDarkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)" }}
+                    cursor={{
+                      fill: isDarkMode
+                        ? "rgba(255, 255, 255, 0.1)"
+                        : "rgba(0, 0, 0, 0.05)",
+                    }}
                   />
-                  <Bar dataKey="calories" radius={[10, 10, 0, 0]} isAnimationActive={true} fill="#8884d8">
+                  <Bar
+                    dataKey="calories"
+                    radius={[10, 10, 0, 0]}
+                    isAnimationActive={true}
+                    fill="#8884d8"
+                  >
                     {barData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={entry.calories >= dashboardData.calorieGoal ? "#ff9404" : "#8884d8"}
+                        fill={
+                          entry.calories >= dashboardData.calorieGoal
+                            ? "#ff9404"
+                            : "#8884d8"
+                        }
                       />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
 
-              <div className={`flex justify-between items-center mt-4 text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+              <div
+                className={`flex justify-between items-center mt-4 text-xs ${
+                  isDarkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
                 <div className="flex items-center">
                   <div className="w-3 h-3 rounded bg-[#ff9404] mr-2 mb-[0.5px]"></div>
                   <span>Por encima del objetivo</span>
@@ -652,7 +859,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
-              className={`rounded-lg p-5 ${isDarkMode ? "bg-[#3B4252]" : "bg-white"} shadow-md`}
+              className={`rounded-lg p-5 ${
+                isDarkMode ? "bg-[#3B4252]" : "bg-white"
+              } shadow-md`}
             >
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -660,7 +869,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 transition={{ delay: 0.6, duration: 0.5 }}
                 className="flex items-center space-x-2 mb-4"
               >
-                <h2 className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                <h2
+                  className={`text-sm font-semibold ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
                   Distribución de Macronutrientes
                 </h2>
                 <ButtonToolTip content={infoText.macronutrients} />
@@ -669,33 +882,77 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
                   <div className="mx-auto w-20 h-20 rounded-full border-4 border-[#8884d8] flex items-center justify-center mb-2">
-                    <span className="text-lg font-bold text-[#8884d8]">{carbsPercentage}%</span>
+                    <span className="text-lg font-bold text-[#8884d8]">
+                      {carbsPercentage}%
+                    </span>
                   </div>
-                  <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Carbohidratos</p>
-                  <p className="text-sm text-[#8884d8] font-semibold">{formatValue(dashboardData.calorieIntake.totalCarbs)} g</p>
-                  <p className={`text-xs ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
-                    {Math.round(dashboardData.calorieIntake.totalCarbs * 4)} kcal
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Carbohidratos
+                  </p>
+                  <p className="text-sm text-[#8884d8] font-semibold">
+                    {formatValue(dashboardData.calorieIntake.totalCarbs)} g
+                  </p>
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-500" : "text-gray-500"
+                    }`}
+                  >
+                    {Math.round(dashboardData.calorieIntake.totalCarbs * 4)}{" "}
+                    kcal
                   </p>
                 </div>
 
                 <div className="text-center">
                   <div className="mx-auto w-20 h-20 rounded-full border-4 border-[#1E90FF] flex items-center justify-center mb-2">
-                    <span className="text-lg font-bold text-[#1E90FF]">{proteinsPercentage}%</span>
+                    <span className="text-lg font-bold text-[#1E90FF]">
+                      {proteinsPercentage}%
+                    </span>
                   </div>
-                  <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Proteínas</p>
-                  <p className="text-sm text-[#1E90FF] font-semibold">{formatValue(dashboardData.calorieIntake.totalProteins)} g</p>
-                  <p className={`text-xs ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
-                    {Math.round(dashboardData.calorieIntake.totalProteins * 4)} kcal
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Proteínas
+                  </p>
+                  <p className="text-sm text-[#1E90FF] font-semibold">
+                    {formatValue(dashboardData.calorieIntake.totalProteins)} g
+                  </p>
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-500" : "text-gray-500"
+                    }`}
+                  >
+                    {Math.round(dashboardData.calorieIntake.totalProteins * 4)}{" "}
+                    kcal
                   </p>
                 </div>
 
                 <div className="text-center">
                   <div className="mx-auto w-20 h-20 rounded-full border-4 border-[#ff9404] flex items-center justify-center mb-2">
-                    <span className="text-lg font-bold text-[#ff9404]">{fatsPercentage}%</span>
+                    <span className="text-lg font-bold text-[#ff9404]">
+                      {fatsPercentage}%
+                    </span>
                   </div>
-                  <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Grasas</p>
-                  <p className="text-sm text-[#ff9404] font-semibold">{formatValue(dashboardData.calorieIntake.totalFats)} g</p>
-                  <p className={`text-xs ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Grasas
+                  </p>
+                  <p className="text-sm text-[#ff9404] font-semibold">
+                    {formatValue(dashboardData.calorieIntake.totalFats)} g
+                  </p>
+                  <p
+                    className={`text-xs ${
+                      isDarkMode ? "text-gray-500" : "text-gray-500"
+                    }`}
+                  >
                     {Math.round(dashboardData.calorieIntake.totalFats * 9)} kcal
                   </p>
                 </div>

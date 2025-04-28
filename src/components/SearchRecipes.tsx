@@ -139,7 +139,7 @@ const SearchRecipes: React.FC = () => {
   return (
     <div
       className={`relative min-h-screen overflow-hidden ${
-        isDarkMode ? "bg-[#282c3c]" : "bg-white"
+        isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
       }`}
     >
       <div className="absolute inset-0 z-0">
@@ -170,7 +170,7 @@ const SearchRecipes: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
             className={`rounded-lg p-4 sm:p-5 shadow-md w-full mt-3 sm:mt-4 ${
-              isDarkMode ? "bg-[#3B4252]" : "bg-gray-100"
+              isDarkMode ? "bg-[#3B4252]" : "bg-white"
             }`}
           >
             <div className="flex items-center mb-3 sm:mb-4">
@@ -194,7 +194,7 @@ const SearchRecipes: React.FC = () => {
                 className={`w-full px-3 py-2 sm:px-4 sm:py-2 border rounded-lg focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 text-sm sm:text-base ${
                   isDarkMode
                     ? "border-gray-600 bg-[#2D3242] text-white placeholder-gray-400"
-                    : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
+                    : "border-gray-300 bg-white focus:bg-[#F8F9FA] text-gray-900 placeholder-gray-500"
                 }`}
                 disabled={!userEmail || loading}
                 aria-label="Buscar recetas"
@@ -256,7 +256,7 @@ const SearchRecipes: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className={`rounded-lg p-4 sm:p-5 shadow-md max-w-5xl mx-auto px-2 sm:px-4 ${
-              isDarkMode ? "bg-[#3B4252]" : "bg-gray-100"
+              isDarkMode ? "bg-[#3B4252]" : "bg-white"
             }`}
           >
             <h3
@@ -276,7 +276,7 @@ const SearchRecipes: React.FC = () => {
                   className={`cursor-pointer p-3 sm:p-4 rounded-lg border hover:shadow-[0_0_10px_rgba(255,148,4,0.2)] transition-all duration-200 flex items-start gap-3 sm:gap-4 ${
                     isDarkMode
                       ? "bg-[#2D3242] border-gray-600 hover:border-[#ff9404]"
-                      : "bg-white border-gray-300 hover:border-[#ff9404]"
+                      : "bg-white border-gray-300 hover:bg-[#F8F9FA] hover:border-[#ff9404]"
                   }`}
                   role="button"
                   tabIndex={0}

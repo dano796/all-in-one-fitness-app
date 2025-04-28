@@ -239,7 +239,7 @@ const WaterTracker: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: "easeOut" }}
       className={`relative p-4 space-y-6 min-h-screen overflow-auto -mt-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
-        isDarkMode ? "bg-[#282c3c]" : "bg-white"
+        isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
       }`}
     >
       <GalaxyBackground />
@@ -254,7 +254,7 @@ const WaterTracker: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          className={`text-xs ${
+          className={`mb-2 text-xs ${
             isDarkMode ? "text-gray-400" : "text-gray-600"
           }`}
         >
@@ -265,16 +265,16 @@ const WaterTracker: React.FC = () => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.8 }}
         >
-<button
-  onClick={handleDatePicker}
-  className={`min-w-[120px] px-6 py-3 font-semibold rounded-lg border shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 sm:text-base text-sm sm:px-6 sm:py-3 sm:min-w-[120px] ${
-    isDarkMode
-      ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 border-[#ff9404] hover:bg-gradient-to-br hover:from-[#3B4252] hover:to-[#4B5563]"
-      : "bg-gradient-to-br from-white to-gray-100 text-gray-900 border-gray-300 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-200"
-  }`}
->
-  {getDateLabel()}
-</button>
+          <button
+            onClick={handleDatePicker}
+            className={`min-w-[120px] px-6 py-3 font-semibold rounded-lg border shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 sm:text-base text-sm sm:px-6 sm:py-3 sm:min-w-[120px] ${
+              isDarkMode
+                ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 border-[#ff9404] hover:bg-gradient-to-br hover:from-[#3B4252] hover:to-[#4B5563]"
+                : "bg-gradient-to-br from-white to-gray-100 text-gray-900 border-gray-300 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-200"
+            }`}
+          >
+            {getDateLabel()}
+          </button>
           <input
             type="date"
             ref={dateInputRef}
@@ -288,7 +288,7 @@ const WaterTracker: React.FC = () => {
 
       <div
         className={`max-w-[800px] mx-auto rounded-xl sm:p-7 p-5 relative z-10 ${
-          isDarkMode ? "bg-[#3B4252]" : "bg-gray-100"
+          isDarkMode ? "bg-[#3B4252]" : "bg-white"
         }`}
       >
         {error && (
@@ -314,7 +314,7 @@ const WaterTracker: React.FC = () => {
 
         <div
           className={`rounded-lg p-6 mb-8 ${
-            isDarkMode ? "bg-[#4B5563]/50" : "bg-white"
+            isDarkMode ? "bg-[#4B5563]/50" : "bg-[#F8F9FA]"
           }`}
         >
           <p

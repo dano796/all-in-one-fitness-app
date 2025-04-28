@@ -18,7 +18,7 @@ const FoodSearchIAPage: React.FC = () => {
   return (
     <div
       className={`relative min-h-screen w-full ${
-        isDarkMode ? "bg-[#282c3c]" : "bg-gray-100"
+        isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
       } overflow-hidden transition-colors duration-300`}
     >
       <div className="absolute inset-0 z-0">

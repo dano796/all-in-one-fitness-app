@@ -64,10 +64,14 @@ const LoginPage = () => {
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9400",
           customClass: {
-            popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
+            popup: isDarkMode
+              ? "custom-swal-background"
+              : "custom-swal-background-light",
             icon: "custom-swal-icon",
             title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-            htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
+            htmlContainer: isDarkMode
+              ? "custom-swal-text"
+              : "custom-swal-text-light",
           },
         });
       } else if (result.success) {
@@ -81,16 +85,16 @@ const LoginPage = () => {
         }
         await Swal.fire({
           title: "¡Éxito!",
-          text: "Inicio de sesión exitoso.",
+          text: "Sesión iniciada correctamente.",
           icon: "success",
-          iconColor: "#ff9400",
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9400",
+          background: isDarkMode ? "#282c3c" : "#ffffff",
           customClass: {
-            popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
+            popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
             icon: "custom-swal-icon",
-            title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-            htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
+            title: isDarkMode ? "text-white" : "text-gray-900",
+            htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
           },
         });
       }
@@ -104,10 +108,14 @@ const LoginPage = () => {
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
         customClass: {
-          popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
+          popup: isDarkMode
+            ? "custom-swal-background"
+            : "custom-swal-background-light",
           icon: "custom-swal-icon",
           title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-          htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
+          htmlContainer: isDarkMode
+            ? "custom-swal-text"
+            : "custom-swal-text-light",
         },
       });
     }
@@ -120,7 +128,7 @@ const LoginPage = () => {
   return (
     <div
       className={`container mx-auto px-8 py-16 relative transition-colors duration-300 ${
-        isDarkMode ? "bg-[#282c3c] text-white" : "bg-white-100 text-gray-900"
+        isDarkMode ? "bg-[#282c3c] text-white" : "bg-[#F8F9FA] text-[#212529]"
       }`}
     >
       {recoveryModalOpen && (
@@ -133,7 +141,7 @@ const LoginPage = () => {
         >
           <div
             className={`rounded-xl p-6 shadow-lg w-full max-w-md ${
-              isDarkMode ? "bg-[#3B4252]" : "bg-white"
+              isDarkMode ? "bg-[#3B4252]" : "bg-[#F8F9FA]"
             }`}
             onClick={(e) => e.stopPropagation()}
           >
@@ -149,7 +157,7 @@ const LoginPage = () => {
 
         <div
           className={`rounded-xl p-8 shadow-sm ${
-            isDarkMode ? "bg-[#3B4252]" : "bg-white"
+            isDarkMode ? "bg-[#3B4252]" : "bg-[#E9ECEF]"
           }`}
         >
           <form className="space-y-6" onSubmit={handleLogin}>
@@ -244,7 +252,9 @@ const LoginPage = () => {
                 Regístrate aquí
               </Link>
             </div>
-            <div className={`${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+            <div
+              className={`${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
+            >
               o
             </div>
             <div>
