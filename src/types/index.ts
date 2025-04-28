@@ -71,12 +71,15 @@ export interface Recipe {
     recipe_category: string[];
   };
   recipe_ingredients?: {
-    ingredient: {
-      ingredient_name: string;
-      quantity?: string;
-      measurement_description?: string;
-      ingredient_description?: string;
-    }[];
+    ingredient: (
+      | string
+      | {
+          ingredient_name: string;
+          quantity?: string;
+          measurement_description?: string;
+          ingredient_description?: string;
+        }
+    )[];
   };
   recipe_nutrition?: {
     calories?: string;

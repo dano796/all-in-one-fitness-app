@@ -485,41 +485,37 @@ const SearchRecipes: React.FC = () => {
                       <h3 className="text-base sm:text-lg font-semibold text-[#ff9404] mb-1 sm:mb-2">
                         Ingredientes
                       </h3>
-                      {(selectedRecipe.recipe_ingredients?.ingredient?.length ??
-                        0) > 0 ? (
-                        <ul
-                          className={`list-disc pl-5 space-y-1 text-xs sm:text-sm ${
-                            isDarkMode ? "text-gray-300" : "text-gray-600"
-                          }`}
-                        >
-                          {selectedRecipe.recipe_ingredients?.ingredient.map(
-                            (ing: any, index: number) => (
-                              <li key={index}>
-                                {typeof ing === "string"
-                                  ? ing
-                                  : ing.ingredient_name ||
-                                    "Ingrediente desconocido"}
-                                {typeof ing !== "string" &&
-                                ing.quantity &&
-                                ing.measurement_description
-                                  ? ` (${ing.quantity} ${ing.measurement_description})`
-                                  : ""}
-                                {typeof ing !== "string" &&
-                                  ing.ingredient_description &&
-                                  ` (${ing.ingredient_description})`}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      ) : (
-                        <p
-                          className={`text-xs sm:text-sm ${
-                            isDarkMode ? "text-gray-400" : "text-gray-500"
-                          }`}
-                        >
-                          Ingredientes no disponibles
-                        </p>
-                      )}
+                      {(selectedRecipe.recipe_ingredients?.ingredient?.length ?? 0) > 0 ? (
+                      <ul
+                        className={`list-disc pl-5 space-y-1 text-xs sm:text-sm ${
+                          isDarkMode ? "text-gray-300" : "text-gray-600"
+                        }`}
+                      >
+                      {selectedRecipe.recipe_ingredients?.ingredient.map((ing: any, index: number) => (
+                        <li key={index}>
+                          {typeof ing === "string" 
+                            ? ing 
+                            : ing.ingredient_name 
+                              ? ing.ingredient_name 
+                              : "Ingrediente desconocido"}
+                          {typeof ing !== "string" && ing.quantity && ing.measurement_description
+                            ? ` (${ing.quantity} ${ing.measurement_description})`
+                            : ""}
+                          {typeof ing !== "string" && ing.ingredient_description
+                            ? ` (${ing.ingredient_description})`
+                            : ""}
+                        </li>
+                      ))}
+                      </ul>
+                    ) : (
+                      <p
+                        className={`text-xs sm:text-sm ${
+                          isDarkMode ? "text-gray-400" : "text-gray-500"
+                        }`}
+                      >
+                        Ingredientes no disponibles
+                      </p>
+                    )}
                     </div>
                   </div>
                 </div>
