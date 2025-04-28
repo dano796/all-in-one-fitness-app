@@ -1,15 +1,18 @@
+// src/components/ImageUploadDragDrop.tsx
 import React, { useState, useCallback } from "react";
 import { UploadCloud, Trash2 } from "lucide-react";
+import { useTheme } from "../pages/ThemeContext";
 
 interface ImageUploadDragDropProps {
   onImageUpload: (file: File) => void;
-  onImageRemove: () => void; 
+  onImageRemove: () => void;
 }
 
 const ImageUploadDragDrop: React.FC<ImageUploadDragDropProps> = ({
   onImageUpload,
   onImageRemove,
 }) => {
+  const { isDarkMode } = useTheme();
   const [isDragging, setIsDragging] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -60,7 +63,7 @@ const ImageUploadDragDrop: React.FC<ImageUploadDragDropProps> = ({
   };
 
   const handleRemoveImage = () => {
-    setImagePreview(null); 
+    setImagePreview(null);
     onImageRemove();
   };
 
@@ -70,7 +73,9 @@ const ImageUploadDragDrop: React.FC<ImageUploadDragDropProps> = ({
         className={`border-2 border-dashed rounded-lg p-6 w-full h-64 flex flex-col items-center justify-center text-center transition-colors duration-300 ${
           isDragging
             ? "border-[#ff9404] bg-[#ff9404]/10"
-            : "border-gray-500 bg-[#2D3242]"
+            : isDarkMode
+            ? "border-gray-500 bg-[#2D3242]"
+            : "border-gray-300 bg-gray-50"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -93,13 +98,25 @@ const ImageUploadDragDrop: React.FC<ImageUploadDragDropProps> = ({
           </div>
         ) : (
           <>
-            <UploadCloud className="h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-gray-400 mb-2">
+            <UploadCloud
+              className={`h-12 w-12 mb-4 ${
+                isDarkMode ? "text-gray-400" : "text-gray-500"
+              }`}
+            />
+            <p
+              className={`mb-2 ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
               Sube una imagen y deja que la IA haga lo demás por ti
             </p>
             <label
               htmlFor="file-upload"
-              className="bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white py-2 px-4 font-semibold rounded-lg cursor-pointer hover:from-[#e08503] hover:to-[#ff9404] transition-all duration-300"
+              className={`text-white py-2 px-4 font-semibold rounded-lg cursor-pointer transition-all duration-300 ${
+                isDarkMode
+                  ? "bg-gradient-to-br from-[#ff9404] to-[#e08503] hover:from-[#e08503] hover:to-[#ff9404]"
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
             >
               Seleccionar un archivo
             </label>

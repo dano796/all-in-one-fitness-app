@@ -10,6 +10,7 @@ import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import ButtonToolTip from "../components/ButtonToolTip";
+import { useTheme } from "../pages/ThemeContext";
 
 const preloadImages = [BotellaVacia, Botella25, Botella75, Botella100];
 preloadImages.forEach((src) => {
@@ -84,6 +85,7 @@ const WaterUnit: React.FC<{ stage: number }> = ({ stage }) => {
 };
 
 const WaterTracker: React.FC = () => {
+  const { isDarkMode } = useTheme();
   const navigate = useNavigate();
   const todayStr = new Date().toLocaleDateString("en-CA", {
     timeZone: TIMEZONE,
@@ -236,7 +238,9 @@ const WaterTracker: React.FC = () => {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: "easeOut" }}
-      className="relative p-4 space-y-6 bg-[#282c3c] min-h-screen overflow-auto -mt-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      className={`relative p-4 space-y-6 min-h-screen overflow-auto -mt-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
+        isDarkMode ? "bg-[#282c3c]" : "bg-white"
+      }`}
     >
       <GalaxyBackground />
 
@@ -250,7 +254,9 @@ const WaterTracker: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          className="mb-2 text-xs text-gray-400"
+          className={`text-xs ${
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          }`}
         >
           Semana {getWeek()}
         </motion.div>
@@ -259,12 +265,16 @@ const WaterTracker: React.FC = () => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.8 }}
         >
-          <button
-            onClick={handleDatePicker}
-            className="min-w-[120px] px-6 py-3 bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#3B4252] hover:to-[#4B5563] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 sm:text-base text-sm sm:px-6 sm:py-3 sm:min-w-[120px]"
-          >
-            {getDateLabel()}
-          </button>
+<button
+  onClick={handleDatePicker}
+  className={`min-w-[120px] px-6 py-3 font-semibold rounded-lg border shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 sm:text-base text-sm sm:px-6 sm:py-3 sm:min-w-[120px] ${
+    isDarkMode
+      ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 border-[#ff9404] hover:bg-gradient-to-br hover:from-[#3B4252] hover:to-[#4B5563]"
+      : "bg-gradient-to-br from-white to-gray-100 text-gray-900 border-gray-300 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-200"
+  }`}
+>
+  {getDateLabel()}
+</button>
           <input
             type="date"
             ref={dateInputRef}
@@ -276,7 +286,11 @@ const WaterTracker: React.FC = () => {
         </motion.div>
       </motion.div>
 
-      <div className="max-w-[800px] mx-auto bg-[#3B4252] rounded-xl sm:p-7 p-5 relative z-10">
+      <div
+        className={`max-w-[800px] mx-auto rounded-xl sm:p-7 p-5 relative z-10 ${
+          isDarkMode ? "bg-[#3B4252]" : "bg-gray-100"
+        }`}
+      >
         {error && (
           <motion.p
             initial={{ opacity: 0 }}
@@ -288,18 +302,34 @@ const WaterTracker: React.FC = () => {
           </motion.p>
         )}
         <div className="flex items-center mb-6">
-          <h2 className="text-xl font-semibold text-white mr-2">
+          <h2
+            className={`text-xl font-semibold ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            } mr-2`}
+          >
             Control de Agua
           </h2>
           <ButtonToolTip content={infoText.waterTrackerInfo} />
         </div>
 
-        <div className="bg-[#4B5563]/50 rounded-lg p-6 mb-8">
-          <p className="text-lg font-semibold text-white">
+        <div
+          className={`rounded-lg p-6 mb-8 ${
+            isDarkMode ? "bg-[#4B5563]/50" : "bg-white"
+          }`}
+        >
+          <p
+            className={`text-lg font-semibold ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Consumido:{" "}
             <span className="text-[#ff9404]">{waterConsumed} ml</span>
           </p>
-          <p className="text-base text-gray-400">
+          <p
+            className={`text-base ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             {((waterConsumed / waterGoal) * 100).toFixed(0)}% de tu meta
           </p>
         </div>
@@ -312,20 +342,32 @@ const WaterTracker: React.FC = () => {
           <button
             onClick={handleRemoveWaterUnit}
             disabled={filledWaterUnits === 0 || !isToday}
-            className="px-4 py-2 text-base bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white border-none rounded-lg shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 disabled:bg-[#4B5563] disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none sm:text-base sm:px-4 sm:py-2 "
+            className={`px-4 py-2 text-base border-none rounded-lg shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 sm:text-base sm:px-4 sm:py-2 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none ${
+              isDarkMode
+                ? "bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white disabled:bg-[#4B5563]"
+                : "bg-gradient-to-br from-gray-200 to-gray-300 text-gray-900 disabled:bg-gray-400"
+            }`}
           >
             -
           </button>
           <button
             onClick={handleAddWaterUnit}
             disabled={filledWaterUnits === TOTAL_WATER_UNITS || !isToday}
-            className="px-4 py-2 text-base bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white border-none rounded-lg shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 disabled:bg-[#4B5563] disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none sm:text-base sm:px-4 sm:py-2"
+            className={`px-4 py-2 text-base border-none rounded-lg shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 sm:text-base sm:px-4 sm:py-2 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none ${
+              isDarkMode
+                ? "bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white disabled:bg-[#4B5563]"
+                : "bg-gradient-to-br from-gray-200 to-gray-300 text-gray-900 disabled:bg-gray-400"
+            }`}
           >
             +
           </button>
         </div>
 
-        <p className="text-sm text-gray-400 mt-8 text-center">
+        <p
+          className={`text-sm mt-8 text-center ${
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          }`}
+        >
           {filledWaterUnits === TOTAL_WATER_UNITS
             ? "¡Meta alcanzada! Eres un maestro del agua 💧"
             : "¡Sigue así, cada gota cuenta!"}

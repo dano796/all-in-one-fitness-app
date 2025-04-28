@@ -1,11 +1,14 @@
+// src/pages/FoodSearchIAPage.tsx
 import React from "react";
 import FoodSearchIA from "../components/FoodSearchIA";
 import GalaxyBackground from "../components/GalaxyBackground";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTheme } from "../pages/ThemeContext";
 
 const FoodSearchIAPage: React.FC = () => {
+  const { isDarkMode } = useTheme();
   const [searchParams] = useSearchParams();
   const foodType = searchParams.get("type") || "desayuno";
   const date =
@@ -13,7 +16,11 @@ const FoodSearchIAPage: React.FC = () => {
     new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
 
   return (
-    <div className="relative min-h-screen w-full bg-[#282c3c] overflow-hidden">
+    <div
+      className={`relative min-h-screen w-full ${
+        isDarkMode ? "bg-[#282c3c]" : "bg-gray-100"
+      } overflow-hidden transition-colors duration-300`}
+    >
       <div className="absolute inset-0 z-0">
         <GalaxyBackground />
       </div>
@@ -26,7 +33,13 @@ const FoodSearchIAPage: React.FC = () => {
           className="flex items-center"
         >
           <Link to="/dashboard" className="inline-block">
-            <button className="flex items-center py-2 px-4 mt-4 sm:mt-6 mx-4 sm:mx-6 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1">
+            <button
+              className={`flex items-center py-2 px-4 mt-4 sm:mt-6 mx-4 sm:mx-6 font-semibold rounded-full shadow-md transition-all duration-300 hover:-translate-y-1 ${
+                isDarkMode
+                  ? "bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404]"
+                  : "bg-orange-500 text-white hover:bg-orange-600 hover:shadow-lg"
+              }`}
+            >
               <FaArrowLeft className="mr-2 text-base sm:text-lg" />
               Volver
             </button>

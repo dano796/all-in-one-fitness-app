@@ -1,9 +1,11 @@
+// src/pages/RegisteredFoods.tsx
 import React, { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
 import { FaArrowLeft, FaTrash } from "react-icons/fa";
 import { Link, useSearchParams } from "react-router-dom";
+import { useTheme } from "../pages/ThemeContext";
 
 interface RegisteredFood {
   id_registro: string;
@@ -28,6 +30,7 @@ interface FoodsResponse {
 }
 
 const RegisteredFoods: React.FC = () => {
+  const { isDarkMode } = useTheme();
   const TIMEZONE = "America/Bogota";
   const [date, setDate] = useState<string>(
     new Date().toLocaleDateString("en-CA", { timeZone: TIMEZONE })
@@ -114,10 +117,10 @@ const RegisteredFoods: React.FC = () => {
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9404",
         customClass: {
-          popup: "custom-swal-background",
+          popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
           icon: "custom-swal-icon",
-          title: "custom-swal-title",
-          htmlContainer: "custom-swal-text",
+          title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
+          htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
         },
       });
       setSelectedFood(null);
@@ -135,10 +138,10 @@ const RegisteredFoods: React.FC = () => {
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
         customClass: {
-          popup: "custom-swal-background",
+          popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
           icon: "custom-swal-icon",
-          title: "custom-swal-title",
-          htmlContainer: "custom-swal-text",
+          title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
+          htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
         },
       });
     }
@@ -150,8 +153,16 @@ const RegisteredFoods: React.FC = () => {
     const foods = foodsData.foods[type] || [];
 
     return (
-      <div className="bg-[#2E3440] rounded-xl p-6 shadow-lg max-w-2xl mx-auto w-full">
-        <h3 className="text-lg font-semibold mb-4 text-center text-white">
+      <div
+        className={`rounded-xl p-6 shadow-lg max-w-2xl mx-auto w-full transition-colors duration-300 ${
+          isDarkMode ? "bg-[#2E3440]" : "bg-white"
+        }`}
+      >
+        <h3
+          className={`text-lg font-semibold mb-4 text-center ${
+            isDarkMode ? "text-white" : "text-gray-900"
+          }`}
+        >
           {label}
         </h3>
         {foods.length > 0 ? (
@@ -159,10 +170,14 @@ const RegisteredFoods: React.FC = () => {
             {foods.map((food, index) => (
               <div
                 key={`${food.id_registro}-${index}`}
-                className={`p-4 rounded-xl border border-gray-600 transition duration-200 ${
+                className={`p-4 rounded-xl border transition duration-200 ${
                   selectedFood?.index === index && selectedFood.type === type
-                    ? "bg-[#4B5563]"
-                    : "hover:bg-[#4B5563]"
+                    ? isDarkMode
+                      ? "bg-[#4B5563]"
+                      : "bg-gray-100"
+                    : isDarkMode
+                    ? "border-gray-600 hover:bg-[#4B5563]"
+                    : "border-gray-300 hover:bg-gray-100"
                 }`}
               >
                 <div className="flex items-center space-x-4">
@@ -179,20 +194,38 @@ const RegisteredFoods: React.FC = () => {
                         type,
                       });
                     }}
-                    className="w-5 h-5 text-[#FF6B35] focus:ring-[#FF6B35]"
+                    className={`w-5 h-5 focus:ring-[#FF6B35] ${
+                      isDarkMode
+                        ? "text-[#FF6B35]"
+                        : "text-orange-500 focus:ring-orange-500"
+                    }`}
                   />
                   <div className="flex-1">
-                    <p className="text-md font-medium text-white">
+                    <p
+                      className={`text-md font-medium ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
                       {food.nombre_comida}
                     </p>
-                    <p className="text-sm text-gray-300">{food.descripcion}</p>
+                    <p
+                      className={`text-sm ${
+                        isDarkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
+                    >
+                      {food.descripcion}
+                    </p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-400 text-center text-sm">
+          <p
+            className={`text-center text-sm ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             No hay {label.toLowerCase()} registrados.
           </p>
         )}
@@ -201,10 +234,20 @@ const RegisteredFoods: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#282c3c] p-6 flex flex-col items-center justify-start [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div
+      className={`min-h-screen p-6 flex flex-col items-center justify-start [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-colors duration-300 ${
+        isDarkMode ? "bg-[#282c3c]" : "bg-gray-100"
+      }`}
+    >
       <div className="mb-6 w-full max-w-2xl">
         <Link to="/dashboard" className="inline-block">
-          <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10">
+          <button
+            className={`flex items-center py-2 px-4 font-semibold rounded-full shadow-md transition-all duration-300 hover:-translate-y-1 z-10 ${
+              isDarkMode
+                ? "bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404]"
+                : "bg-orange-500 text-white hover:bg-orange-600 hover:shadow-lg"
+            }`}
+          >
             <FaArrowLeft className="mr-1 text-base" />
             Volver
           </button>
@@ -212,7 +255,11 @@ const RegisteredFoods: React.FC = () => {
       </div>
 
       <div className="mb-6 w-full max-w-2xl">
-        <h2 className="text-md font-semibold text-white text-center">
+        <h2
+          className={`text-md font-semibold text-center ${
+            isDarkMode ? "text-white" : "text-gray-900"
+          }`}
+        >
           Comidas Registradas -{" "}
           {new Date(date + "T00:00:00").toLocaleDateString("es-ES", {
             timeZone: TIMEZONE,
@@ -233,7 +280,11 @@ const RegisteredFoods: React.FC = () => {
         </div>
       )}
       {!typeParam && (
-        <p className="text-gray-400 text-sm text-center">
+        <p
+          className={`text-sm text-center ${
+            isDarkMode ? "text-gray-400" : "text-gray-600"
+          }`}
+        >
           Por favor selecciona un tipo de comida desde el dashboard.
         </p>
       )}
@@ -242,7 +293,11 @@ const RegisteredFoods: React.FC = () => {
         <div className="mt-6 text-right w-full max-w-2xl sticky bottom-0 z-10">
           <button
             onClick={handleDeleteFood}
-            className="ml-auto flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10"
+            className={`ml-auto flex items-center py-2 px-4 font-semibold rounded-full shadow-md transition-all duration-300 hover:-translate-y-1 z-10 ${
+              isDarkMode
+                ? "bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404]"
+                : "bg-orange-500 text-white hover:bg-orange-600 hover:shadow-lg"
+            }`}
           >
             <FaTrash className="mr-1 text-base" />
             Eliminar

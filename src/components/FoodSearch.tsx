@@ -4,9 +4,10 @@ import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
 import { FaArrowLeft, FaSearch } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion"; // Agregamos framer-motion
-import { ClipLoader } from "react-spinners"; // Agregamos ClipLoader
+import { motion } from "framer-motion";
+import { ClipLoader } from "react-spinners";
 import FoodItem from "./FoodItem";
+import { useTheme } from "../pages/ThemeContext";
 
 interface Food {
   food_id: string;
@@ -15,6 +16,7 @@ interface Food {
 }
 
 const FoodSearch: React.FC = () => {
+  const { isDarkMode } = useTheme();
   const [query, setQuery] = useState<string>("");
   const [foods, setFoods] = useState<Food[]>([]);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
@@ -221,8 +223,7 @@ const FoodSearch: React.FC = () => {
   );
 
   return (
-    <div className="relative min-h-screen bg-[#282c3c] overflow-hidden">
-      {/* Contenido principal */}
+    <div className={`relative min-h-screen ${isDarkMode ? 'bg-[#282c3c]' : 'bg-gray-100'} overflow-hidden`}>
       <div className="relative z-10 p-4 mt-8 sm:p-6 space-y-4 sm:space-y-6">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -233,7 +234,7 @@ const FoodSearch: React.FC = () => {
             >
               <Link to="/dashboard">
                 <button
-                  className="flex items-center py-2 px-3 sm:px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300"
+                  className={`flex items-center py-2 px-3 sm:px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] ${isDarkMode ? 'text-white' : 'text-gray-900'} font-semibold rounded-full shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300`}
                   aria-label="Volver al dashboard"
                 >
                   <FaArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -247,9 +248,9 @@ const FoodSearch: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="bg-[#3B4252] rounded-lg p-4 sm:p-5 shadow-md w-full mt-3 sm:mt-4"
+            className={`${isDarkMode ? 'bg-[#3B4252]' : 'bg-white'} rounded-lg p-4 sm:p-5 shadow-md w-full mt-3 sm:mt-4`}
           >
-            <h2 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">
+            <h2 className={`text-base sm:text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-3 sm:mb-4`}>
               Buscar Alimentos
             </h2>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -260,13 +261,13 @@ const FoodSearch: React.FC = () => {
                 onKeyDown={handleKeyDown}
                 placeholder="Ingresa un alimento (ejemplo: manzana)"
                 disabled={loading}
-                className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-600 rounded-lg bg-[#2D3242] text-white placeholder-gray-400 focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 text-sm sm:text-base"
+                className={`w-full px-3 py-2 sm:px-4 sm:py-2 border ${isDarkMode ? 'border-gray-600 bg-[#2D3242] text-white placeholder-gray-400' : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'} rounded-lg focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 text-sm sm:text-base`}
                 aria-label="Buscar alimentos"
               />
               <button
                 onClick={handleSearch}
                 disabled={loading}
-                className="flex items-center justify-center py-2 px-4 sm:px-6 bg-gradient-to-br from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-lg shadow-md hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`flex items-center justify-center py-2 px-4 sm:px-6 bg-gradient-to-br from-[#ff9404] to-[#FF6B35] ${isDarkMode ? 'text-white' : 'text-gray-900'} font-semibold rounded-lg shadow-md hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed`}
                 aria-label="Iniciar búsqueda"
               >
                 {loading ? (
@@ -305,7 +306,7 @@ const FoodSearch: React.FC = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-gray-300 text-center my-6 sm:my-8 max-w-5xl mx-auto text-sm sm:text-base px-2 sm:px-4"
+            className={`text-center my-6 sm:my-8 max-w-5xl mx-auto text-sm sm:text-base ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} px-2 sm:px-4`}
           >
             No se encontraron resultados
           </motion.div>
@@ -316,12 +317,12 @@ const FoodSearch: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-[#3B4252] rounded-lg p-4 sm:p-5 shadow-md max-w-5xl mx-auto px-2 sm:px-4"
+            className={`${isDarkMode ? 'bg-[#3B4252]' : 'bg-white'} rounded-lg p-4 sm:p-5 shadow-md max-w-5xl mx-auto px-2 sm:px-4`}
           >
-            <h3 className="text-lg sm:text-xl font-semibold text-white mx-2 mb-3 sm:mb-4">
+            <h3 className={`text-lg sm:text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mx-2 mb-3 sm:mb-4`}>
               Resultados
             </h3>
-            <div className="space-y-3 max-h-[50vh] overflow-y-auto ml-2 pr-2 [scrollbar-width:thin] scrollbar-thin scrollbar-track-[#2D3242] scrollbar-thumb-[#6B7280] hover:scrollbar-thumb-[#9CA3AF]">
+            <div className={`space-y-3 max-h-[50vh] overflow-y-auto ml-2 pr-2 [scrollbar-width:thin] scrollbar-thin ${isDarkMode ? 'scrollbar-track-[#2D3242] scrollbar-thumb-[#6B7280] hover:scrollbar-thumb-[#9CA3AF]' : 'scrollbar-track-gray-100 scrollbar-thumb-gray-400 hover:scrollbar-thumb-gray-500'}`}>
               {foods.map((food) => (
                 <FoodItem
                   key={food.food_id}

@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTheme } from "../pages/ThemeContext";
 
 interface Food {
   food_id: string;
@@ -36,27 +37,31 @@ const NutritionalDisplay: React.FC<{
   nutritionalValues,
   convertToFraction,
   evaluateFraction,
-}) => (
-  <div className="mt-4">
-    <h3 className="text-sm font-semibold mb-2 text-white">
-      Valores Nutricionales Ajustados
-    </h3>
-    <p className="text-xs text-gray-300">
-      Per{" "}
-      {quantity === ""
-        ? "0"
-        : fixedUnit === "oz" || fixedUnit === "cup"
-        ? convertToFraction(evaluateFraction(quantity), fixedUnit === "cup")
-        : quantity}{" "}
-      {unitLabel} - Calories: {nutritionalValues.calories || 0}kcal | Fat:{" "}
-      {(nutritionalValues.fat || 0).toFixed(2)}g | Carbs:{" "}
-      {(nutritionalValues.carbs || 0).toFixed(2)}g | Protein:{" "}
-      {(nutritionalValues.protein || 0).toFixed(2)}g
-    </p>
-  </div>
-);
+}) => {
+  const { isDarkMode } = useTheme();
+  return (
+    <div className="mt-4">
+      <h3 className={`text-sm font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+        Valores Nutricionales Ajustados
+      </h3>
+      <p className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+        Per{" "}
+        {quantity === ""
+          ? "0"
+          : fixedUnit === "oz" || fixedUnit === "cup"
+          ? convertToFraction(evaluateFraction(quantity), fixedUnit === "cup")
+          : quantity}{" "}
+        {unitLabel} - Calories: {nutritionalValues.calories || 0}kcal | Fat:{" "}
+        {(nutritionalValues.fat || 0).toFixed(2)}g | Carbs:{" "}
+        {(nutritionalValues.carbs || 0).toFixed(2)}g | Protein:{" "}
+        {(nutritionalValues.protein || 0).toFixed(2)}g
+      </p>
+    </div>
+  );
+};
 
 const FoodQuantityAdjust: React.FC = () => {
+  const { isDarkMode } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const { food, type } = location.state || {};
@@ -475,29 +480,29 @@ const FoodQuantityAdjust: React.FC = () => {
           state={{ fromAddButton: true }}
           className="inline-block"
         >
-          <button className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10">
+          <button className={`flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] ${isDarkMode ? 'text-white' : 'text-gray-900'} font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10`}>
             <FaArrowLeft className="mr-1 text-base" />
             Volver
           </button>
         </Link>
       </div>
 
-      <div className="bg-[#3B4252] rounded-lg p-4 shadow-md flex-1 mt-9">
-        <h2 className="text-sm font-semibold mb-2 text-white">
+      <div className={`${isDarkMode ? 'bg-[#3B4252]' : 'bg-white'} rounded-lg p-4 shadow-md flex-1 mt-9`}>
+        <h2 className={`text-sm font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Ajustar Cantidad - {food.food_name}
         </h2>
         {error && <p className="text-red-400 mt-2 text-xs">{error}</p>}
 
         <div className="mt-4">
           <div className="mb-4">
-            <label className="text-sm font-medium text-gray-300">
+            <label className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
               Cantidad (en {unitLabel}):
             </label>
             <input
               type="number"
               value={displayQuantity}
               onChange={handleQuantityChange}
-              className="w-full border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:bg-[#2D3242] focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none mt-2 sm:text-sm sm:px-2.5 sm:py-1.5 text-xs px-2 py-1"
+              className={`w-full border ${isDarkMode ? 'border-gray-500 bg-[#2D3242] text-gray-200 focus:bg-[#2D3242]' : 'border-gray-300 bg-white text-gray-900 focus:bg-gray-50'} rounded-md text-center focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20 focus:scale-102 transition-all duration-300 placeholder:text-gray-500 [.error&]:border-[#ff4444] [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none mt-2 sm:text-sm sm:px-2.5 sm:py-1.5 text-xs px-2 py-1`}
               min={fixedUnit === "g" || fixedUnit === "unit" ? "0" : "0"}
               step={fixedUnit === "g" || fixedUnit === "unit" ? "1" : "0.25"}
             />
@@ -515,7 +520,7 @@ const FoodQuantityAdjust: React.FC = () => {
           <div className="mt-4 text-right">
             <button
               onClick={handleSaveFood}
-              className="py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10"
+              className={`py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] ${isDarkMode ? 'text-white' : 'text-gray-900'} font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10`}
             >
               Agregar Alimento
             </button>

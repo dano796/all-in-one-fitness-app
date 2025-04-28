@@ -1,11 +1,14 @@
+// src/pages/RegisterPage.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import Swal from "sweetalert2";
 import { supabase } from "../lib/supabaseClient";
 import { FaCheck } from "react-icons/fa";
+import { useTheme } from "./ThemeContext";
 
 const RegisterPage = () => {
+  const { isDarkMode } = useTheme();
   const [usuario, setUsuario] = useState("");
   const [correo, setCorreo] = useState("");
   const [contraseña, setContraseña] = useState("");
@@ -157,10 +160,10 @@ const RegisterPage = () => {
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9400",
           customClass: {
-            popup: "custom-swal-background",
+            popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
             icon: "custom-swal-icon",
-            title: "custom-swal-title",
-            htmlContainer: "custom-swal-text",
+            title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
+            htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
           },
         });
         setContador(60);
@@ -206,10 +209,10 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-8 py-16 bg-[#282c3c] text-white">
+    <div className={`container mx-auto px-8 py-16 transition-colors duration-300 ${isDarkMode ? "bg-[#282c3c] text-white" : "bg-white-100 text-gray-900"}`}>
       <div className="max-w-md mx-auto">
         <h1 className="text-5xl font-bold mb-8 pb-3 text-center">Crear Cuenta</h1>
-        <div className="bg-[#3B4252] rounded-xl p-8 shadow-sm">
+        <div className={`rounded-xl p-8 shadow-sm ${isDarkMode ? "bg-[#3B4252]" : "bg-white"}`}>
           <form className="space-y-6" onSubmit={handleRegister}>
             <div>
               <input
@@ -217,9 +220,11 @@ const RegisterPage = () => {
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
                 placeholder="NombreUsuario"
-                className={`w-full px-4 py-2 bg-[#282c3c] text-white border rounded-lg
-                  ${errors.usuario ? 'border-red-500' : 'border-gray-600'}
-                  focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0`}
+                className={`w-full px-4 py-2 rounded-lg border focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 transition-colors duration-300 ${
+                  isDarkMode
+                    ? `bg-[#282c3c] text-white ${errors.usuario ? "border-red-500" : "border-gray-600"}`
+                    : `bg-white text-gray-900 ${errors.usuario ? "border-red-500" : "border-gray-300"}`
+                }`}
                 required
               />
               {errors.usuario && errors.usuario !== "required" && (
@@ -232,9 +237,11 @@ const RegisterPage = () => {
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
                 placeholder="example@email.com"
-                className={`w-full px-4 py-2 bg-[#282c3c] text-white border rounded-lg
-                  ${errors.correo ? 'border-red-500' : 'border-gray-600'}
-                  focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0`}
+                className={`w-full px-4 py-2 rounded-lg border focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 transition-colors duration-300 ${
+                  isDarkMode
+                    ? `bg-[#282c3c] text-white ${errors.correo ? "border-red-500" : "border-gray-600"}`
+                    : `bg-white text-gray-900 ${errors.correo ? "border-red-500" : "border-gray-300"}`
+                }`}
                 required
               />
               {errors.correo && errors.correo !== "required" && (
@@ -248,9 +255,11 @@ const RegisterPage = () => {
                   value={contraseña}
                   onChange={handlePasswordChange}
                   placeholder="••••••••"
-                  className={`w-full px-4 py-2 bg-[#282c3c] text-white border rounded-lg pr-10
-                    ${errors.contraseña ? 'border-red-500' : 'border-gray-600'}
-                    focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0`}
+                  className={`w-full px-4 py-2 rounded-lg border pr-10 focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 transition-colors duration-300 ${
+                    isDarkMode
+                      ? `bg-[#282c3c] text-white ${errors.contraseña ? "border-red-500" : "border-gray-600"}`
+                      : `bg-white text-gray-900 ${errors.contraseña ? "border-red-500" : "border-gray-300"}`
+                  }`}
                   required
                 />
                 <button
@@ -260,9 +269,9 @@ const RegisterPage = () => {
                   style={{ top: "50%", transform: "translateY(-50%)" }}
                 >
                   {showPassword ? (
-                    <EyeOff size={20} className="text-gray-400 hover:text-[#ff9400]" />
+                    <EyeOff size={20} className={`hover:text-[#ff9400] ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />
                   ) : (
-                    <Eye size={20} className="text-gray-400 hover:text-[#ff9400]" />
+                    <Eye size={20} className={`hover:text-[#ff9400] ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />
                   )}
                 </button>
                 <div
@@ -270,36 +279,36 @@ const RegisterPage = () => {
                     isPasswordFocused ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
                   }`}
                 >
-                  <ul className="list-none pl-2 space-y-1 bg-[#3B4252] p-4 rounded-lg shadow-md">
+                  <ul className={`list-none pl-2 space-y-1 p-4 rounded-lg shadow-md ${isDarkMode ? "bg-[#3B4252]" : "bg-white"}`}>
                     <li className="flex items-center">
-                      <span className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border border-gray-500 ${validatePassword(contraseña).hasUpperCase ? "bg-gray-300 border-gray-300" : "bg-transparent"}`}>
-                        {validatePassword(contraseña).hasUpperCase && <FaCheck className="text-black text-[8px]" />}
+                      <span className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${isDarkMode ? "border-gray-500" : "border-gray-400"} ${validatePassword(contraseña).hasUpperCase ? isDarkMode ? "bg-gray-300 border-gray-300" : "bg-gray-200 border-gray-200" : "bg-transparent"}`}>
+                        {validatePassword(contraseña).hasUpperCase && <FaCheck className={`${isDarkMode ? "text-black" : "text-gray-900"} text-[8px]`} />}
                       </span>
-                      <span className={validatePassword(contraseña).hasUpperCase ? "text-gray-300" : "text-gray-400"}>Letra Mayúscula</span>
+                      <span className={validatePassword(contraseña).hasUpperCase ? isDarkMode ? "text-gray-300" : "text-gray-700" : isDarkMode ? "text-gray-400" : "text-gray-500"}>Letra Mayúscula</span>
                     </li>
                     <li className="flex items-center">
-                      <span className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border border-gray-500 ${validatePassword(contraseña).hasLowerCase ? "bg-gray-300 border-gray-300" : "bg-transparent"}`}>
-                        {validatePassword(contraseña).hasLowerCase && <FaCheck className="text-black text-[8px]" />}
+                      <span className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${isDarkMode ? "border-gray-500" : "border-gray-400"} ${validatePassword(contraseña).hasLowerCase ? isDarkMode ? "bg-gray-300 border-gray-300" : "bg-gray-200 border-gray-200" : "bg-transparent"}`}>
+                        {validatePassword(contraseña).hasLowerCase && <FaCheck className={`${isDarkMode ? "text-black" : "text-gray-900"} text-[8px]`} />}
                       </span>
-                      <span className={validatePassword(contraseña).hasLowerCase ? "text-gray-300" : "text-gray-400"}>Letra Minúscula</span>
+                      <span className={validatePassword(contraseña).hasLowerCase ? isDarkMode ? "text-gray-300" : "text-gray-700" : isDarkMode ? "text-gray-400" : "text-gray-500"}>Letra Minúscula</span>
                     </li>
                     <li className="flex items-center">
-                      <span className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border border-gray-500 ${validatePassword(contraseña).hasNumber ? "bg-gray-300 border-gray-300" : "bg-transparent"}`}>
-                        {validatePassword(contraseña).hasNumber && <FaCheck className="text-black text-[8px]" />}
+                      <span className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${isDarkMode ? "border-gray-500" : "border-gray-400"} ${validatePassword(contraseña).hasNumber ? isDarkMode ? "bg-gray-300 border-gray-300" : "bg-gray-200 border-gray-200" : "bg-transparent"}`}>
+                        {validatePassword(contraseña).hasNumber && <FaCheck className={`${isDarkMode ? "text-black" : "text-gray-900"} text-[8px]`} />}
                       </span>
-                      <span className={validatePassword(contraseña).hasNumber ? "text-gray-300" : "text-gray-400"}>Número</span>
+                      <span className={validatePassword(contraseña).hasNumber ? isDarkMode ? "text-gray-300" : "text-gray-700" : isDarkMode ? "text-gray-400" : "text-gray-500"}>Número</span>
                     </li>
                     <li className="flex items-center">
-                      <span className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border border-gray-500 ${validatePassword(contraseña).hasSpecialChar ? "bg-gray-300 border-gray-300" : "bg-transparent"}`}>
-                        {validatePassword(contraseña).hasSpecialChar && <FaCheck className="text-black text-[8px]" />}
+                      <span className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${isDarkMode ? "border-gray-500" : "border-gray-400"} ${validatePassword(contraseña).hasSpecialChar ? isDarkMode ? "bg-gray-300 border-gray-300" : "bg-gray-200 border-gray-200" : "bg-transparent"}`}>
+                        {validatePassword(contraseña).hasSpecialChar && <FaCheck className={`${isDarkMode ? "text-black" : "text-gray-900"} text-[8px]`} />}
                       </span>
-                      <span className={validatePassword(contraseña).hasSpecialChar ? "text-gray-300" : "text-gray-400"}>Carácter Especial (e.g. !@#$%)</span>
+                      <span className={validatePassword(contraseña).hasSpecialChar ? isDarkMode ? "text-gray-300" : "text-gray-700" : isDarkMode ? "text-gray-400" : "text-gray-500"}>Carácter Especial (e.g. !@#$%)</span>
                     </li>
                     <li className="flex items-center">
-                      <span className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border border-gray-500 ${validatePassword(contraseña).isLongEnough ? "bg-gray-300 border-gray-300" : "bg-transparent"}`}>
-                        {validatePassword(contraseña).isLongEnough && <FaCheck className="text-black text-[8px]" />}
+                      <span className={`mr-2 inline-flex items-center justify-center w-3 h-3 rounded-full border ${isDarkMode ? "border-gray-500" : "border-gray-400"} ${validatePassword(contraseña).isLongEnough ? isDarkMode ? "bg-gray-300 border-gray-300" : "bg-gray-200 border-gray-200" : "bg-transparent"}`}>
+                        {validatePassword(contraseña).isLongEnough && <FaCheck className={`${isDarkMode ? "text-black" : "text-gray-900"} text-[8px]`} />}
                       </span>
-                      <span className={validatePassword(contraseña).isLongEnough ? "text-gray-300" : "text-gray-400"}>8 Caracteres o Más</span>
+                      <span className={validatePassword(contraseña).isLongEnough ? isDarkMode ? "text-gray-300" : "text-gray-700" : isDarkMode ? "text-gray-400" : "text-gray-500"}>8 Caracteres o Más</span>
                     </li>
                   </ul>
                 </div>
@@ -315,9 +324,11 @@ const RegisterPage = () => {
                   value={confirmarContraseña}
                   onChange={(e) => setConfirmarContraseña(e.target.value)}
                   placeholder="••••••••"
-                  className={`w-full px-4 py-2 bg-[#282c3c] text-white border rounded-lg pr-10
-                    ${errors.confirmarContraseña ? 'border-red-500' : 'border-gray-600'}
-                    focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0`}
+                  className={`w-full px-4 py-2 rounded-lg border pr-10 focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 transition-colors duration-300 ${
+                    isDarkMode
+                      ? `bg-[#282c3c] text-white ${errors.confirmarContraseña ? "border-red-500" : "border-gray-600"}`
+                      : `bg-white text-gray-900 ${errors.confirmarContraseña ? "border-red-500" : "border-gray-300"}`
+                  }`}
                   required
                 />
                 <button
@@ -327,9 +338,9 @@ const RegisterPage = () => {
                   style={{ top: "50%", transform: "translateY(-50%)" }}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff size={20} className="text-gray-400 hover:text-[#ff9400]" />
+                    <EyeOff size={20} className={`hover:text-[#ff9400] ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />
                   ) : (
-                    <Eye size={20} className="text-gray-400 hover:text-[#ff9400]" />
+                    <Eye size={20} className={`hover:text-[#ff9400] ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} />
                   )}
                 </button>
               </div>
@@ -346,20 +357,33 @@ const RegisterPage = () => {
                 className="hidden"
               />
               <label htmlFor="terms" className="flex items-center cursor-pointer">
-                <span className={`w-4 h-4 mr-2 rounded border border-gray-500 flex items-center justify-center transition-all duration-200 ${acceptedTerms ? "bg-[#ff9400] border-[#ff9400]" : "bg-[#282c3c]"}`}>
-                  {acceptedTerms && <FaCheck className="text-[#282c3c] text-[10px]" />}
+                <span className={`w-4 h-4 mr-2 rounded border flex items-center justify-center transition-all duration-200 ${
+                  isDarkMode
+                    ? `${acceptedTerms ? "bg-[#ff9400] border-[#ff9400]" : "bg-[#282c3c] border-gray-500"}`
+                    : `${acceptedTerms ? "bg-[#ff9400] border-[#ff9400]" : "bg-white border-gray-400"}`
+                }`}>
+                  {acceptedTerms && <FaCheck className={`${isDarkMode ? "text-[#282c3c]" : "text-white"} text-[10px]`} />}
                 </span>
-                <span className={`${errors.terms ? "text-red-500" : acceptedTerms ? "text-gray-300" : "text-gray-400"} hover:text-[#ff9400] transition-colors duration-200`}>
+                <span className={`${
+                  errors.terms ? "text-red-500" : acceptedTerms ? isDarkMode ? "text-gray-300" : "text-gray-700" : isDarkMode ? "text-gray-400" : "text-gray-500"
+                } hover:text-[#ff9400] transition-colors duration-200`}>
                   Aceptar términos y condiciones
                 </span>
               </label>
               {errors.terms && <p className="text-red-500 text-sm mt-1 ml-6">{errors.terms}</p>}
             </div>
-            <button type="submit" className="w-full py-2 bg-[#ff9400] text-white font-semibold rounded-lg hover:bg-[#ff9400]">
+            <button
+              type="submit"
+              className={`w-full py-2 font-semibold rounded-lg text-white transition-all duration-300 ${
+                isDarkMode
+                  ? "bg-[#ff9400] hover:bg-[#e68900]"
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
+            >
               Crear Cuenta
             </button>
           </form>
-          <p className="mt-4 text-center text-gray-400">
+          <p className={`mt-4 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
             ¿Ya tienes una cuenta?{" "}
             <Link to="/login" className="text-[#ff9400] hover:underline">Inicia sesión aquí</Link>
           </p>

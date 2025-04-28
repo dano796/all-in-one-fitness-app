@@ -1,3 +1,4 @@
+// src/components/FoodSearchIA.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import ImageUploadDragDrop from "./ImageUploadDragDrop";
 import { supabase } from "../lib/supabaseClient";
@@ -7,6 +8,7 @@ import axios, { AxiosError } from "axios";
 import FoodItem from "./FoodItem";
 import { motion } from "framer-motion";
 import ButtonToolTip from "./ButtonToolTip";
+import { useTheme } from "../pages/ThemeContext";
 
 interface FoodSearchIAProps {
   initialType?: string;
@@ -20,6 +22,7 @@ interface Food {
 }
 
 const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
+  const { isDarkMode } = useTheme();
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -85,7 +88,7 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
       const formData = new FormData();
       formData.append("image", uploadedImage);
       formData.append("email", user.email || "");
-      formData.append("type", selectedType); // Usamos el tipo seleccionado
+      formData.append("type", selectedType);
 
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/foods/analyze-image`,
@@ -161,10 +164,10 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9404",
           customClass: {
-            popup: "custom-swal-background",
+            popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
             icon: "custom-swal-icon",
-            title: "custom-swal-title",
-            htmlContainer: "custom-swal-text",
+            title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
+            htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
           },
         });
 
@@ -187,10 +190,10 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9404",
           customClass: {
-            popup: "custom-swal-background",
+            popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
             icon: "custom-swal-icon",
-            title: "custom-swal-title",
-            htmlContainer: "custom-swal-text",
+            title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
+            htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
           },
         });
       } finally {
@@ -219,10 +222,12 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-[#3B4252] rounded-lg p-6 shadow-md flex-1 mt-4"
+      className={`rounded-lg p-6 shadow-md flex-1 mt-4 transition-colors duration-300 ${
+        isDarkMode ? "bg-[#3B4252]" : "bg-white"
+      }`}
     >
       <div className="flex items-center gap-3 mb-6">
-        <h2 className="text-xl font-semibold text-white">
+        <h2 className={`text-xl font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
           Registro de Comida con IA
         </h2>
         <ButtonToolTip content={infoText.foodAIInfo} />
@@ -232,7 +237,7 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
       <div className="mb-4">
         <label
           htmlFor="meal-type"
-          className="text-base font-medium text-white mr-2"
+          className={`text-base font-medium mr-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}
         >
           Selecciona el tipo de comida:
         </label>
@@ -240,7 +245,11 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
           id="meal-type"
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value)}
-          className="px-2.5 py-1.5 text-sm border border-gray-500 rounded-md bg-[#2D3242] text-gray-200 transition-all duration-300 focus:outline-none focus:border-[#ff9404] focus:ring-2 focus:ring-[#ff9404]/20"
+          className={`px-2.5 py-1.5 text-sm border rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#ff9404]/20 ${
+            isDarkMode
+              ? "border-gray-500 bg-[#2D3242] text-gray-200 focus:border-[#ff9404]"
+              : "border-gray-300 bg-white text-gray-900 focus:border-[#ff9404]"
+          }`}
         >
           <option value="Desayuno">Desayuno</option>
           <option value="Almuerzo">Almuerzo</option>
@@ -260,13 +269,17 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
           transition={{ duration: 0.3 }}
           className="mt-4 flex flex-col items-center space-y-4"
         >
-          <p className="text-gray-400 text-center text-xs">
+          <p className={`text-center text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
             Imagen cargada:{" "}
             <span className="font-semibold">{uploadedImage.name}</span>
           </p>
           <button
             onClick={handleCalculate}
-            className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-md hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404] transition-all duration-300 hover:-translate-y-1 z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`flex items-center py-2 px-4 text-white font-semibold rounded-full shadow-md transition-all duration-300 hover:-translate-y-1 z-10 disabled:opacity-50 disabled:cursor-not-allowed ${
+              isDarkMode
+                ? "bg-gradient-to-r from-[#ff9404] to-[#FF6B35] hover:shadow-lg hover:from-[#FF6B35] hover:to-[#ff9404]"
+                : "bg-orange-500 hover:bg-orange-600 hover:shadow-lg"
+            }`}
             disabled={loading}
           >
             {loading ? "Analizando..." : "Analizar"}
@@ -290,7 +303,9 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
           transition={{ duration: 0.4 }}
           className="mt-4"
         >
-          <h3 className="text-sm font-semibold mb-2 text-white">Resultado</h3>
+          <h3 className={`text-sm font-semibold mb-2 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+            Resultado
+          </h3>
           <div className="space-y-3">
             <FoodItem
               food={result.foods.food[0]}

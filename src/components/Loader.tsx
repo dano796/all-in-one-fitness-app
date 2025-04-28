@@ -1,9 +1,12 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useTheme } from "../pages/ThemeContext";
 
 const word = "ALL    IN    ONE".split("");
 
-const letterVariants = {
+import { Variants } from "framer-motion";
+
+const letterVariants: Variants = {
   hidden: { opacity: 0, x: -20 },
   visible: (i: number) => ({
     opacity: 1,
@@ -12,7 +15,7 @@ const letterVariants = {
       delay: i * 0.1,
       duration: 0.5,
       repeat: Infinity,
-      repeatType: "loop" as const,
+      repeatType: "loop" as "loop", // Explicitly type as a valid literal
       repeatDelay: 1,
     },
   }),
@@ -40,9 +43,12 @@ const AnimatedLetter: React.FC<{ letter: string; index: number }> = ({
 );
 
 const Loader: React.FC = () => {
+  const { isDarkMode } = useTheme();
   return (
     <motion.div
-      className="fixed inset-0 flex items-center justify-center bg-black/60 z-50"
+      className={`fixed inset-0 flex items-center justify-center z-50 ${
+        isDarkMode ? "bg-black/60" : "bg-gray-100/60"
+      }`}
       initial="hidden"
       animate="visible"
       variants={containerVariants}

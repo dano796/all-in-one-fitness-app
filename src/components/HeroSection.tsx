@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "../lib/supabaseClient";
+import { useTheme } from "../pages/ThemeContext";
 
 const carouselItemsLeft = [
   "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=300&h=400&fit=crop",
@@ -26,7 +27,7 @@ const leftCarouselVariants = {
       duration: 55,
       ease: "linear",
       repeat: Infinity,
-      repeatType: "reverse" as const,
+      repeatType: "reverse",
     },
   },
 };
@@ -38,7 +39,7 @@ const rightCarouselVariants = {
       duration: 55,
       ease: "linear",
       repeat: Infinity,
-      repeatType: "reverse" as const,
+      repeatType: "reverse",
     },
   },
 };
@@ -66,6 +67,7 @@ const Carousel: React.FC<{
 );
 
 const HeroSection: React.FC = () => {
+  const { isDarkMode } = useTheme();
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
 
   const fetchUser = useCallback(async () => {
@@ -94,15 +96,27 @@ const HeroSection: React.FC = () => {
   }, [fetchUser]);
 
   return (
-    <section className="container mx-auto px-8 mb-12 lg:px-16 lg:mb-0 bg-[#282c3c] text-left">
+    <section
+      className={`container mx-auto px-8 mb-12 lg:px-16 lg:mb-0 text-left ${
+        isDarkMode ? "bg-[#282c3c]" : "bg-white"
+      }`}
+    >
       <div className="lg:grid lg:grid-cols-2 gap-12 items-start">
         <div className="flex flex-col justify-center h-full">
-          <h1 className="text-6xl xl:text-7xl font-bold mt-10 lg:mt-10 xl:mt-12 mb-8 text-white">
+          <h1
+            className={`text-6xl xl:text-7xl font-bold mt-10 lg:mt-10 xl:mt-12 mb-8 ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             All In One
             <br />
             Fitness App
           </h1>
-          <p className="text-xl text-gray-400 mb-8">
+          <p
+            className={`text-xl mb-8 ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             Tu compañero integral para un estilo de vida saludable. Monitorea
             calorías, entrenamientos, hidratación y más, todo en un solo lugar.
           </p>

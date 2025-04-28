@@ -13,8 +13,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import ButtonToolTip from "./ButtonToolTip";
 import { ClipLoader } from "react-spinners";
 import { Recipe } from "../types";
+import { useTheme } from "../pages/ThemeContext";
 
 const SearchRecipes: React.FC = () => {
+  const { isDarkMode } = useTheme();
   const [query, setQuery] = useState<string>("");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
@@ -135,13 +137,15 @@ const SearchRecipes: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#282c3c] overflow-hidden">
-      {/* Fondo de partículas con z-index bajo */}
+    <div
+      className={`relative min-h-screen overflow-hidden ${
+        isDarkMode ? "bg-[#282c3c]" : "bg-white"
+      }`}
+    >
       <div className="absolute inset-0 z-0">
         <GalaxyBackground />
       </div>
 
-      {/* Contenido principal con z-index más alto */}
       <div className="relative z-10 p-4 mt-8 lg:mt-0 sm:p-6 space-y-4 sm:space-y-6">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -165,10 +169,16 @@ const SearchRecipes: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="bg-[#3B4252] rounded-lg p-4 sm:p-5 shadow-md w-full mt-3 sm:mt-4"
+            className={`rounded-lg p-4 sm:p-5 shadow-md w-full mt-3 sm:mt-4 ${
+              isDarkMode ? "bg-[#3B4252]" : "bg-gray-100"
+            }`}
           >
             <div className="flex items-center mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-semibold text-white mr-2">
+              <h3
+                className={`text-base sm:text-lg font-semibold ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                } mr-2`}
+              >
                 Buscar Recetas
               </h3>
               <ButtonToolTip content={infoText.recipeSearch} />
@@ -181,7 +191,11 @@ const SearchRecipes: React.FC = () => {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Buscar recetas... (ej: pasta, pizza, ensalada)"
-                className="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-600 rounded-lg bg-[#2D3242] text-white placeholder-gray-400 focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 text-sm sm:text-base"
+                className={`w-full px-3 py-2 sm:px-4 sm:py-2 border rounded-lg focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 text-sm sm:text-base ${
+                  isDarkMode
+                    ? "border-gray-600 bg-[#2D3242] text-white placeholder-gray-400"
+                    : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
+                }`}
                 disabled={!userEmail || loading}
                 aria-label="Buscar recetas"
               />
@@ -228,7 +242,9 @@ const SearchRecipes: React.FC = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-gray-300 text-center my-6 sm:my-8 max-w-5xl mx-auto text-sm sm:text-base px-2 sm:px-4"
+            className={`text-center my-6 sm:my-8 max-w-5xl mx-auto text-sm sm:text-base px-2 sm:px-4 ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            }`}
           >
             No se encontraron recetas para tu búsqueda.
           </motion.div>
@@ -239,9 +255,15 @@ const SearchRecipes: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-[#3B4252] rounded-lg p-4 sm:p-5 shadow-md max-w-5xl mx-auto px-2 sm:px-4"
+            className={`rounded-lg p-4 sm:p-5 shadow-md max-w-5xl mx-auto px-2 sm:px-4 ${
+              isDarkMode ? "bg-[#3B4252]" : "bg-gray-100"
+            }`}
           >
-            <h3 className="text-lg sm:text-xl font-semibold text-white mx-2 mb-3 sm:mb-4">
+            <h3
+              className={`text-lg sm:text-xl font-semibold mx-2 mb-3 sm:mb-4 ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
               Resultados
             </h3>
             <div className="space-y-3 sm:space-y-4 max-h-[50vh] overflow-y-auto ml-2 pr-2 [scrollbar-width:thin] scrollbar-thin scrollbar-track-[#2D3242] scrollbar-thumb-[#6B7280] hover:scrollbar-thumb-[#9CA3AF]">
@@ -251,7 +273,11 @@ const SearchRecipes: React.FC = () => {
                   whileHover={{ scale: 1.001 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleRecipeSelect(recipe)}
-                  className="cursor-pointer p-3 sm:p-4 rounded-lg bg-[#2D3242] border border-gray-600 hover:border-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.2)] transition-all duration-200 flex items-start gap-3 sm:gap-4"
+                  className={`cursor-pointer p-3 sm:p-4 rounded-lg border hover:shadow-[0_0_10px_rgba(255,148,4,0.2)] transition-all duration-200 flex items-start gap-3 sm:gap-4 ${
+                    isDarkMode
+                      ? "bg-[#2D3242] border-gray-600 hover:border-[#ff9404]"
+                      : "bg-white border-gray-300 hover:border-[#ff9404]"
+                  }`}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) =>
@@ -267,15 +293,27 @@ const SearchRecipes: React.FC = () => {
                     />
                   )}
                   <div className="flex-1">
-                    <p className="font-medium text-white text-sm sm:text-base">
+                    <p
+                      className={`font-medium text-sm sm:text-base ${
+                        isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
+                    >
                       {recipe.recipe_name}
                     </p>
                     {recipe.recipe_description && (
-                      <p className="text-xs sm:text-sm text-gray-300 mt-1 line-clamp-2">
+                      <p
+                        className={`text-xs sm:text-sm mt-1 line-clamp-2 ${
+                          isDarkMode ? "text-gray-300" : "text-gray-600"
+                        }`}
+                      >
                         {recipe.recipe_description}
                       </p>
                     )}
-                    <div className="text-xs text-gray-400 mt-1 sm:mt-2 flex gap-3 sm:gap-4">
+                    <div
+                      className={`text-xs mt-1 sm:mt-2 flex gap-3 sm:gap-4 ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
                       {recipe.cooking_time_min && (
                         <span>Tiempo: {recipe.cooking_time_min} min</span>
                       )}
@@ -307,18 +345,25 @@ const SearchRecipes: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.3 }}
-                className="bg-[#3B4252] rounded-lg p-4 sm:p-6 shadow-xl w-full max-w-[75vw] max-h-[90vh] overflow-hidden relative"
+                className={`rounded-lg p-4 sm:p-6 shadow-xl w-full max-w-[75vw] max-h-[90vh] overflow-hidden relative ${
+                  isDarkMode ? "bg-[#3B4252]" : "bg-white"
+                }`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex justify-between items-center mb-4 sm:mb-6">
-                  <div className="w-6 sm:w-8"></div>{" "}
-                  {/* Espaciador para balance */}
-                  <h2 className="text-2xl sm:text-3xl font-bold text-white text-center flex-grow px-2 sm:px-4">
+                  <div className="w-6 sm:w-8"></div>
+                  <h2
+                    className={`text-2xl sm:text-3xl font-bold text-center flex-grow px-2 sm:px-4 ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                  >
                     {selectedRecipe.recipe_name || "Receta sin nombre"}
                   </h2>
                   <button
                     onClick={handleClose}
-                    className="text-white hover:text-[#ff9404] transition-all duration-300 z-20 w-6 sm:w-8 flex-shrink-0"
+                    className={`hover:text-[#ff9404] transition-all duration-300 z-20 w-6 sm:w-8 flex-shrink-0 ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                     aria-label="Cerrar modal"
                   >
                     <FaTimes className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -332,7 +377,6 @@ const SearchRecipes: React.FC = () => {
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-2 sm:mt-4">
-                  {/* Columna izquierda: Imagen */}
                   <div className="flex flex-col items-center">
                     {selectedRecipe.recipe_image ? (
                       <img
@@ -341,22 +385,33 @@ const SearchRecipes: React.FC = () => {
                         className="w-full h-48 sm:h-64 md:h-80 object-contain rounded-lg"
                       />
                     ) : (
-                      <div className="w-full h-48 sm:h-64 md:h-80 bg-gray-600 rounded-lg flex items-center justify-center">
-                        <p className="text-gray-400 text-xs sm:text-sm">
+                      <div
+                        className={`w-full h-48 sm:h-64 md:h-80 rounded-lg flex items-center justify-center ${
+                          isDarkMode ? "bg-gray-600" : "bg-gray-200"
+                        }`}
+                      >
+                        <p
+                          className={`text-xs sm:text-sm ${
+                            isDarkMode ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        >
                           Imagen no disponible
                         </p>
                       </div>
                     )}
                   </div>
 
-                  {/* Columna derecha: Detalles */}
                   <div className="overflow-y-auto max-h-[60vh] sm:max-h-[70vh] pr-2 sm:pr-6 [scrollbar-width:thin] scrollbar-thin scrollbar-track-[#2D3242] scrollbar-thumb-[#6B7280] hover:scrollbar-thumb-[#9CA3AF]">
                     {selectedRecipe.recipe_description && (
                       <div className="mb-3 sm:mb-4">
                         <h3 className="text-base sm:text-lg font-semibold text-[#ff9404] mb-1 sm:mb-2">
                           Descripción
                         </h3>
-                        <p className="text-gray-300 text-xs sm:text-sm">
+                        <p
+                          className={`text-xs sm:text-sm ${
+                            isDarkMode ? "text-gray-300" : "text-gray-600"
+                          }`}
+                        >
                           {selectedRecipe.recipe_description}
                         </p>
                       </div>
@@ -366,7 +421,11 @@ const SearchRecipes: React.FC = () => {
                       <h3 className="text-base sm:text-lg font-semibold text-[#ff9404] mb-1 sm:mb-2">
                         Información
                       </h3>
-                      <div className="text-gray-300 text-xs sm:text-sm space-y-1">
+                      <div
+                        className={`text-xs sm:text-sm space-y-1 ${
+                          isDarkMode ? "text-gray-300" : "text-gray-600"
+                        }`}
+                      >
                         {selectedRecipe.cooking_time_min && (
                           <p>
                             <strong>Tiempo de preparación:</strong>{" "}
@@ -404,7 +463,11 @@ const SearchRecipes: React.FC = () => {
                       <h3 className="text-base sm:text-lg font-semibold text-[#ff9404] mb-1 sm:mb-2">
                         Nutrición (por porción)
                       </h3>
-                      <div className="grid grid-cols-2 gap-1 sm:gap-2 text-gray-300 text-xs sm:text-sm">
+                      <div
+                        className={`grid grid-cols-2 gap-1 sm:gap-2 text-xs sm:text-sm ${
+                          isDarkMode ? "text-gray-300" : "text-gray-600"
+                        }`}
+                      >
                         {Object.entries(
                           formatNutrition(selectedRecipe.recipe_nutrition || {})
                         ).map(([key, value]) => (
@@ -424,7 +487,11 @@ const SearchRecipes: React.FC = () => {
                       </h3>
                       {(selectedRecipe.recipe_ingredients?.ingredient?.length ??
                         0) > 0 ? (
-                        <ul className="list-disc pl-5 text-gray-300 space-y-1 text-xs sm:text-sm">
+                        <ul
+                          className={`list-disc pl-5 space-y-1 text-xs sm:text-sm ${
+                            isDarkMode ? "text-gray-300" : "text-gray-600"
+                          }`}
+                        >
                           {selectedRecipe.recipe_ingredients?.ingredient.map(
                             (ing: any, index: number) => (
                               <li key={index}>
@@ -445,7 +512,11 @@ const SearchRecipes: React.FC = () => {
                           )}
                         </ul>
                       ) : (
-                        <p className="text-gray-400 text-xs sm:text-sm">
+                        <p
+                          className={`text-xs sm:text-sm ${
+                            isDarkMode ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        >
                           Ingredientes no disponibles
                         </p>
                       )}

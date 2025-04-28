@@ -1,11 +1,14 @@
+// src/pages/LoginPage.tsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { Eye, EyeOff } from "lucide-react";
 import PasswordRecovery from "../components/PasswordRecovery";
 import { supabase } from "../lib/supabaseClient";
+import { useTheme } from "../pages/ThemeContext";
 
 const LoginPage = () => {
+  const { isDarkMode } = useTheme();
   const [input, setInput] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -61,10 +64,10 @@ const LoginPage = () => {
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9400",
           customClass: {
-            popup: "custom-swal-background",
+            popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
             icon: "custom-swal-icon",
-            title: "custom-swal-title",
-            htmlContainer: "custom-swal-text",
+            title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
+            htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
           },
         });
       } else if (result.success) {
@@ -84,10 +87,10 @@ const LoginPage = () => {
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9400",
           customClass: {
-            popup: "custom-swal-background",
+            popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
             icon: "custom-swal-icon",
-            title: "custom-swal-title",
-            htmlContainer: "custom-swal-text",
+            title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
+            htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
           },
         });
       }
@@ -101,10 +104,10 @@ const LoginPage = () => {
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
         customClass: {
-          popup: "custom-swal-background",
+          popup: isDarkMode ? "custom-swal-background" : "custom-swal-background-light",
           icon: "custom-swal-icon",
-          title: "custom-swal-title",
-          htmlContainer: "custom-swal-text",
+          title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
+          htmlContainer: isDarkMode ? "custom-swal-text" : "custom-swal-text-light",
         },
       });
     }
@@ -115,7 +118,11 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-8 py-16 relative bg-[#282c3c] text-white">
+    <div
+      className={`container mx-auto px-8 py-16 relative transition-colors duration-300 ${
+        isDarkMode ? "bg-[#282c3c] text-white" : "bg-white-100 text-gray-900"
+      }`}
+    >
       {recoveryModalOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
@@ -125,7 +132,9 @@ const LoginPage = () => {
           }}
         >
           <div
-            className="bg-[#3B4252] rounded-xl p-6 shadow-lg w-full max-w-md"
+            className={`rounded-xl p-6 shadow-lg w-full max-w-md ${
+              isDarkMode ? "bg-[#3B4252]" : "bg-white"
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <PasswordRecovery onClose={() => setRecoveryModalOpen(false)} />
@@ -138,12 +147,18 @@ const LoginPage = () => {
           Iniciar Sesión
         </h1>
 
-        <div className="bg-[#3B4252] rounded-xl p-8 shadow-sm">
+        <div
+          className={`rounded-xl p-8 shadow-sm ${
+            isDarkMode ? "bg-[#3B4252]" : "bg-white"
+          }`}
+        >
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label
                 htmlFor="input"
-                className="block text-sm font-medium text-gray-300 mb-1"
+                className={`block text-sm font-medium mb-1 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
               >
                 Usuario o Correo
               </label>
@@ -153,8 +168,11 @@ const LoginPage = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400
-                focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0"
+                className={`w-full px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 transition-colors duration-300 ${
+                  isDarkMode
+                    ? "border-gray-600 bg-[#282c3c] text-white"
+                    : "border-gray-300 bg-white text-gray-900"
+                }`}
                 placeholder="Usuario o tu@email.com"
               />
             </div>
@@ -162,7 +180,9 @@ const LoginPage = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-300 mb-1"
+                className={`block text-sm font-medium mb-1 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
               >
                 Contraseña
               </label>
@@ -173,14 +193,21 @@ const LoginPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-[#282c3c] text-white placeholder-gray-400
-                  focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0"
+                  className={`w-full px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 transition-colors duration-300 ${
+                    isDarkMode
+                      ? "border-gray-600 bg-[#282c3c] text-white"
+                      : "border-gray-300 bg-white text-gray-900"
+                  }`}
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-[#ff9404]"
+                  className={`absolute inset-y-0 right-0 flex items-center pr-3 transition-colors duration-300 ${
+                    isDarkMode
+                      ? "text-gray-400 hover:text-[#ff9404]"
+                      : "text-gray-500 hover:text-orange-500"
+                  }`}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -189,27 +216,45 @@ const LoginPage = () => {
 
             <button
               type="submit"
-              className="w-full py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg hover:bg-[#ff9404] hover:text-[#282c3c] transition"
+              className={`w-full py-2 px-4 font-semibold rounded-lg transition-colors duration-300 ${
+                isDarkMode
+                  ? "bg-[#ff9404] text-white hover:bg-[#ff9404] hover:text-[#282c3c]"
+                  : "bg-orange-500 text-white hover:bg-orange-600 hover:text-white"
+              }`}
             >
               Iniciar Sesión
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-400 space-y-2">
+          <div
+            className={`mt-6 text-center text-sm space-y-2 ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             <div>
               ¿No tienes una cuenta?{" "}
               <Link
                 to="/registro"
-                className="text-[#ff9404] font-medium hover:underline"
+                className={`font-medium transition-colors duration-300 ${
+                  isDarkMode
+                    ? "text-[#ff9404] hover:underline"
+                    : "text-orange-500 hover:underline"
+                }`}
               >
                 Regístrate aquí
               </Link>
             </div>
-            <div className="text-gray-400">o</div>
+            <div className={`${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+              o
+            </div>
             <div>
               <button
                 onClick={() => setRecoveryModalOpen(true)}
-                className="text-[#ff9404] font-medium hover:underline"
+                className={`font-medium transition-colors duration-300 ${
+                  isDarkMode
+                    ? "text-[#ff9404] hover:underline"
+                    : "text-orange-500 hover:underline"
+                }`}
               >
                 ¿Olvidaste tu contraseña?
               </button>

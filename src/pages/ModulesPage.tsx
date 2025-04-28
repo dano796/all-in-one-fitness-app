@@ -1,3 +1,4 @@
+// src/pages/ModulesPage.tsx
 import React from "react";
 import {
   Utensils,
@@ -8,14 +9,29 @@ import {
   Camera,
 } from "lucide-react";
 import ModuleCard from "../components/ModuleCard";
+import { useTheme } from "../pages/ThemeContext";
 
 const ModulesPage: React.FC = () => {
+  const { isDarkMode } = useTheme();
+
   return (
-    <div className="container mx-auto px-8 py-16 bg-[#282c3c] text-white">
-      <h1 className="text-5xl font-bold mb-8 pb-5 text-center text-#ff9404">
+    <div
+      className={`container mx-auto px-8 py-16 transition-colors duration-300 ${
+        isDarkMode ? "bg-[#282c3c] text-white" : "bg-white-100 text-gray-900"
+      }`}
+    >
+      <h1
+        className={`text-5xl font-bold mb-8 pb-5 text-center ${
+          isDarkMode ? "text-[#ff9404]" : "text-orange-500"
+        }`}
+      >
         Nuestros Módulos
       </h1>
-      <div className="text-[#ff9404] grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div
+        className={`grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto ${
+          isDarkMode ? "text-[#ff9404]" : "text-orange-500"
+        }`}
+      >
         <ModuleCard
           icon={<Utensils className="w-8 h-8" />}
           title="Conteo de Calorías"

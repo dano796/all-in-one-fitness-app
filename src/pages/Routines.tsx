@@ -1,3 +1,4 @@
+// src/pages/Routines.tsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -5,6 +6,7 @@ import { MoreHorizontal, Plus, Trash2 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import axios from "axios";
 import GalaxyBackground from "../components/GalaxyBackground";
+import { useTheme } from "./ThemeContext";
 
 interface Routine {
   id: string;
@@ -14,6 +16,7 @@ interface Routine {
 }
 
 const Routines: React.FC = () => {
+  const { isDarkMode } = useTheme();
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState<string>("");
   const [routines, setRoutines] = useState<Routine[]>([]);
@@ -110,13 +113,11 @@ const Routines: React.FC = () => {
   }, [userEmail, fetchRoutines]);
 
   return (
-    <div className="relative min-h-screen bg-[#282c3c] overflow-hidden">
-      {/* Fondo de partículas con z-index bajo */}
+    <div className={`relative min-h-screen overflow-hidden transition-colors duration-300 ${isDarkMode ? "bg-[#282c3c]" : "bg-white-100"}`}>
       <div className="absolute inset-0 z-0">
         <GalaxyBackground />
       </div>
 
-      {/* Contenido principal con z-index más alto */}
       <div className="relative z-10 p-4 sm:p-6 space-y-4 sm:space-y-6">
         <motion.div
           initial={{ opacity: 0, y: -50 }}
@@ -128,7 +129,9 @@ const Routines: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="w-full sm:flex-1 text-center sm:text-right text-sm font-semibold text-white uppercase tracking-wide drop-shadow-sm"
+            className={`w-full sm:flex-1 text-center sm:text-right text-sm font-semibold uppercase tracking-wide drop-shadow-sm ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
           >
             MIS RUTINAS
           </motion.div>
@@ -143,7 +146,11 @@ const Routines: React.FC = () => {
           >
             <button
               onClick={handleAddRoutineClick}
-              className="w-full sm:w-auto py-2 sm:py-3 px-4 sm:px-6 bg-gradient-to-r from-[#ff9404] to-[#e08503] text-white font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] transition-all duration-300 flex items-center gap-2 justify-center hover:bg-gradient-to-r hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95"
+              className={`w-full sm:w-auto py-2 sm:py-3 px-4 sm:px-6 font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] transition-all duration-300 flex items-center gap-2 justify-center hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 ${
+                isDarkMode
+                  ? "bg-gradient-to-r from-[#ff9404] to-[#e08503] text-white hover:from-[#e08503] hover:to-[#ff9404]"
+                  : "bg-orange-500 text-white hover:bg-orange-600"
+              }`}
             >
               <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
               Nueva rutina
@@ -154,14 +161,18 @@ const Routines: React.FC = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-full flex-1 bg-gray-700 rounded-lg p-4 sm:p-6 relative z-10 shadow-lg min-h-[200px] sm:min-h-[400px] flex flex-col justify-start"
+            className={`w-full flex-1 rounded-lg p-4 sm:p-6 relative z-10 shadow-lg min-h-[200px] sm:min-h-[400px] flex flex-col justify-start ${
+              isDarkMode ? "bg-gray-700" : "bg-white"
+            }`}
           >
             {error && (
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="text-red-400 mb-3 sm:mb-4 text-center text-xs sm:text-sm"
+                className={`mb-3 sm:mb-4 text-center text-xs sm:text-sm ${
+                  isDarkMode ? "text-red-400" : "text-red-600"
+                }`}
               >
                 {error}
               </motion.p>
@@ -171,7 +182,7 @@ const Routines: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="text-gray-400 text-center text-xs sm:text-sm"
+                className={`text-center text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
               >
                 Cargando...
               </motion.p>
@@ -183,13 +194,15 @@ const Routines: React.FC = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.6 + index * 0.3, duration: 0.6 }}
-                    className="max-w-full bg-gray-600 rounded-lg p-3 sm:p-4 flex items-center justify-between cursor-pointer transition-all duration-300 border border-gray-500 hover:bg-gray-500 hover:border-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.2)] relative"
+                    className={`max-w-full rounded-lg p-3 sm:p-4 flex items-center justify-between cursor-pointer transition-all duration-300 border hover:border-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.2)] relative ${
+                      isDarkMode ? "bg-gray-600 border-gray-500 hover:bg-gray-500" : "bg-white border-gray-300 hover:bg-gray-50"
+                    }`}
                   >
                     <div
                       className="flex items-center gap-2 sm:gap-3 flex-1 overflow-hidden"
                       onClick={() => handleRoutineClick(routine.id)}
                     >
-                      <h3 className="text-xs sm:text-base font-semibold text-white truncate">
+                      <h3 className={`text-xs sm:text-base font-semibold truncate ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                         {routine.day}: {routine.name}
                       </h3>
                     </div>
@@ -200,7 +213,7 @@ const Routines: React.FC = () => {
                       className="p-1 sm:p-2 bg-transparent transition-transform duration-200 hover:scale-125 active:scale-90 ml-2"
                       onClick={() => toggleDeleteConfirm(routine.id)}
                     >
-                      <MoreHorizontal className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 transition-colors duration-300 hover:text-[#ff9404]" />
+                      <MoreHorizontal className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors duration-300 ${isDarkMode ? "text-gray-400 hover:text-[#ff9404]" : "text-gray-500 hover:text-[#ff9404]"}`} />
                     </motion.button>
                     {showDeleteConfirm === routine.id && (
                       <motion.div
@@ -208,23 +221,33 @@ const Routines: React.FC = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute -top-16 right-0 bg-gray-700/95 rounded-lg p-4 shadow-lg z-20 border border-gray-500 flex flex-col gap-2 w-44 sm:w-48"
+                        className={`absolute -top-16 right-0 rounded-lg p-4 shadow-lg z-20 border flex flex-col gap-2 w-44 sm:w-48 ${
+                          isDarkMode ? "bg-gray-700/95 border-gray-500" : "bg-white-100 border-gray-300"
+                        }`}
                         ref={deleteConfirmRef}
                       >
-                        <p className="text-xs sm:text-sm text-gray-300 text-center m-0 font-medium">
+                        <p className={`text-xs sm:text-sm text-center m-0 font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
                           ¿Eliminar esta rutina?
                         </p>
                         <div className="flex justify-between gap-2">
                           <button
                             onClick={() => handleDeleteRoutine(routine.id)}
-                            className="flex-1 py-2 bg-gradient-to-r from-[#ff9404] to-[#e08503] text-white font-semibold text-sm rounded-md border-none flex items-center justify-center gap-1 transition-all duration-300 hover:bg-gradient-to-r hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_8px_rgba(255,148,4,0.5)] hover:scale-103 active:scale-97"
+                            className={`flex-1 py-2 font-semibold text-sm rounded-md border-none flex items-center justify-center gap-1 transition-all duration-300 hover:shadow-[0_0_8px_rgba(255,148,4,0.5)] hover:scale-103 active:scale-97 ${
+                              isDarkMode
+                                ? "bg-gradient-to-r from-[#ff9404] to-[#e08503] text-white hover:from-[#e08503] hover:to-[#ff9404]"
+                                : "bg-orange-500 text-white hover:bg-orange-600"
+                            }`}
                           >
                             <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                             Sí
                           </button>
                           <button
                             onClick={() => toggleDeleteConfirm(null)}
-                            className="flex-1 py-2 bg-gradient-to-r from-[#ff9404] to-[#e08503] text-white font-semibold text-sm rounded-md border-none transition-all duration-300 hover:bg-gradient-to-r hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_8px_rgba(255,148,4,0.5)] hover:scale-103 active:scale-97"
+                            className={`flex-1 py-2 font-semibold text-sm rounded-md border-none transition-all duration-300 hover:shadow-[0_0_8px_rgba(255,148,4,0.5)] hover:scale-103 active:scale-97 ${
+                              isDarkMode
+                                ? "bg-gradient-to-r from-[#ff9404] to-[#e08503] text-white hover:from-[#e08503] hover:to-[#ff9404]"
+                                : "bg-orange-500 text-white hover:bg-orange-600"
+                            }`}
                           >
                             No
                           </button>
@@ -235,7 +258,7 @@ const Routines: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-400 text-center text-xs sm:text-sm">
+              <p className={`text-center text-xs sm:text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
                 No hay rutinas registradas.
               </p>
             )}

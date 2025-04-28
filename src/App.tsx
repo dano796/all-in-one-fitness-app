@@ -9,6 +9,7 @@ import {
 import { supabase } from "./lib/supabaseClient";
 import Loader from "./components/Loader";
 import { User } from "@supabase/supabase-js";
+import { ThemeProvider } from "./pages/ThemeContext";
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -23,9 +24,7 @@ const FoodSearch = lazy(() => import("./components/FoodSearch"));
 const WaterTracker = lazy(() => import("./components/WaterTracker"));
 const ComidasRegistro = lazy(() => import("./pages/RegisteredFoods"));
 const CalorieCalculator = lazy(() => import("./components/CalorieCalculator"));
-const FoodQuantityAdjust = lazy(
-  () => import("./components/FoodQuantityAdjust")
-);
+const FoodQuantityAdjust = lazy(() => import("./components/FoodQuantityAdjust"));
 const OneRMCalculator = lazy(() => import("./components/OneRepMaxCalculator"));
 const Routines = lazy(() => import("./pages/Routines"));
 const RoutineDetails = lazy(() => import("./pages/RoutineDetails"));
@@ -133,11 +132,10 @@ const protectedRoutes = [
     component: FoodSearchIAPage,
   },
   {
-    path : "/search-recipes",
+    path: "/search-recipes",
     layout: RecipeSearchLayout,
     component: SearchRecipes,
   },
-
 ];
 
 function App() {
@@ -223,14 +221,16 @@ function App() {
 
   return (
     <Router>
-      <Suspense fallback={<Loader />}>
-        <div className="relative min-h-screen">
-          {renderRoutes()}
-          {isLoading && <Loader />}
-        </div>
-      </Suspense>
+      <ThemeProvider>
+        <Suspense fallback={<Loader />}>
+          <div className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
+            {renderRoutes()}
+            {isLoading && <Loader />}
+          </div>
+        </Suspense>
+      </ThemeProvider>
     </Router>
   );
 }
 
-export default App; 
+export default App;
