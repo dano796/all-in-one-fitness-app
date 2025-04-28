@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Send, X } from 'lucide-react';
 import { useTheme } from '../pages/ThemeContext';
-import GalaxyBackground from './GalaxyBackground';
+
 
 interface ChatMessage {
   sender: 'user' | 'bot';
@@ -96,7 +96,7 @@ const ChatBot: React.FC = () => {
             isDarkMode ? 'bg-[#282c3c]' : 'bg-[#F8F9FA]'
           } transition-colors duration-300 flex flex-col`}
         >
-          <GalaxyBackground />
+       
 
           {/* Encabezado del chat */}
           <div
