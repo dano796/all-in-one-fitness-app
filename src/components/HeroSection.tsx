@@ -27,7 +27,7 @@ const leftCarouselVariants = {
       duration: 55,
       ease: "linear",
       repeat: Infinity,
-      repeatType: "reverse",
+      repeatType: "reverse" as const,
     },
   },
 };
@@ -39,7 +39,7 @@ const rightCarouselVariants = {
       duration: 55,
       ease: "linear",
       repeat: Infinity,
-      repeatType: "reverse",
+      repeatType: "reverse" as const,
     },
   },
 };
