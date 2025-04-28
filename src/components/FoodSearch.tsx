@@ -223,7 +223,7 @@ const FoodSearch: React.FC = () => {
   );
 
   return (
-    <div className={`relative min-h-screen ${isDarkMode ? 'bg-[#282c3c]' : 'bg-gray-100'} overflow-hidden`}>
+    <div className={`relative min-h-screen ${isDarkMode ? 'bg-[#282c3c]' : 'bg-white-100'} overflow-hidden`}>
       <div className="relative z-10 p-4 mt-8 sm:p-6 space-y-4 sm:space-y-6">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">

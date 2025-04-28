@@ -115,7 +115,7 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-[#282c3c] text-white' : 'bg-gray-100 text-gray-900'} relative overflow-hidden transition-colors duration-300`}>
+    <div className={`min-h-screen ${isDarkMode ? 'bg-[#282c3c] text-white' : 'bg-white-100 text-gray-900'} relative overflow-hidden transition-colors duration-300`}>
       <GalaxyBackground />
 
       <div className="container mx-auto px-4 py-12 relative z-10">

@@ -186,7 +186,7 @@ const OneRepMaxCalculator: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className={`rounded-xl p-6 shadow-md mb-8 ${
-              isDarkMode ? "bg-[#3B4252]" : "bg-gray-100"
+              isDarkMode ? "bg-[#3B4252]" : "bg-white-100"
             }`}
           >
             <div className="flex items-center justify-center gap-3 mb-8">
@@ -369,7 +369,7 @@ const OneRepMaxCalculator: React.FC = () => {
                     <div className="space-y-4">
                       <div
                         className={`p-4 rounded-lg flex justify-between ${
-                          isDarkMode ? "bg-[#282c3c]" : "bg-gray-100"
+                          isDarkMode ? "bg-[#282c3c]" : "bg-white-100"
                         }`}
                       >
                         <p className="font-medium text-[#ff9404]">2 Reps</p>
@@ -383,7 +383,7 @@ const OneRepMaxCalculator: React.FC = () => {
                       </div>
                       <div
                         className={`p-4 rounded-lg flex justify-between ${
-                          isDarkMode ? "bg-[#282c3c]" : "bg-gray-100"
+                          isDarkMode ? "bg-[#282c3c]" : "bg-white-100"
                         }`}
                       >
                         <p className="font-medium text-[#ff9404]">3 Reps</p>
@@ -397,7 +397,7 @@ const OneRepMaxCalculator: React.FC = () => {
                       </div>
                       <div
                         className={`p-4 rounded-lg flex justify-between ${
-                          isDarkMode ? "bg-[#282c3c]" : "bg-gray-100"
+                          isDarkMode ? "bg-[#282c3c]" : "bg-white-100"
                         }`}
                       >
                         <p className="font-medium text-[#ff9404]">4 Reps</p>
