@@ -98,13 +98,13 @@ const DesktopMenu: React.FC<{
           <>
             <Link
               to="/login"
-              className={`border border-[#FF9500] font-semibold text-[#FF9500] py-2 px-4 rounded-lg hover:bg-[#FF9500] hover:text-${isDarkMode ? '#1C1C1E' : 'white'} transition`}
+              className={`border border-[#FF9500] font-semibold text-[#FF9500] py-2 px-4 rounded-lg hover:bg-[#FF9500] hover:text-${isDarkMode ? 'white' : 'gray-900'} transition`}
             >
               Iniciar Sesión
             </Link>
             <Link
               to="/registro"
-              className={`bg-[#FF9500] font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} py-2 px-4 rounded-lg hover:bg-[#FF9500] hover:text-${isDarkMode ? '#1C1C1E' : 'white'} transition`}
+              className={`bg-[#FF9500] border border-transparent font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} py-2 px-4 rounded-lg hover:bg-transparent hover:border-[#FF9500] hover:text-[#FF9500] transition`}
             >
               Registrarse
             </Link>
