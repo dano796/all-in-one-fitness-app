@@ -1,3 +1,4 @@
+// src/App.tsx
 import React, { useEffect, useState, Suspense, lazy } from "react";
 import {
   BrowserRouter as Router,
@@ -10,7 +11,7 @@ import { supabase } from "./lib/supabaseClient";
 import Loader from "./components/Loader";
 import { User } from "@supabase/supabase-js";
 import { ThemeProvider } from "./pages/ThemeContext";
-import ChatBot from "./components/ChatBot"; // Importa el componente del chatbot
+import ChatBot from "./components/ChatBot";
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -161,7 +162,10 @@ function App() {
     fetchUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_, session) => setUser(session?.user ?? null)
+      (_, session) => {
+        setUser(session?.user ?? null);
+        setIsLoading(false); // Aseguramos que isLoading se desactive al cambiar el estado de autenticación
+      }
     );
 
     return () => {
@@ -227,7 +231,7 @@ function App() {
           <div className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
             {renderRoutes()}
             {isLoading && <Loader />}
-            <ChatBot /> {/* Añade el componente del chatbot aquí */}
+            <ChatBot user={user} /> {/* Pasamos el estado user al ChatBot */}
           </div>
         </Suspense>
       </ThemeProvider>
