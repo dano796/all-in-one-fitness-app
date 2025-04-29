@@ -259,7 +259,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
                   <div className="flex justify-start items-start gap-3">
                     <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#ff9404] rounded-full flex items-center justify-center flex-shrink-0">
                       <img
-                        src="https://static.vecteezy.com/system/resources/previews/008/556/478/non_2x/cute-dog-lifting-barbell-cartoon-icon-illustration-animal-sport-icon-concept-isolated-premium-vector.jpg"
+                        src="https://png.pngtree.com/png-clipart/20230621/original/pngtree-illustration-of-a-standing-cat-png-image_9194368.png"
                         alt="FitMate"
                         className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
                       />
@@ -282,7 +282,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
           {user && !isIdLoading && (
             <div
               className={`flex items-center p-4 sm:p-5 border-t ${
-                isDarkMode ? 'border-[#4B5563] bg-[#3B4252]' : 'border-gray-200 bg-white'
+                isDarkMode ? 'border-[#ff9404] bg-[#3B4252]' : 'border-gray-200 bg-white'
               } flex-shrink-0`}
             >
               <input
