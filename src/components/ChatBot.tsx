@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+// src/components/ChatBot.tsx
+import { useState, useEffect, useRef } from 'react';
+import { supabase } from '../lib/supabaseClient'; // Importa el cliente de Supabase en el frontend
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Send, X } from 'lucide-react';
 import { useTheme } from '../pages/ThemeContext';
-
+import GalaxyBackground from './GalaxyBackground';
 
 interface ChatMessage {
   sender: 'user' | 'bot';
@@ -20,8 +22,46 @@ const ChatBot: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Obtener el userId (puedes obtenerlo desde tu autenticación, por ejemplo, Supabase)
-  const userId = 'user-id-placeholder'; // Reemplaza esto con el ID del usuario autenticado
+  // Obtener el idusuario del usuario autenticado
+  const [idusuario, setIdusuario] = useState<number | null>(null);
+
+// src/components/ChatBot.tsx
+useEffect(() => {
+  const fetchUser = async () => {
+    console.log('Iniciando fetchUser...');
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError) {
+      console.error('Error al obtener usuario autenticado:', authError);
+      setIdusuario(null);
+      return;
+    }
+
+    if (!user) {
+      console.log('No hay usuario autenticado');
+      setIdusuario(null);
+      return;
+    }
+
+    console.log('Usuario autenticado:', { id: user.id, email: user.email });
+
+    // Buscar el idusuario en la tabla Inicio Sesion usando el correo del usuario
+    const { data, error } = await supabase
+      .from('Inicio Sesion')
+      .select('idusuario')
+      .eq('Correo', user.email)
+      .single();
+
+    if (error || !data) {
+      console.error('Error al obtener idusuario:', error);
+      setIdusuario(null);
+      return;
+    }
+
+    console.log('idusuario obtenido:', data.idusuario);
+    setIdusuario(data.idusuario);
+  };
+  fetchUser();
+}, []);
 
   // Hacer scroll automático al último mensaje
   useEffect(() => {
@@ -30,6 +70,15 @@ const ChatBot: React.FC = () => {
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
+
+    // Verificar si hay un idusuario válido
+    if (!idusuario) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: 'bot', text: 'Por favor, inicia sesión para usar el chat.' },
+      ]);
+      return;
+    }
 
     // Agregar el mensaje del usuario
     setMessages((prev) => [...prev, { sender: 'user', text: input }]);
@@ -40,7 +89,7 @@ const ChatBot: React.FC = () => {
       // Hacer la solicitud al backend
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/chat`, {
         message: input,
-        userId,
+        userId: idusuario, // Ahora userId es idusuario, un número válido
       });
       const botResponse = response.data.message;
 
@@ -71,17 +120,19 @@ const ChatBot: React.FC = () => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(true)}
-          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-lg flex items-center justify-center ${
+          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
             isDarkMode
-              ? 'bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-white border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)]'
-              : 'bg-white text-gray-900 border-gray-300 hover:bg-gray-50'
-          } transition-all duration-300`}
+              ? 'border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)]'
+              : 'border-gray-300 hover:bg-gray-50'
+          }`}
         >
-          <img
-            src="https://static.vecteezy.com/system/resources/previews/008/556/478/non_2x/cute-dog-lifting-barbell-cartoon-icon-illustration-animal-sport-icon-concept-isolated-premium-vector.jpg"
-            alt="FitMate"
-            className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
-          />
+          <div className="w-full h-full bg-[#A9D6E5] rounded-full flex items-center justify-center">
+            <img
+              src="https://static.vecteezy.com/system/resources/previews/008/556/478/non_2x/cute-dog-lifting-barbell-cartoon-icon-illustration-animal-sport-icon-concept-isolated-premium-vector.jpg"
+              alt="FitMate"
+              className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+            />
+          </div>
         </motion.button>
       )}
 
@@ -96,7 +147,7 @@ const ChatBot: React.FC = () => {
             isDarkMode ? 'bg-[#282c3c]' : 'bg-[#F8F9FA]'
           } transition-colors duration-300 flex flex-col`}
         >
-       
+          <GalaxyBackground />
 
           {/* Encabezado del chat */}
           <div
@@ -105,11 +156,13 @@ const ChatBot: React.FC = () => {
             } flex-shrink-0`}
           >
             <div className="flex items-center space-x-3">
-              <img
-                src="https://static.vecteezy.com/system/resources/previews/008/556/478/non_2x/cute-dog-lifting-barbell-cartoon-icon-illustration-animal-sport-icon-concept-isolated-premium-vector.jpg"
-                alt="FitMate"
-                className="w-8 h-8 sm:w-9 sm:h-9 object-contain"
-              />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#A9D6E5] rounded-full flex items-center justify-center">
+                <img
+                  src="https://static.vecteezy.com/system/resources/previews/008/556/478/non_2x/cute-dog-lifting-barbell-cartoon-icon-illustration-animal-sport-icon-concept-isolated-premium-vector.jpg"
+                  alt="FitMate"
+                  className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+                />
+              </div>
               <h3 className={`text-base sm:text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                 FitMate - Asistente de Fitness
               </h3>
@@ -137,11 +190,13 @@ const ChatBot: React.FC = () => {
                 }`}
               >
                 {msg.sender === 'bot' && (
-                  <img
-                    src="https://static.vecteezy.com/system/resources/previews/008/556/478/non_2x/cute-dog-lifting-barbell-cartoon-icon-illustration-animal-sport-icon-concept-isolated-premium-vector.jpg"
-                    alt="FitMate"
-                    className="w-8 h-8 sm:w-9 sm:h-9 object-contain flex-shrink-0"
-                  />
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#A9D6E5] rounded-full flex items-center justify-center flex-shrink-0">
+                    <img
+                      src="https://static.vecteezy.com/system/resources/previews/008/556/478/non_2x/cute-dog-lifting-barbell-cartoon-icon-illustration-animal-sport-icon-concept-isolated-premium-vector.jpg"
+                      alt="FitMate"
+                      className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+                    />
+                  </div>
                 )}
                 <div
                   className={`max-w-[80%] sm:max-w-[85%] p-3 sm:p-4 rounded-xl text-sm sm:text-base leading-relaxed break-words ${
@@ -160,11 +215,13 @@ const ChatBot: React.FC = () => {
             ))}
             {isLoading && (
               <div className="flex justify-start items-start gap-3">
-                <img
-                  src="https://static.vecteezy.com/system/resources/previews/008/556/478/non_2x/cute-dog-lifting-barbell-cartoon-icon-illustration-animal-sport-icon-concept-isolated-premium-vector.jpg"
-                  alt="FitMate"
-                  className="w-8 h-8 sm:w-9 sm:h-9 object-contain flex-shrink-0"
-                />
+                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#A9D6E5] rounded-full flex items-center justify-center flex-shrink-0">
+                  <img
+                    src="https://static.vecteezy.com/system/resources/previews/008/556/478/non_2x/cute-dog-lifting-barbell-cartoon-icon-illustration-animal-sport-icon-concept-isolated-premium-vector.jpg"
+                    alt="FitMate"
+                    className="w-6 h-6 sm:w-7 sm:h-7 object-contain"
+                  />
+                </div>
                 <div
                   className={`p-3 sm:p-4 rounded-xl text-sm sm:text-base ${
                     isDarkMode ? 'bg-[#4B5563] text-gray-400' : 'bg-gray-100 text-gray-600'
