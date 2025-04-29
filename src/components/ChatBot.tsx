@@ -203,7 +203,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
               <div className="flex justify-center items-center h-full">
                 <div
                   className={`p-3 sm:p-4 rounded-xl text-sm sm:text-base ${
-                    isDarkMode ? 'bg-[#ff9404] text-gray-400' : 'bg-gray-100 text-gray-600'
+                    isDarkMode ? 'bg-[#4B5563] text-gray-400' : 'bg-gray-100 text-gray-600'
                   } shadow-sm text-center`}
                 >
                   Debes iniciar sesión para usar el chat.
