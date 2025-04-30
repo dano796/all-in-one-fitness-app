@@ -484,7 +484,7 @@ const ExerciseList: React.FC = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.0, duration: 0.8 }}
                   onClick={() => handleAddExerciseToRoutine(selectedExercise)}
-                  className={`w-full py-3 bgAXISgradient-to-r from-[#ff9404] to-[#e08503] rounded-lg text-base font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'} shadow-[0_0_10px_rgba(255,148,4,0.3)] transition-all duration-300 hover:bg-gradient-to-r hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95`}
+                  className={`w-full py-3 bg-gradient-to-r from-[#ff9404] to-[#e08503] rounded-lg text-base font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'} shadow-[0_0_10px_rgba(255,148,4,0.3)] transition-all duration-300 hover:bg-gradient-to-r hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95`}
                 >
                   Agregar a la rutina
                 </motion.button>
@@ -517,11 +517,6 @@ const ExerciseList: React.FC = () => {
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-4">
-                      <img
-                        src={exercise.gifUrl}
-                        alt={exercise.name}
-                        className="w-12 h-12 object-contain rounded-lg"
-                      />
                       <h3 className={`text-base font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                         {exercise.name} ({exercise.equipment})
                       </h3>

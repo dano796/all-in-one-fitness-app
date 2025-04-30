@@ -1,4 +1,3 @@
-// src/components/ChatBot.tsx
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { motion } from 'framer-motion';
@@ -10,24 +9,33 @@ import { User } from '@supabase/supabase-js';
 interface ChatMessage {
   sender: 'user' | 'bot';
   text: string;
+  elements?: JSX.Element[]; // Nueva propiedad para almacenar los elementos JSX parseados
 }
 
 interface ChatBotProps {
   user: User | null;
+  initialMessage?: string;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
+const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: controlledIsOpen = false, onClose }) => {
   const { isDarkMode } = useTheme();
   const [messages, setMessages] = useState<ChatMessage[]>([
     { sender: 'bot', text: '¡Hola! Soy FitMate, tu asistente de fitness. ¿En qué puedo ayudarte hoy?' },
   ]);
   const [input, setInput] = useState<string>('');
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(controlledIsOpen);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [idusuario, setIdusuario] = useState<number | null>(null);
-  const [isIdLoading, setIsIdLoading] = useState<boolean>(false); // Nuevo estado para manejar la carga de idusuario
+  const [isIdLoading, setIsIdLoading] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatBotRef = useRef<HTMLDivElement>(null); // Ref para el contenedor del chat
+  const chatBotRef = useRef<HTMLDivElement>(null);
+
+  // Sincronizar isOpen con controlledIsOpen
+  useEffect(() => {
+    setIsOpen(controlledIsOpen);
+  }, [controlledIsOpen]);
 
   // Obtener idusuario basado en el usuario autenticado
   useEffect(() => {
@@ -69,6 +77,14 @@ const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
     fetchIdUsuario();
   }, [user]);
 
+  // Enviar mensaje inicial cuando se abre el chat
+  useEffect(() => {
+    if (isOpen && initialMessage && messages.length === 1) {
+      setMessages((prev) => [...prev, { sender: 'user', text: initialMessage }]);
+      handleSendMessage(initialMessage);
+    }
+  }, [isOpen, initialMessage]);
+
   // Hacer scroll automático al último mensaje
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -79,6 +95,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isOpen && chatBotRef.current && !chatBotRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        if (onClose) onClose();
       }
     };
 
@@ -86,10 +103,192 @@ const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
+  // Función para parsear Markdown y convertirlo a elementos JSX
+  const parseMarkdownToJSX = (text: string): JSX.Element[] => {
+    const elements: JSX.Element[] = [];
+    const lines = text.split('\n');
+    let currentList: JSX.Element[] | null = null;
+    let listType: 'ul' | 'ol' | null = null;
+
+    lines.forEach((line, index) => {
+      // Eliminar espacios en blanco al inicio y final
+      const trimmedLine = line.trim();
+
+      // Ignorar líneas vacías
+      if (!trimmedLine) {
+        // Si estamos en una lista, la cerramos
+        if (currentList) {
+          elements.push(
+            listType === 'ul' ? (
+              <ul key={`ul-${index}`} className="ml-4 list-disc">
+                {currentList}
+              </ul>
+            ) : (
+              <ol key={`ol-${index}`} className="ml-4 list-decimal">
+                {currentList}
+              </ol>
+            )
+          );
+          currentList = null;
+          listType = null;
+        }
+        return;
+      }
+
+      // Títulos (# Título)
+      const titleMatch = trimmedLine.match(/^(#+)\s+(.*)$/);
+      if (titleMatch) {
+        // Cerrar lista si existe
+        if (currentList) {
+          elements.push(
+            listType === 'ul' ? (
+              <ul key={`ul-${index}`} className="ml-4 list-disc">
+                {currentList}
+              </ul>
+            ) : (
+              <ol key={`ol-${index}`} className="ml-4 list-decimal">
+                {currentList}
+              </ol>
+            )
+          );
+          currentList = null;
+          listType = null;
+        }
+
+        const level = titleMatch[1].length;
+        const titleText = titleMatch[2];
+        const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+        elements.push(
+          <HeadingTag key={`heading-${index}`} className="font-bold text-lg mt-2 mb-1">
+            {titleText}
+          </HeadingTag>
+        );
+        return;
+      }
+
+      // Listas numeradas (1. Item)
+      const numberedListMatch = trimmedLine.match(/^(\d+)\.\s+(.*)$/);
+      if (numberedListMatch) {
+        const itemText = numberedListMatch[2];
+
+        // Si no estamos en una lista o estamos en una lista diferente, cerramos la anterior
+        if (currentList && listType !== 'ol') {
+          elements.push(
+            listType === 'ul' ? (
+              <ul key={`ul-${index}`} className="ml-4 list-disc">
+                {currentList}
+              </ul>
+            ) : (
+              <ol key={`ol-${index}`} className="ml-4 list-decimal">
+                {currentList}
+              </ol>
+            )
+          );
+          currentList = null;
+        }
+
+        // Iniciamos o continuamos la lista numerada
+        if (!currentList) {
+          currentList = [];
+          listType = 'ol';
+        }
+
+        currentList.push(<li key={`ol-item-${index}`}>{itemText}</li>);
+        return;
+      }
+
+      // Listas con guiones (- Item)
+      const bulletListMatch = trimmedLine.match(/^-+\s+(.*)$/);
+      if (bulletListMatch) {
+        const itemText = bulletListMatch[1];
+
+        // Si no estamos en una lista o estamos en una lista diferente, cerramos la anterior
+        if (currentList && listType !== 'ul') {
+          elements.push(
+            listType === 'ul' ? (
+              <ul key={`ul-${index}`} className="ml-4 list-disc">
+                {currentList}
+              </ul>
+            ) : (
+              <ol key={`ol-${index}`} className="ml-4 list-decimal">
+                {currentList}
+              </ol>
+            )
+          );
+          currentList = null;
+        }
+
+        // Iniciamos o continuamos la lista con guiones
+        if (!currentList) {
+          currentList = [];
+          listType = 'ul';
+        }
+
+        currentList.push(<li key={`ul-item-${index}`}>{itemText}</li>);
+        return;
+      }
+
+      // Si no es un título ni una lista, cerramos cualquier lista abierta
+      if (currentList) {
+        elements.push(
+          listType === 'ul' ? (
+            <ul key={`ul-${index}`} className="ml-4 list-disc">
+              {currentList}
+            </ul>
+          ) : (
+            <ol key={`ol-${index}`} className="ml-4 list-decimal">
+              {currentList}
+            </ol>
+          )
+        );
+        currentList = null;
+        listType = null;
+      }
+
+      // Negritas (**texto**)
+      let formattedLine: string | JSX.Element = trimmedLine;
+      if (formattedLine.includes('**')) {
+        const parts = formattedLine.split(/\*\*(.*?)\*\*/g);
+        formattedLine = parts.map((part, i) =>
+          i % 2 === 1 ? <strong key={`strong-${index}-${i}`}>{part}</strong> : part
+        );
+      }
+
+      // Cursivas (*texto*)
+      if (typeof formattedLine === 'string' && formattedLine.includes('*')) {
+        const parts = formattedLine.split(/\*(.*?)\*/g);
+        formattedLine = parts.map((part, i) =>
+          i % 2 === 1 ? <em key={`em-${index}-${i}`}>{part}</em> : part
+        );
+      }
+
+      // Texto normal (como un párrafo)
+      elements.push(<p key={`p-${index}`}>{formattedLine}</p>);
+    });
+
+    // Cerrar cualquier lista que quede abierta al final
+    if (currentList) {
+      elements.push(
+        listType === 'ul' ? (
+          <ul key={`ul-final`} className="ml-4 list-disc">
+            {currentList}
+          </ul>
+        ) : (
+          <ol key={`ol-final`} className="ml-4 list-decimal">
+            {currentList}
+          </ol>
+        )
+      );
+    }
+
+    return elements;
+  };
+
+  const handleSendMessage = async (messageToSend?: string) => {
+    const message = messageToSend || input;
+    if (!message.trim()) return;
 
     if (!user || !idusuario) {
       setMessages((prev) => [
@@ -108,18 +307,23 @@ const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
     }
 
     // Agregar el mensaje del usuario
-    setMessages((prev) => [...prev, { sender: 'user', text: input }]);
+    if (!messageToSend) {
+      setMessages((prev) => [...prev, { sender: 'user', text: message }]);
+    }
     setInput('');
     setIsLoading(true);
 
     try {
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/chat`, {
-        message: input,
+        message,
         userId: idusuario,
       });
       const botResponse = response.data.message;
 
-      setMessages((prev) => [...prev, { sender: 'bot', text: botResponse }]);
+      // Parsear la respuesta del bot a elementos JSX
+      const parsedElements = parseMarkdownToJSX(botResponse);
+
+      setMessages((prev) => [...prev, { sender: 'bot', text: botResponse, elements: parsedElements }]);
     } catch (error: any) {
       setMessages((prev) => [
         ...prev,
@@ -142,7 +346,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            setIsOpen(true);
+            if (onClose) onClose();
+          }}
           className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
             isDarkMode
               ? 'border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)]'
@@ -188,7 +395,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
               </h3>
             </div>
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsOpen(false);
+                if (onClose) onClose();
+              }}
               className={`p-2 rounded-full ${
                 isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'
               } transition-colors duration-300`}
@@ -251,7 +461,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
                           : 'bg-gray-100 text-gray-900'
                       } shadow-sm`}
                     >
-                      {msg.text}
+                      {msg.elements ? msg.elements : msg.text}
                     </div>
                   </motion.div>
                 ))}
@@ -298,7 +508,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user }) => {
                 }`}
               />
               <button
-                onClick={handleSendMessage}
+                onClick={() => handleSendMessage()}
                 disabled={isLoading}
                 className={`ml-3 p-3 sm:p-4 rounded-full ${
                   isDarkMode

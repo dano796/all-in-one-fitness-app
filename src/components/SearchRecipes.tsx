@@ -14,6 +14,8 @@ import ButtonToolTip from "./ButtonToolTip";
 import { ClipLoader } from "react-spinners";
 import { Recipe } from "../types";
 import { useTheme } from "../pages/ThemeContext";
+import ChatBot from "../components/ChatBot";
+import { User } from "@supabase/supabase-js";
 
 const SearchRecipes: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -24,6 +26,9 @@ const SearchRecipes: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [user, setUser] = useState<User | null>(null);
+  const [isChatBotOpen, setIsChatBotOpen] = useState<boolean>(false);
+  const [initialChatMessage, setInitialChatMessage] = useState<string>("");
 
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
@@ -38,6 +43,7 @@ const SearchRecipes: React.FC = () => {
         setError("Debes iniciar sesión para buscar recetas.");
         navigate("/login");
       } else {
+        setUser(user);
         setUserEmail(user.email || "");
       }
     };
@@ -111,6 +117,27 @@ const SearchRecipes: React.FC = () => {
 
   const handleClose = () => {
     setSelectedRecipe(null);
+  };
+
+  const handleOpenChatBot = (recipe: Recipe) => {
+    const ingredients = recipe.recipe_ingredients?.ingredient?.map((ing: any) => {
+      if (typeof ing === "string") {
+        return ing;
+      } else {
+        let ingredientText = ing.ingredient_name || "Ingrediente desconocido";
+        if (ing.quantity && ing.measurement_description) {
+          ingredientText += ` (${ing.quantity} ${ing.measurement_description})`;
+        }
+        if (ing.ingredient_description) {
+          ingredientText += ` (${ing.ingredient_description})`;
+        }
+        return ingredientText;
+      }
+    }).join(", ") || "Ingredientes no disponibles";
+
+    const message = `¿Cómo puedo preparar una receta de "${recipe.recipe_name}" con los siguientes ingredientes: ${ingredients}? Por favor, dame instrucciones detalladas paso a paso.`;
+    setInitialChatMessage(message);
+    setIsChatBotOpen(true);
   };
 
   const infoText = {
@@ -370,6 +397,15 @@ const SearchRecipes: React.FC = () => {
                   </button>
                 </div>
 
+                <div className="flex justify-center mb-4">
+                  <button
+                    onClick={() => handleOpenChatBot(selectedRecipe)}
+                    className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300"
+                  >
+                    ¿Quieres saber cómo prepararla?
+                  </button>
+                </div>
+
                 {error && (
                   <p className="text-red-400 mb-3 sm:mb-4 text-xs sm:text-sm">
                     {error}
@@ -486,36 +522,36 @@ const SearchRecipes: React.FC = () => {
                         Ingredientes
                       </h3>
                       {(selectedRecipe.recipe_ingredients?.ingredient?.length ?? 0) > 0 ? (
-                      <ul
-                        className={`list-disc pl-5 space-y-1 text-xs sm:text-sm ${
-                          isDarkMode ? "text-gray-300" : "text-gray-600"
-                        }`}
-                      >
-                      {selectedRecipe.recipe_ingredients?.ingredient.map((ing: any, index: number) => (
-                        <li key={index}>
-                          {typeof ing === "string" 
-                            ? ing 
-                            : ing.ingredient_name 
-                              ? ing.ingredient_name 
-                              : "Ingrediente desconocido"}
-                          {typeof ing !== "string" && ing.quantity && ing.measurement_description
-                            ? ` (${ing.quantity} ${ing.measurement_description})`
-                            : ""}
-                          {typeof ing !== "string" && ing.ingredient_description
-                            ? ` (${ing.ingredient_description})`
-                            : ""}
-                        </li>
-                      ))}
-                      </ul>
-                    ) : (
-                      <p
-                        className={`text-xs sm:text-sm ${
-                          isDarkMode ? "text-gray-400" : "text-gray-500"
-                        }`}
-                      >
-                        Ingredientes no disponibles
-                      </p>
-                    )}
+                        <ul
+                          className={`list-disc pl-5 space-y-1 text-xs sm:text-sm ${
+                            isDarkMode ? "text-gray-300" : "text-gray-600"
+                          }`}
+                        >
+                          {selectedRecipe.recipe_ingredients?.ingredient.map((ing: any, index: number) => (
+                            <li key={index}>
+                              {typeof ing === "string" 
+                                ? ing 
+                                : ing.ingredient_name 
+                                  ? ing.ingredient_name 
+                                  : "Ingrediente desconocido"}
+                              {typeof ing !== "string" && ing.quantity && ing.measurement_description
+                                ? ` (${ing.quantity} ${ing.measurement_description})`
+                                : ""}
+                              {typeof ing !== "string" && ing.ingredient_description
+                                ? ` (${ing.ingredient_description})`
+                                : ""}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p
+                          className={`text-xs sm:text-sm ${
+                            isDarkMode ? "text-gray-400" : "text-gray-500"
+                          }`}
+                        >
+                          Ingredientes no disponibles
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -523,6 +559,8 @@ const SearchRecipes: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        <ChatBot user={user} initialMessage={initialChatMessage} isOpen={isChatBotOpen} onClose={() => setIsChatBotOpen(false)} />
       </div>
     </div>
   );
