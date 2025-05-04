@@ -20,18 +20,10 @@ const ModulesPage: React.FC = () => {
         isDarkMode ? "bg-[#282c3c] text-white" : "bg-white-100 text-gray-900"
       }`}
     >
-      <h1
-        className={`text-5xl font-bold mb-8 pb-5 text-center ${
-          isDarkMode ? "text-[#ff9404]" : "text-orange-500"
-        }`}
-      >
+      <h1 className="text-5xl font-bold mb-8 pb-5 text-center">
         Nuestros Módulos
       </h1>
-      <div
-        className={`grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto ${
-          isDarkMode ? "text-[#ff9404]" : "text-orange-500"
-        }`}
-      >
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto text-[#ff9404]">
         <ModuleCard
           icon={<Utensils className="w-8 h-8" />}
           title="Conteo de Calorías"

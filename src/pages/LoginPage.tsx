@@ -211,11 +211,7 @@ const LoginPage = () => {
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
-                  className={`absolute inset-y-0 right-0 flex items-center pr-3 transition-colors duration-300 ${
-                    isDarkMode
-                      ? "text-gray-400 hover:text-[#ff9404]"
-                      : "text-gray-500 hover:text-orange-500"
-                  }`}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 transition-colors duration-300 text-gray-400 hover:text-[#ff9404]"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -224,11 +220,7 @@ const LoginPage = () => {
 
             <button
               type="submit"
-              className={`w-full py-2 px-4 font-semibold rounded-lg transition-colors duration-300 ${
-                isDarkMode
-                  ? "bg-[#ff9404] text-white hover:bg-[#ff9404] hover:text-[#282c3c]"
-                  : "bg-orange-500 text-white hover:bg-orange-600 hover:text-white"
-              }`}
+              className="w-full py-2 px-4 font-semibold rounded-lg transition-colors duration-300 bg-[#ff9404] text-white hover:bg-[#ff9404] hover:text-[#282c3c]"
             >
               Iniciar Sesión
             </button>
@@ -243,11 +235,7 @@ const LoginPage = () => {
               ¿No tienes una cuenta?{" "}
               <Link
                 to="/registro"
-                className={`font-medium transition-colors duration-300 ${
-                  isDarkMode
-                    ? "text-[#ff9404] hover:underline"
-                    : "text-orange-500 hover:underline"
-                }`}
+                className="font-medium transition-colors duration-300 text-[#ff9404] hover:underline"
               >
                 Regístrate aquí
               </Link>
@@ -260,11 +248,7 @@ const LoginPage = () => {
             <div>
               <button
                 onClick={() => setRecoveryModalOpen(true)}
-                className={`font-medium transition-colors duration-300 ${
-                  isDarkMode
-                    ? "text-[#ff9404] hover:underline"
-                    : "text-orange-500 hover:underline"
-                }`}
+                className="font-medium transition-colors duration-300 text-[#ff9404] hover:underline"
               >
                 ¿Olvidaste tu contraseña?
               </button>

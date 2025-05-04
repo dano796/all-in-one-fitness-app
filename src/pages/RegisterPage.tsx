@@ -649,17 +649,13 @@ const RegisterPage = () => {
             </div>
             <button
               type="submit"
-              className={`w-full py-2 font-semibold rounded-lg text-white transition-all duration-300 ${
-                isDarkMode
-                  ? "bg-[#ff9400] hover:bg-[#e68900]"
-                  : "bg-orange-500 hover:bg-orange-600"
-              }`}
+              className="w-full py-2 font-semibold rounded-lg text-white transition-all duration-300 bg-[#ff9400] hover:text-[#282c3c]"
             >
               Crear Cuenta
             </button>
           </form>
           <p
-            className={`mt-4 text-center ${
+            className={`mt-4 text-center text-sm ${
               isDarkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >

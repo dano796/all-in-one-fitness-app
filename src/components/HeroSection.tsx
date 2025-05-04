@@ -98,7 +98,7 @@ const HeroSection: React.FC = () => {
   return (
     <section
       className={`container mx-auto px-8 mb-12 lg:px-16 lg:mb-0 text-left ${
-        isDarkMode ? "bg-[#282c3c]" : "bg-white"
+        isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
       }`}
     >
       <div className="lg:grid lg:grid-cols-2 gap-12 items-start">
