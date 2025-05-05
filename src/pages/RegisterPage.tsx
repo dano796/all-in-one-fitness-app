@@ -1,4 +1,3 @@
-// src/pages/RegisterPage.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
@@ -192,6 +191,34 @@ const RegisterPage = () => {
     } catch (err) {
       console.error("Error durante el registro:", err);
       setErrors((prev) => ({ ...prev, correo: "Ocurrió un error inesperado" }));
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) throw error;
+    } catch (err) {
+      console.error("Error with Google signup:", err);
+      await Swal.fire({
+        title: "¡Error!",
+        text: "Ocurrió un error al intentar registrarte con Google.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#ff9400",
+        background: isDarkMode ? "#282c3c" : "#ffffff",
+        customClass: {
+          popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
+          icon: "custom-swal-icon",
+          title: isDarkMode ? "text-white" : "text-gray-900",
+          htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
+        },
+      });
     }
   };
 
@@ -653,6 +680,22 @@ const RegisterPage = () => {
             >
               Crear Cuenta
             </button>
+            <div className="relative flex items-center justify-center my-4">
+              <div className="flex-grow border-t border-gray-600"></div>
+              <span className={`px-4 text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                O regístrate con
+              </span>
+              <div className="flex-grow border-t border-gray-600"></div>
+            </div>
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={handleGoogleRegister}
+                className="flex items-center justify-center w-28 h-8 rounded-lg transition-all duration-300 bg-[#4A5568] border border-gray-600 hover:bg-[#5A6678]"
+              >
+                <img src="https://img.icons8.com/m_sharp/200/FFFFFF/google-logo.png" alt="Google Logo" className="w-6 h-6" />
+              </button>
+            </div>
           </form>
           <p
             className={`mt-4 text-center text-sm ${

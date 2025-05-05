@@ -1,4 +1,3 @@
-// src/App.tsx
 import React, { useEffect, useState, Suspense, lazy } from "react";
 import {
   BrowserRouter as Router,
@@ -34,6 +33,7 @@ const RMProgressPage = lazy(() => import("./pages/RMProgressPage"));
 const Settings = lazy(() => import("./pages/Settings"));
 const FoodSearchIAPage = lazy(() => import("./pages/FoodSearchIAPage"));
 const SearchRecipes = lazy(() => import("./components/SearchRecipes"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -185,6 +185,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
       </Route>
 
       {/* Protected Routes */}

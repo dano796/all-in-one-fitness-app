@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Trash2, CheckCircle, X, ChevronDown, ChevronUp, Clock } from "lucide-react";
+import { ChevronLeft, Trash2, CheckCircle, X, ChevronDown, ChevronUp, Clock, Camera } from "lucide-react";
 import axios from "axios";
 import GalaxyBackground from "../components/GalaxyBackground";
 import { Progress } from "@/components/ui/progress";
 import { useTheme } from "./ThemeContext";
 import timerEndSound from "../assets/sounds/timer-end.mp3.wav";
+import * as tf from '@tensorflow/tfjs';
+import * as posedetection from '@tensorflow-models/pose-detection';
 
 interface Routine {
   id: string;
@@ -28,6 +30,11 @@ interface Exercise {
   note?: string;
 }
 
+interface VideoDevice {
+  deviceId: string;
+  label: string;
+}
+
 const RoutineDetails: React.FC = () => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
@@ -45,9 +52,19 @@ const RoutineDetails: React.FC = () => {
   const [expandedExercises, setExpandedExercises] = useState<{ [key: string]: boolean }>({});
   const [customTimer, setCustomTimer] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toLocaleDateString("en-CA") // Formato YYYY-MM-DD
+    new Date().toLocaleDateString("en-CA")
   );
+  const [activeAnalysisExerciseId, setActiveAnalysisExerciseId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<string>("");
+  const [videoDevices, setVideoDevices] = useState<VideoDevice[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState<boolean>(false);
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const detectorRef = useRef<posedetection.PoseDetector | null>(null);
+  const isDetectingRef = useRef<boolean>(false);
+  const lastFeedbackUpdate = useRef<number>(0);
 
   const timerSound = new Audio(timerEndSound);
 
@@ -56,6 +73,188 @@ const RoutineDetails: React.FC = () => {
   const userEmail = queryParams.get("email") || "";
 
   const isToday = selectedDate === new Date().toLocaleDateString("en-CA");
+
+  // Mapeo de ejercicios a reglas de evaluación
+  const exerciseRules: { [key: string]: (keypoints: posedetection.Keypoint[]) => string } = {
+    squat: (keypoints) => {
+      const leftKnee = keypoints.find((kp) => kp.name === 'left_knee');
+      const leftHip = keypoints.find((kp) => kp.name === 'left_hip');
+      const leftAnkle = keypoints.find((kp) => kp.name === 'left_ankle');
+      const rightKnee = keypoints.find((kp) => kp.name === 'right_knee');
+      const rightHip = keypoints.find((kp) => kp.name === 'right_hip');
+      const rightAnkle = keypoints.find((kp) => kp.name === 'right_ankle');
+      
+      if (leftKnee && leftHip && leftAnkle && rightKnee && rightHip && rightAnkle &&
+          leftKnee.score && leftHip.score && leftAnkle.score &&
+          rightKnee.score && rightHip.score && rightAnkle.score > 0.5) {
+        const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+        const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+        const avgAngle = (leftAngle + rightAngle) / 2;
+        
+        if (avgAngle > 80 && avgAngle < 100) {
+          return '¡Buena sentadilla! Mantén la espalda recta y baja lentamente hasta que tus muslos estén paralelos al suelo. Sube controladamente.';
+        } else if (avgAngle <= 80) {
+          return 'Ajusta tu postura: dobla más las rodillas y baja hasta que tus muslos estén paralelos al suelo. Mantén la espalda recta.';
+        } else {
+          return 'Ajusta tu postura: no bajes tanto, sube un poco y mantén el control de la bajada.';
+        }
+      }
+      return getPoseAdjustmentFeedback(keypoints, ['left_knee', 'left_hip', 'left_ankle', 'right_knee', 'right_hip', 'right_ankle']);
+    },
+    bench_press: (keypoints) => {
+      const leftElbow = keypoints.find((kp) => kp.name === 'left_elbow');
+      const leftShoulder = keypoints.find((kp) => kp.name === 'left_shoulder');
+      const leftWrist = keypoints.find((kp) => kp.name === 'left_wrist');
+      const rightElbow = keypoints.find((kp) => kp.name === 'right_elbow');
+      const rightShoulder = keypoints.find((kp) => kp.name === 'right_shoulder');
+      const rightWrist = keypoints.find((kp) => kp.name === 'right_wrist');
+      
+      if (leftElbow && leftShoulder && leftWrist && rightElbow && rightShoulder && rightWrist &&
+          leftElbow.score && leftShoulder.score && leftWrist.score &&
+          rightElbow.score && rightShoulder.score && rightWrist.score > 0.5) {
+        const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
+        const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
+        const avgAngle = (leftAngle + rightAngle) / 2;
+        
+        if (avgAngle > 80 && avgAngle < 110) {
+          return '¡Buen press de banca! Mantén los codos a 90° en la bajada y sube la barra con control, sin arquear la espalda.';
+        } else if (avgAngle <= 80) {
+          return 'Ajusta tu postura: baja más los codos hasta formar un ángulo de 90° y mantén los hombros estables.';
+        } else {
+          return 'Ajusta tu postura: no extiendas tanto los codos, baja la barra hasta el pecho con control.';
+        }
+      }
+      return getPoseAdjustmentFeedback(keypoints, ['left_elbow', 'left_shoulder', 'left_wrist', 'right_elbow', 'right_shoulder', 'right_wrist']);
+    },
+    bicep_curl: (keypoints) => {
+      const leftElbow = keypoints.find((kp) => kp.name === 'left_elbow');
+      const leftShoulder = keypoints.find((kp) => kp.name === 'left_shoulder');
+      const leftWrist = keypoints.find((kp) => kp.name === 'left_wrist');
+      const rightElbow = keypoints.find((kp) => kp.name === 'right_elbow');
+      const rightShoulder = keypoints.find((kp) => kp.name === 'right_shoulder');
+      const rightWrist = keypoints.find((kp) => kp.name === 'right_wrist');
+      
+      if (leftElbow && leftShoulder && leftWrist && leftElbow.score && leftShoulder.score && leftWrist.score > 0.5) {
+        const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
+        if (leftAngle >= 30 && leftAngle <= 60) {
+          return '¡Buen curl de bíceps! Mantén el codo cerca del cuerpo, sube la barra lentamente y baja con control.';
+        } else if (leftAngle < 30) {
+          return 'Ajusta tu postura: flexiona más el codo para subir la barra hasta el pecho, manteniendo el codo fijo.';
+        } else {
+          return 'Ajusta tu postura: no extiendas tanto el brazo, baja la barra hasta casi estirar el codo.';
+        }
+      } else if (rightElbow && rightShoulder && rightWrist && rightElbow.score && rightShoulder.score && rightWrist.score > 0.5) {
+        const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
+        if (rightAngle >= 30 && rightAngle <= 60) {
+          return '¡Buen curl de bíceps! Mantén el codo cerca del cuerpo, sube la barra lentamente y baja con control.';
+        } else if (rightAngle < 30) {
+          return 'Ajusta tu postura: flexiona más el codo para subir la barra hasta el pecho, manteniendo el codo fijo.';
+        } else {
+          return 'Ajusta tu postura: no extiendas tanto el brazo, baja la barra hasta casi estirar el codo.';
+        }
+      }
+      return getPoseAdjustmentFeedback(keypoints, ['left_elbow', 'left_shoulder', 'left_wrist', 'right_elbow', 'right_shoulder', 'right_wrist']);
+    },
+    deadlift: (keypoints) => {
+      const leftHip = keypoints.find((kp) => kp.name === 'left_hip');
+      const leftKnee = keypoints.find((kp) => kp.name === 'left_knee');
+      const leftAnkle = keypoints.find((kp) => kp.name === 'left_ankle');
+      const rightHip = keypoints.find((kp) => kp.name === 'right_hip');
+      const rightKnee = keypoints.find((kp) => kp.name === 'right_knee');
+      const rightAnkle = keypoints.find((kp) => kp.name === 'right_ankle');
+      
+      if (leftHip && leftKnee && leftAnkle && rightHip && rightKnee && rightAnkle &&
+          leftHip.score && leftKnee.score && leftAnkle.score &&
+          rightHip.score && rightKnee.score && rightAnkle.score > 0.5) {
+        const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+        const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+        const avgAngle = (leftAngle + rightAngle) / 2;
+        
+        if (avgAngle > 160 && avgAngle < 180) {
+          return '¡Buen peso muerto! Mantén la espalda recta, las rodillas ligeramente flexionadas y sube la barra con fuerza desde el suelo.';
+        } else if (avgAngle < 160) {
+          return 'Ajusta tu postura: flexiona menos las rodillas y mantén la espalda recta al levantar la barra.';
+        } else {
+          return 'Ajusta tu postura: no te inclines tanto hacia atrás, sube la barra hasta estar de pie completamente.';
+        }
+      }
+      return getPoseAdjustmentFeedback(keypoints, ['left_hip', 'left_knee', 'left_ankle', 'right_hip', 'right_knee', 'right_ankle']);
+    },
+    military_press: (keypoints) => {
+      const leftElbow = keypoints.find((kp) => kp.name === 'left_elbow');
+      const leftShoulder = keypoints.find((kp) => kp.name === 'left_shoulder');
+      const leftWrist = keypoints.find((kp) => kp.name === 'left_wrist');
+      const rightElbow = keypoints.find((kp) => kp.name === 'right_elbow');
+      const rightShoulder = keypoints.find((kp) => kp.name === 'right_shoulder');
+      const rightWrist = keypoints.find((kp) => kp.name === 'right_wrist');
+      
+      if (leftElbow && leftShoulder && leftWrist && rightElbow && rightShoulder && rightWrist &&
+          leftElbow.score && leftShoulder.score && leftWrist.score &&
+          rightElbow.score && rightShoulder.score && rightWrist.score > 0.5) {
+        const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
+        const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
+        const avgAngle = (leftAngle + rightAngle) / 2;
+        
+        if (avgAngle > 80 && avgAngle < 110) {
+          return '¡Buen press militar! Mantén los codos alineados con los hombros y sube las mancuernas hasta arriba de la cabeza.';
+        } else if (avgAngle <= 80) {
+          return 'Ajusta tu postura: sube más las mancuernas, formando un ángulo de 90° con los codos.';
+        } else {
+          return 'Ajusta tu postura: no extiendas tanto los brazos, baja las mancuernas a la altura de los hombros.';
+        }
+      }
+      return getPoseAdjustmentFeedback(keypoints, ['left_elbow', 'left_shoulder', 'left_wrist', 'right_elbow', 'right_shoulder', 'right_wrist']);
+    },
+    default: (keypoints) => {
+      return getPoseAdjustmentFeedback(keypoints, ['left_knee', 'left_hip', 'left_ankle', 'left_elbow', 'left_shoulder', 'left_wrist']);
+    },
+  };
+
+  // Función para proporcionar feedback detallado sobre ajustes de posición
+  const getPoseAdjustmentFeedback = (keypoints: posedetection.Keypoint[], requiredKeypoints: string[]): string => {
+    const videoWidth = videoRef.current?.videoWidth || 640;
+    const videoHeight = videoRef.current?.videoHeight || 480;
+
+    const missingKeypoints = requiredKeypoints.filter((kpName) => {
+      const kp = keypoints.find((k) => k.name === kpName);
+      return !kp || !kp.score || kp.score <= 0.5;
+    });
+
+    if (missingKeypoints.length > 0) {
+      const detectedKeypoints = keypoints.filter((kp) => kp.score && kp.score > 0.5);
+      if (detectedKeypoints.length === 0) {
+        return 'No se detecta ninguna parte del cuerpo. Colócate frente a la cámara y asegúrate de estar completamente visible.';
+      }
+
+      const leftmostX = Math.min(...detectedKeypoints.map((kp) => kp.x));
+      const rightmostX = Math.max(...detectedKeypoints.map((kp) => kp.x));
+      const topmostY = Math.min(...detectedKeypoints.map((kp) => kp.y));
+      const bottommostY = Math.max(...detectedKeypoints.map((kp) => kp.y));
+
+      const suggestions: string[] = [];
+
+      if (leftmostX < videoWidth * 0.1) {
+        suggestions.push('Muévete más a la derecha para que todo tu cuerpo sea visible.');
+      }
+      if (rightmostX > videoWidth * 0.9) {
+        suggestions.push('Muévete más a la izquierda para que todo tu cuerpo sea visible.');
+      }
+      if (topmostY < videoHeight * 0.1) {
+        suggestions.push('Baja un poco tu posición o ajusta la cámara hacia arriba.');
+      }
+      if (bottommostY > videoHeight * 0.9) {
+        suggestions.push('Sube un poco tu posición o ajusta la cámara hacia abajo.');
+      }
+
+      if (suggestions.length > 0) {
+        return suggestions.join(' ');
+      }
+
+      return `No se detectan correctamente las partes necesarias (${missingKeypoints.join(', ')}). Asegúrate de que tus brazos, piernas y torso sean visibles para la cámara.`;
+    }
+
+    return 'Ajusta tu posición frente a la cámara para que se detecte el ejercicio correctamente.';
+  };
 
   const fetchRoutineDetails = useCallback(async () => {
     if (!routineId) {
@@ -147,6 +346,179 @@ const RoutineDetails: React.FC = () => {
       if (interval) clearInterval(interval);
     };
   }, [isTimerRunning, timer]);
+
+  useEffect(() => {
+    async function getVideoDevices() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stream.getTracks().forEach(track => track.stop());
+
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices
+          .filter((device) => device.kind === 'videoinput')
+          .map((device) => ({
+            deviceId: device.deviceId,
+            label: device.label || `Cámara ${device.deviceId.slice(0, 5)}`,
+          }));
+
+        if (videoDevices.length === 0) {
+          setFeedback("No se encontraron dispositivos de video. Conecta una cámara e intenta de nuevo.");
+          return;
+        }
+
+        setVideoDevices(videoDevices);
+        setSelectedDeviceId(videoDevices[0].deviceId);
+      } catch (err) {
+        console.error("Error al enumerar dispositivos:", err);
+        if (err.name === 'NotAllowedError') {
+          setFeedback("Permiso denegado para acceder a la cámara. Otorga permisos en la configuración del navegador.");
+        } else if (err.name === 'NotFoundError') {
+          setFeedback("No se encontraron cámaras. Conecta una cámara e intenta de nuevo.");
+        } else {
+          setFeedback("Error al acceder a los dispositivos de video: " + err.message);
+        }
+      }
+    }
+    getVideoDevices();
+  }, []);
+
+  useEffect(() => {
+    if (activeAnalysisExerciseId && videoRef.current) {
+      async function setupCamera() {
+        try {
+          if (videoRef.current.srcObject) {
+            const oldStream = videoRef.current.srcObject as MediaStream;
+            oldStream.getTracks().forEach(track => track.stop());
+          }
+          const constraints: MediaStreamConstraints = {
+            video: {
+              deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
+              facingMode: 'user',
+            },
+          };
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.play();
+          }
+          await loadPoseDetector();
+          detectPose();
+        } catch (err) {
+          console.error("Error al acceder a la cámara:", err);
+          setFeedback("No se pudo acceder a la cámara: " + err.message);
+        }
+      }
+      setupCamera();
+    }
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+      }
+      if (detectorRef.current) {
+        detectorRef.current.dispose();
+        detectorRef.current = null;
+      }
+      isDetectingRef.current = false;
+    };
+  }, [activeAnalysisExerciseId, selectedDeviceId]);
+
+  async function loadPoseDetector() {
+    try {
+      await tf.setBackend('webgl');
+      await tf.ready();
+      detectorRef.current = await posedetection.createDetector(posedetection.SupportedModels.MoveNet, {
+        modelType: 'SinglePose.Lightning',
+      });
+    } catch (err) {
+      console.error("Error al cargar el detector de poses:", err);
+      setFeedback("Error al cargar el modelo de detección de poses: " + err.message);
+    }
+  }
+
+  async function detectPose() {
+    if (!activeAnalysisExerciseId || !videoRef.current || !canvasRef.current || !detectorRef.current || isDetectingRef.current) {
+      return;
+    }
+    isDetectingRef.current = true;
+    try {
+      const poses = await detectorRef.current.estimatePoses(videoRef.current);
+      if (poses.length > 0) {
+        drawKeypoints(poses[0].keypoints);
+        analyzeExercise(poses[0].keypoints);
+      } else {
+        setFeedback("No se detectaron poses en el video. Asegúrate de estar frente a la cámara.");
+      }
+    } catch (err) {
+      console.error("Error al detectar poses:", err);
+      setFeedback("Error al procesar la pose: " + err.message);
+      if (err.message.includes('WebGL')) {
+        try {
+          await tf.setBackend('cpu');
+          await tf.ready();
+          setFeedback("Cambiado al backend CPU debido a un error con WebGL. Intenta de nuevo.");
+        } catch (cpuErr) {
+          console.error("Error al cambiar al backend CPU:", cpuErr);
+          setFeedback("Error crítico: No se puede procesar la pose. Reinicia la aplicación.");
+        }
+      }
+    } finally {
+      isDetectingRef.current = false;
+      setTimeout(() => {
+        if (activeAnalysisExerciseId) detectPose();
+      }, 500); // Reducir frecuencia a 2 FPS para estabilidad
+    }
+  }
+
+  function drawKeypoints(keypoints: posedetection.Keypoint[]) {
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        keypoints.forEach((kp) => {
+          if (kp.score && kp.score > 0.5) {
+            ctx.beginPath();
+            ctx.arc(kp.x, kp.y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ff9404';
+            ctx.fill();
+          }
+        });
+      }
+    }
+  }
+
+  function analyzeExercise(keypoints: posedetection.Keypoint[]) {
+    if (editedExercises[currentExerciseIndex]) {
+      const exerciseName = editedExercises[currentExerciseIndex].name.toLowerCase();
+      console.log("Analizando ejercicio:", exerciseName); // Registro en consola
+      let ruleKey = 'default';
+      if (exerciseName.includes('squat') || exerciseName.includes('sentadilla')) {
+        ruleKey = 'squat';
+      } else if (exerciseName.includes('bench press') || exerciseName.includes('press de banca')) {
+        ruleKey = 'bench_press';
+      } else if (exerciseName.includes('bicep curl') || exerciseName.includes('curl de bíceps')) {
+        ruleKey = 'bicep_curl';
+      } else if (exerciseName.includes('deadlift') || exerciseName.includes('peso muerto')) {
+        ruleKey = 'deadlift';
+      } else if (exerciseName.includes('military press') || exerciseName.includes('press militar')) {
+        ruleKey = 'military_press';
+      }
+      
+      const currentTime = Date.now();
+      if (currentTime - lastFeedbackUpdate.current >= 500) { // Estabilizar feedback cada 500ms
+        const feedbackMessage = exerciseRules[ruleKey](keypoints);
+        setFeedback(feedbackMessage);
+        lastFeedbackUpdate.current = currentTime;
+      }
+    }
+  }
+
+  function calculateAngle(a: posedetection.Keypoint, b: posedetection.Keypoint, c: posedetection.Keypoint): number {
+    const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
+    let angle = Math.abs((radians * 180.0) / Math.PI);
+    if (angle > 180) angle = 360 - angle;
+    return angle;
+  }
 
   const startRestTimer = (restTimer: string) => {
     const seconds = restTimer === "Otro" ? parseInt(customTimer) || 0 : parseInt(restTimer) || 0;
@@ -360,7 +732,7 @@ const RoutineDetails: React.FC = () => {
     isDarkMode
       ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
       : "bg-gray-200 text-gray-900 hover:bg-gray-300"
-  } animate-pulse`;
+  }`;
 
   const addExerciseButtonStyle = `px-4 py-2 font-semibold text-sm rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-102 active:scale-95 transition-all duration-300 ${
     isDarkMode
@@ -369,6 +741,18 @@ const RoutineDetails: React.FC = () => {
   }`;
 
   const addSetSerieButtonStyle = `px-4 py-2 font-semibold text-sm rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-102 active:scale-95 transition-all duration-300 ${
+    isDarkMode
+      ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
+      : "bg-gray-200 text-gray-900 hover:bg-gray-300"
+  }`;
+
+  const cameraButtonStyle = `px-4 py-2 font-semibold text-sm rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-102 active:scale-95 transition-all duration-300 ${
+    isDarkMode
+      ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
+      : "bg-gray-200 text-gray-900 hover:bg-gray-300"
+  }`;
+
+  const cameraIconStyle = `p-2 rounded-full border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 ${
     isDarkMode
       ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
       : "bg-gray-200 text-gray-900 hover:bg-gray-300"
@@ -392,12 +776,9 @@ const RoutineDetails: React.FC = () => {
 
   return (
     <div className={`relative min-h-screen p-4 overflow-y-auto transition-colors duration-300 ${isDarkMode ? "bg-transparent text-white" : "bg-transparent text-gray-900"}`}>
-      {/* Fondo GalaxyBackground detrás de los contenedores de contenido */}
       <div className="absolute inset-0 z-0">
         <GalaxyBackground />
       </div>
-
-      {/* Contenedor principal del contenido */}
       <div className="relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -50 }}
@@ -442,9 +823,7 @@ const RoutineDetails: React.FC = () => {
         >
           <Progress
             value={calculateProgress()}
-            className={`w-full h-2 rounded-full [&>div]:bg-[#ff9404] [&>div]:rounded-full [&>div]:transition-all [&>div]:duration-[1500ms] [&>div]:ease-out ${
-              isDarkMode ? "bg-gray-600" : "bg-gray-300"
-            }`}
+            className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-600" : "bg-gray-300"} [&>div]:bg-[#ff9404] [&>div]:rounded-full [&>div]:transition-all [&>div]:duration-[1500ms] [&>div]:ease-out`}
           />
         </motion.div>
 
@@ -496,9 +875,7 @@ const RoutineDetails: React.FC = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 + exerciseIndex * 0.2, duration: 0.8, ease: [0.68, -0.55, 0.265, 1.55] }}
-                className={`rounded-xl p-4 mb-4 shadow-xl hover:-translate-y-1 transition-transform border-[#ff9404]/50 ${
-                  isDarkMode ? "bg-[#3B4252]" : "bg-white"
-                }`}
+                className={`rounded-xl p-4 mb-4 shadow-xl hover:-translate-y-1 transition-transform border border-[#ff9404]/50 ${isDarkMode ? "bg-[#3B4252]" : "bg-white"}`}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-4">
@@ -536,11 +913,7 @@ const RoutineDetails: React.FC = () => {
                             value={exercise.note || ""}
                             onChange={(e) => handleNoteChange(exerciseIndex, e.target.value)}
                             onBlur={() => handleNoteBlur(exerciseIndex)}
-                            className={`w-full rounded-lg p-2 text-base focus:border-[#ff9404] outline-none transition-colors ${
-                              isDarkMode
-                                ? "bg-[#4B5563] text-white border-gray-600"
-                                : "bg-white text-gray-900 border-gray-300"
-                            }`}
+                            className={`w-full rounded-lg p-2 text-base focus:border-[#ff9404] outline-none transition-colors ${isDarkMode ? "bg-[#4B5563] text-white border border-gray-600" : "bg-white text-gray-900 border border-gray-300"}`}
                           />
                         </div>
 
@@ -553,11 +926,7 @@ const RoutineDetails: React.FC = () => {
                               <select
                                 value={exercise.restTimer || "Apagado"}
                                 onChange={(e) => handleRestTimerChange(exerciseIndex, e.target.value)}
-                                className={`w-full max-w-[200px] p-3 rounded-lg border text-base transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:scale-102 ${
-                                  isDarkMode
-                                    ? "bg-[#4B5563] text-white border-gray-600"
-                                    : "bg-white text-gray-900 border-gray-300"
-                                }`}
+                                className={`w-full max-w-[200px] p-3 rounded-lg border text-base transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:scale-102 ${isDarkMode ? "bg-[#4B5563] text-white border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
                               >
                                 <option value="Apagado">Apagado</option>
                                 <option value="30">30 segundos</option>
@@ -581,11 +950,7 @@ const RoutineDetails: React.FC = () => {
                               placeholder="Segundos"
                               value={customTimer}
                               onChange={(e) => setCustomTimer(e.target.value)}
-                              className={`mt-2 w-full max-w-[200px] p-3 rounded-lg border text-base transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:scale-102 ${
-                                isDarkMode
-                                  ? "bg-[#4B5563] text-white border-gray-600"
-                                  : "bg-white text-gray-900 border-gray-300"
-                              }`}
+                              className={`mt-2 w-full max-w-[200px] p-3 rounded-lg border text-base transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:scale-102 ${isDarkMode ? "bg-[#4B5563] text-white border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
                             />
                           )}
                         </div>
@@ -608,9 +973,7 @@ const RoutineDetails: React.FC = () => {
                               )}
                             </div>
                             {serie.sets.length > 0 && (
-                              <div className={`flex justify-between py-2 border-b mb-2 ${
-                                isDarkMode ? "border-gray-600" : "border-gray-300"
-                              }`}>
+                              <div className={`flex justify-between py-2 border-b mb-2 ${isDarkMode ? "border-gray-600" : "border-gray-300"}`}>
                                 <span className={`text-sm font-semibold flex-1 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>SET</span>
                                 <span className={`text-sm font-semibold flex-1 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>PREVIO</span>
                                 <span className={`text-sm font-semibold flex-1 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>KG</span>
@@ -633,11 +996,7 @@ const RoutineDetails: React.FC = () => {
                                     handleSetChange(exerciseIndex, serieIndex, setIndex, "kg", e.target.value)
                                   }
                                   onBlur={() => handleSetBlur(exerciseIndex, serieIndex, setIndex)}
-                                  className={`bg-[#4B5563] border rounded-lg p-2 w-16 text-center focus:border-[#ff9404] outline-none transition-colors ${
-                                    isDarkMode
-                                      ? "bg-[#4B5563] text-white border-gray-600"
-                                      : "bg-white text-gray-900 border-gray-300"
-                                  }`}
+                                  className={`rounded-lg p-2 w-16 text-center focus:border-[#ff9404] outline-none transition-colors ${isDarkMode ? "bg-[#4B5563] text-white border border-gray-600" : "bg-white text-gray-900 border border-gray-300"}`}
                                   disabled={!isToday}
                                 />
                                 <input
@@ -648,11 +1007,7 @@ const RoutineDetails: React.FC = () => {
                                     handleSetChange(exerciseIndex, serieIndex, setIndex, "reps", e.target.value)
                                   }
                                   onBlur={() => handleSetBlur(exerciseIndex, serieIndex, setIndex)}
-                                  className={`rounded-lg p-2 w-16 text-center focus:border-[#ff9404] outline-none transition-colors ${
-                                    isDarkMode
-                                      ? "bg-[#4B5563] text-white border-gray-600"
-                                      : "bg-white text-gray-900 border-gray-300"
-                                  }`}
+                                  className={`rounded-lg p-2 w-16 text-center focus:border-[#ff9404] outline-none transition-colors ${isDarkMode ? "bg-[#4B5563] text-white border border-gray-600" : "bg-white text-gray-900 border border-gray-300"}`}
                                   disabled={!isToday}
                                 />
                                 <button
@@ -679,7 +1034,7 @@ const RoutineDetails: React.FC = () => {
                             {isToday && (
                               <button
                                 onClick={() => handleAddSet(exerciseIndex, serieIndex)}
-                                className={`w-full ${addSetSerieButtonStyle} mt-2`}
+                                className={addSetSerieButtonStyle}
                               >
                                 + Añadir Set
                               </button>
@@ -689,7 +1044,7 @@ const RoutineDetails: React.FC = () => {
                         {isToday && (
                           <button
                             onClick={() => handleAddSerie(exerciseIndex)}
-                            className={`w-full ${addSetSerieButtonStyle} mt-2`}
+                            className={addSetSerieButtonStyle}
                           >
                             + Añadir Serie
                           </button>
@@ -697,6 +1052,49 @@ const RoutineDetails: React.FC = () => {
                       </div>
                     )}
                   </motion.div>
+                )}
+                {isToday && (
+                  <div className="mt-4 flex flex-col gap-2">
+                    <button
+                      onClick={() => {
+                        setCurrentExerciseIndex(exerciseIndex);
+                        setActiveAnalysisExerciseId(exercise.id);
+                        setFeedback(""); // Limpiar feedback al iniciar un nuevo análisis
+                      }}
+                      className={cameraButtonStyle}
+                    >
+                      Analizar Ejercicio
+                    </button>
+                    {activeAnalysisExerciseId === exercise.id && (
+                      <div className="relative mt-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <button
+                            onClick={() => setIsCameraModalOpen(true)}
+                            className={cameraIconStyle}
+                          >
+                            <Camera className="w-6 h-6" />
+                          </button>
+                        </div>
+                        <video ref={videoRef} className="w-full max-w-md rounded-lg" />
+                        <canvas
+                          ref={canvasRef}
+                          className="absolute top-0 left-0 w-full max-w-md rounded-lg"
+                          width={videoRef.current?.videoWidth || 640}
+                          height={videoRef.current?.videoHeight || 480}
+                        />
+                        <p className={`mt-2 text-lg font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{feedback}</p>
+                        <button
+                          onClick={() => {
+                            setActiveAnalysisExerciseId(null);
+                            setFeedback(""); // Limpiar feedback al detener
+                          }}
+                          className={cameraButtonStyle}
+                        >
+                          Detener Análisis
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 )}
               </motion.div>
             ))
@@ -742,17 +1140,11 @@ const RoutineDetails: React.FC = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`rounded-2xl p-6 w-11/12 max-w-md relative shadow-2xl border text-center ${
-                  isDarkMode
-                    ? "bg-gradient-to-br from-gray-700 to-gray-800 border-white/10"
-                    : "bg-white-100 border-gray-300"
-                }`}
+                className={`rounded-2xl p-6 w-11/12 max-w-md relative shadow-2xl border ${isDarkMode ? "bg-gradient-to-br from-gray-700 to-gray-800 border-white/10" : "bg-white border-gray-300"}`}
               >
                 <button
                   onClick={closeTimerModal}
-                  className={`absolute top-4 right-4 transition-colors ${
-                    isDarkMode ? "text-white hover:text-red-500" : "text-gray-900 hover:text-red-600"
-                  }`}
+                  className={`absolute top-4 right-4 transition-colors ${isDarkMode ? "text-white hover:text-red-500" : "text-gray-900 hover:text-red-600"}`}
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -761,7 +1153,7 @@ const RoutineDetails: React.FC = () => {
                   <svg className="w-full h-full -rotate-90" viewBox="0 0 200 200">
                     <circle className={`fill-none stroke-[10] ${isDarkMode ? "stroke-gray-600" : "stroke-gray-300"}`} cx="100" cy="100" r="90" />
                     <circle
-                      className="fill-none stroke-[#ff9404] stroke-[10] stroke-linecap-round transition-[stroke-dashoffset] duration-1000 [animation:pulse_2s_infinite_ease-in-out]"
+                      className="fill-none stroke-[#ff9404] stroke-[10] stroke-linecap-round transition-[stroke-dashoffset] duration-1000"
                       cx="100"
                       cy="100"
                       r="90"
@@ -769,7 +1161,7 @@ const RoutineDetails: React.FC = () => {
                       strokeDashoffset={565.48 * (1 - timerProgress / 100)}
                     />
                   </svg>
-                  <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl font-bold drop-shadow-md ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                     {timer}s
                   </div>
                 </div>
@@ -793,9 +1185,55 @@ const RoutineDetails: React.FC = () => {
         </AnimatePresence>
 
         <AnimatePresence>
+          {isCameraModalOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/90 flex items-center justify-center z-40"
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className={`rounded-2xl p-6 w-11/12 max-w-sm relative shadow-2xl border ${isDarkMode ? "bg-gradient-to-br from-gray-700 to-gray-800 border-white/10" : "bg-white border-gray-300"}`}
+              >
+                <button
+                  onClick={() => setIsCameraModalOpen(false)}
+                  className={`absolute top-4 right-4 transition-colors ${isDarkMode ? "text-white hover:text-red-500" : "text-gray-900 hover:text-red-600"}`}
+                >
+                  <X className="w-6 h-6" />
+                </button>
+                <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>Seleccionar Cámara</h2>
+                <select
+                  value={selectedDeviceId}
+                  onChange={(e) => {
+                    setSelectedDeviceId(e.target.value);
+                    setIsCameraModalOpen(false);
+                  }}
+                  className={`w-full p-3 rounded-lg border text-base transition-all duration-300 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] ${isDarkMode ? "bg-[#4B5563] text-white border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
+                >
+                  {videoDevices.length === 0 ? (
+                    <option value="">No hay cámaras disponibles</option>
+                  ) : (
+                    videoDevices.map((device) => (
+                      <option key={device.deviceId} value={device.deviceId}>
+                        {device.label}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
           {timerCompleted && isToday && (
             <motion.div
-              className="fixed inset-0 pointer-events-none z-0"
+              className="fixed inset-0 pointer-events-none"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -827,18 +1265,6 @@ const RoutineDetails: React.FC = () => {
           )}
         </AnimatePresence>
       </div>
-
-      {/* Estilos adicionales para viveza */}
-      <style>{`
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-          100% { transform: scale(1); }
-        }
-        .animate-pulse {
-          animation: pulse 2s infinite ease-in-out;
-        }
-      `}</style>
     </div>
   );
 };
