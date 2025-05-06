@@ -634,7 +634,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
               initial={{ x: '-100%' }}
               animate={{ x: isSidebarOpen ? 0 : '-100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className={`absolute top-0 left-0 w-1/2 h-full bg-[#2D2D2D] text-white p-4 overflow-y-auto border-r border-[#ff9404] z-20`}
+              className={`absolute top-0 left-0 w-3/4 h-full bg-[#2D2D2D] text-white p-4 overflow-y-auto border-r border-[#ff9404] z-20`}
             >
               <div className="mb-4">
                 <h4 className="text-sm font-semibold text-gray-300">Conversaciones</h4>
