@@ -11,6 +11,8 @@ import Loader from "./components/Loader";
 import { User } from "@supabase/supabase-js";
 import { ThemeProvider } from "./pages/ThemeContext";
 import ChatBot from "./components/ChatBot";
+import { useNotificationStore } from "./store/notificationStore";
+import ToastContainer from "./components/ToastContainer";
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -143,6 +145,7 @@ const protectedRoutes = [
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { addNotification } = useNotificationStore();
 
   useEffect(() => {
     let mounted = true;
@@ -156,15 +159,45 @@ function App() {
       if (mounted) {
         setUser(user);
         setIsLoading(false);
+        
+        if (user) {
+          addNotification(
+            "🎉 ¡Bienvenido de nuevo!",
+            "💪 Te damos la bienvenida a tu app de fitness todo en uno.",
+            "success"
+          );
+        }
       }
     };
 
     fetchUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_, session) => {
+      (event, session) => {
         setUser(session?.user ?? null);
-        setIsLoading(false); // Aseguramos que isLoading se desactive al cambiar el estado de autenticación
+        setIsLoading(false);
+        
+        if (event === 'SIGNED_IN') {
+          addNotification(
+            "✅ Sesión iniciada",
+            "🔐 Has iniciado sesión correctamente.",
+            "success"
+          );
+          
+          setTimeout(() => {
+            addNotification(
+              "💧 Recordatorio",
+              "🚰 No olvides registrar tu consumo de agua de hoy.",
+              "info"
+            );
+          }, 3000);
+        } else if (event === 'SIGNED_OUT') {
+          addNotification(
+            "👋 Sesión cerrada",
+            "🔒 Has cerrado sesión correctamente.",
+            "info"
+          );
+        }
       }
     );
 
@@ -172,7 +205,7 @@ function App() {
       mounted = false;
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [addNotification]);
 
   const renderRoutes = () => (
     <Routes>
@@ -232,7 +265,8 @@ function App() {
           <div className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
             {renderRoutes()}
             {isLoading && <Loader />}
-            <ChatBot user={user} /> {/* Pasamos el estado user al ChatBot */}
+            <ChatBot user={user} />
+            <ToastContainer /> 
           </div>
         </Suspense>
       </ThemeProvider>

@@ -1,4 +1,3 @@
-// src/pages/ContactPage.tsx
 import React from "react";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { useTheme } from "../pages/ThemeContext";

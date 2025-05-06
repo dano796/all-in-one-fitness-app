@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../pages/ThemeContext";
+import { useNotificationStore } from "../store/notificationStore";
 
 interface Food {
   food_id: string;
@@ -77,6 +78,7 @@ const FoodQuantityAdjust: React.FC = () => {
   const [displayQuantity, setDisplayQuantity] = useState<string>("100");
   const [fixedUnit, setFixedUnit] = useState<string>("g");
   const [unitLabel, setUnitLabel] = useState<string>("g");
+  const { addNotification } = useNotificationStore();
   const [nutritionalValues, setNutritionalValues] = useState<NutritionalValues>(
     {
       calories: null,
@@ -422,6 +424,14 @@ const FoodQuantityAdjust: React.FC = () => {
         requestBody
       );
 
+      addNotification(
+        "Alimento registrado",
+        `Has añadido ${food.food_name} a tu registro de ${normalizedType.toLowerCase()}.`,
+        "success",
+        true,
+        "comida"
+      );
+
       await Swal.fire({
         title: "¡Éxito!",
         text: "La comida ha sido registrada exitosamente.",
@@ -437,7 +447,10 @@ const FoodQuantityAdjust: React.FC = () => {
         },
       });
 
-      navigate(`/dashboard?type=${normalizedType}`, {
+      const searchParams = new URLSearchParams(location.search);
+      const currentDate = searchParams.get("date") || new Date().toISOString().split('T')[0];
+
+      navigate(`/comidas?type=${normalizedType.toLowerCase()}&date=${currentDate}`, {
         state: { fromAddButton: true },
       });
     } catch (err) {
@@ -445,6 +458,15 @@ const FoodQuantityAdjust: React.FC = () => {
       const errorMessage =
         axiosError.response?.data?.error || "Error al agregar el alimento";
       setError(errorMessage);
+      
+      addNotification(
+        "Error al registrar alimento",
+        errorMessage,
+        "error",
+        true,
+        "comida"
+      );
+
       await Swal.fire({
         title: "¡Error!",
         text: errorMessage,
@@ -460,17 +482,7 @@ const FoodQuantityAdjust: React.FC = () => {
         },
       });
     }
-  }, [
-    food,
-    type,
-    userEmail,
-    quantity,
-    fixedUnit,
-    unitLabel,
-    nutritionalValues,
-    convertToFraction,
-    evaluateFraction,
-    navigate,
+  }, [food,type, userEmail, quantity, fixedUnit, unitLabel, nutritionalValues, convertToFraction, evaluateFraction, navigate, addNotification, isDarkMode,
   ]);
 
   if (!food || !type) {

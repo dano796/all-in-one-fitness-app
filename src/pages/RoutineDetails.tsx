@@ -9,6 +9,7 @@ import { useTheme } from "./ThemeContext";
 import timerEndSound from "../assets/sounds/timer-end.mp3.wav";
 import * as tf from '@tensorflow/tfjs';
 import * as posedetection from '@tensorflow-models/pose-detection';
+import { useNotificationStore } from "../store/notificationStore";
 
 interface Routine {
   id: string;
@@ -65,6 +66,7 @@ const RoutineDetails: React.FC = () => {
   const detectorRef = useRef<posedetection.PoseDetector | null>(null);
   const isDetectingRef = useRef<boolean>(false);
   const lastFeedbackUpdate = useRef<number>(0);
+  const { addNotification } = useNotificationStore();
 
   const timerSound = new Audio(timerEndSound);
 
@@ -337,6 +339,14 @@ const RoutineDetails: React.FC = () => {
       setIsTimerModalOpen(false);
       setTimerCompleted(true);
       timerSound.play().catch((err) => console.error("Error al reproducir el sonido:", err));
+      // Mostrar notificación cuando el temporizador de descanso se completa
+      addNotification(
+        "⏰ Descanso completado",
+        "🏋️‍♂️ ¡Es hora de continuar con tu rutina!",
+        "success",
+        true,
+        "ejercicio"
+      );
       setTimeout(() => {
         timerSound.pause();
         timerSound.currentTime = 0;
@@ -345,7 +355,7 @@ const RoutineDetails: React.FC = () => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isTimerRunning, timer]);
+  }, [isTimerRunning, timer, addNotification]);
 
   useEffect(() => {
     async function getVideoDevices() {
@@ -370,12 +380,16 @@ const RoutineDetails: React.FC = () => {
         setSelectedDeviceId(videoDevices[0].deviceId);
       } catch (err) {
         console.error("Error al enumerar dispositivos:", err);
-        if (err.name === 'NotAllowedError') {
+        if (err instanceof Error && err.name === 'NotAllowedError') {
           setFeedback("Permiso denegado para acceder a la cámara. Otorga permisos en la configuración del navegador.");
-        } else if (err.name === 'NotFoundError') {
+        } else if (err instanceof Error && err.name === 'NotFoundError') {
           setFeedback("No se encontraron cámaras. Conecta una cámara e intenta de nuevo.");
         } else {
-          setFeedback("Error al acceder a los dispositivos de video: " + err.message);
+          if (err instanceof Error) {
+            setFeedback("Error al acceder a los dispositivos de video: " + err.message);
+          } else {
+            setFeedback("Error al acceder a los dispositivos de video.");
+          }
         }
       }
     }
@@ -405,7 +419,11 @@ const RoutineDetails: React.FC = () => {
           detectPose();
         } catch (err) {
           console.error("Error al acceder a la cámara:", err);
-          setFeedback("No se pudo acceder a la cámara: " + err.message);
+          if (err instanceof Error) {
+            setFeedback("No se pudo acceder a la cámara: " + err.message);
+          } else {
+            setFeedback("No se pudo acceder a la cámara debido a un error desconocido.");
+          }
         }
       }
       setupCamera();
@@ -432,7 +450,11 @@ const RoutineDetails: React.FC = () => {
       });
     } catch (err) {
       console.error("Error al cargar el detector de poses:", err);
-      setFeedback("Error al cargar el modelo de detección de poses: " + err.message);
+      if (err instanceof Error) {
+        setFeedback("Error al cargar el modelo de detección de poses: " + err.message);
+      } else {
+        setFeedback("Error al cargar el modelo de detección de poses.");
+      }
     }
   }
 
@@ -451,8 +473,12 @@ const RoutineDetails: React.FC = () => {
       }
     } catch (err) {
       console.error("Error al detectar poses:", err);
-      setFeedback("Error al procesar la pose: " + err.message);
-      if (err.message.includes('WebGL')) {
+      if (err instanceof Error) {
+        setFeedback("Error al procesar la pose: " + err.message);
+      } else {
+        setFeedback("Error al procesar la pose.");
+      }
+      if (err instanceof Error && err.message.includes('WebGL')) {
         try {
           await tf.setBackend('cpu');
           await tf.ready();
@@ -505,7 +531,7 @@ const RoutineDetails: React.FC = () => {
       }
       
       const currentTime = Date.now();
-      if (currentTime - lastFeedbackUpdate.current >= 500) { // Estabilizar feedback cada 500ms
+      if (currentTime - lastFeedbackUpdate.current >= 500) {
         const feedbackMessage = exerciseRules[ruleKey](keypoints);
         setFeedback(feedbackMessage);
         lastFeedbackUpdate.current = currentTime;
@@ -553,7 +579,7 @@ const RoutineDetails: React.FC = () => {
       setRoutine((prev) => (prev ? { ...prev, exercises: updatedExercises } : prev));
     } catch (err) {
       console.error("Error al guardar los cambios automáticamente:", err);
-      if (err.response?.status === 403) {
+      if (axios.isAxiosError(err) && err.response?.status === 403) {
         setError("No se pueden modificar sets de días anteriores.");
       } else {
         setError("Error al guardar los cambios.");
@@ -630,9 +656,12 @@ const RoutineDetails: React.FC = () => {
     const updatedExercises = [...editedExercises];
     const updatedSeries = [...updatedExercises[exerciseIndex].series];
     const updatedSets = [...updatedSeries[serieIndex].sets];
+    
+    const newCompletedState = !updatedSets[setIndex].completed;
+    
     updatedSets[setIndex] = {
       ...updatedSets[setIndex],
-      completed: !updatedSets[setIndex].completed,
+      completed: newCompletedState,
     };
     updatedSeries[serieIndex] = { sets: updatedSets };
     updatedExercises[exerciseIndex] = {
@@ -640,6 +669,42 @@ const RoutineDetails: React.FC = () => {
       series: updatedSeries,
     };
     setEditedExercises(updatedExercises);
+    
+    if (newCompletedState) {
+      addNotification(
+        "✅ Set completado", 
+        `💪 Has completado un set de ${updatedExercises[exerciseIndex].name}`,
+        "success",
+        true,
+        "ejercicio"
+      );
+      
+      const allSetsInSerieCompleted = updatedSeries[serieIndex].sets.every(set => set.completed);
+      if (allSetsInSerieCompleted && updatedSeries[serieIndex].sets.length > 0) {
+        addNotification(
+          "🎯 Serie completada", 
+          `🔥 ¡Buen trabajo! Has completado la serie ${serieIndex + 1} de ${updatedExercises[exerciseIndex].name}`,
+          "success",
+          true,
+          "ejercicio"
+        );
+      }
+      
+      const allSeriesCompleted = updatedExercises[exerciseIndex].series.every(
+        serie => serie.sets.every(set => set.completed)
+      );
+      if (allSeriesCompleted && updatedExercises[exerciseIndex].series.some(serie => serie.sets.length > 0)) {
+        addNotification(
+          "🏆 Ejercicio completado", 
+          `🎉 ¡Felicidades! Has completado todas las series de ${updatedExercises[exerciseIndex].name}`,
+          "success",
+          true,
+          "ejercicio"
+        );
+      }
+    }
+    
+    saveRoutine(updatedExercises);
   };
 
   const handleNoteChange = (exerciseIndex: number, value: string) => {

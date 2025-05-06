@@ -38,7 +38,7 @@ export interface Set {
 export interface WaterLog {
   id: string;
   userId: string;
-  amount: number; // in ml
+  amount: number;
   date: string;
 }
 

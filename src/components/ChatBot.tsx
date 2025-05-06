@@ -140,7 +140,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
   const createNewConversation = async (firstWord?: string) => {
     if (!idusuario) return;
 
-    const defaultTitle = ''; // Título inicial vacío, se actualizará con el primer mensaje
+    const defaultTitle = '';
     try {
       const { data, error } = await supabase
         .from('Conversaciones')
@@ -152,7 +152,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
 
       setConversations((prev) => [data, ...prev]);
       setCurrentConversationId(data.id_conversacion);
-      setMessages([{ sender: 'bot', text: '¡Hola! Soy FitMate, tu asistente de fitness. ¿En qué puedo ayudarte hoy?' }]);
+      setMessages([{ sender: 'bot', text: '¡Hola! Soy FitMate, tu asistente de fitness. ¿En qué puedo ayudarte hoy? 🏋️‍♂️' }]);
       setIsSidebarOpen(false);
       setIsFirstUserMessage(true);
     } catch (error) {
@@ -510,7 +510,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
   useEffect(() => {
     conversations.forEach((conv) => {
       if (!animatedTitles[conv.id_conversacion] || animatedTitles[conv.id_conversacion] !== conv.titulo) {
-        const fullTitle = conv.titulo || ''; // Solo la idea de Open AI, no "FitMate"
+        const fullTitle = conv.titulo || '';
         let currentTitle = '';
         let index = 0;
 

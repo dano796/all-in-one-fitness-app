@@ -1,4 +1,3 @@
-// src/pages/AboutPage.tsx
 import React from "react";
 import { Users, Target, Award, LucideIcon } from "lucide-react";
 import { useTheme } from "../pages/ThemeContext";

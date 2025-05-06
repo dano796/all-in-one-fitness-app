@@ -4,6 +4,7 @@ import { Dumbbell, UserCircle, LogOut, Menu, X } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { useTheme } from "../pages/ThemeContext";
+import NotificationCenter from "./NotificationCenter";
 
 type User = SupabaseUser;
 
@@ -63,14 +64,17 @@ const DesktopMenu: React.FC<{
       </div>
       <div className="flex items-center space-x-4">
         {user && (
-          <Link
-            to="/dashboard"
-            className={`hover:text-[#FF9500] transition font-semibold ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            }`}
-          >
-            Dashboard
-          </Link>
+          <>
+            <Link
+              to="/dashboard"
+              className={`hover:text-[#FF9500] transition font-semibold ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
+              Dashboard
+            </Link>
+            <NotificationCenter />
+          </>
         )}
         {user ? (
           <div className="relative" ref={menuRef}>
@@ -210,15 +214,20 @@ const MobileMenu: React.FC<{
         Contacto
       </Link>
       {user && (
-        <Link
-          to="/dashboard"
-          className={`block py-2 ${
-            isDarkMode ? "text-gray-300" : "text-gray-600"
-          } hover:text-[#FF9500] transition`}
-          onClick={() => setMobileMenuOpen(false)}
-        >
-          Dashboard
-        </Link>
+        <>
+          <Link
+            to="/dashboard"
+            className={`block py-2 ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            } hover:text-[#FF9500] transition`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Dashboard
+          </Link>
+          <div className="py-2">
+            <NotificationCenter />
+          </div>
+        </>
       )}
       {user ? (
         <button

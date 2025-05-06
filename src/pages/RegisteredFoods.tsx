@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import { FaArrowLeft, FaTrash } from "react-icons/fa";
 import { Link, useSearchParams } from "react-router-dom";
 import { useTheme } from "../pages/ThemeContext";
+import { useNotificationStore } from "../store/notificationStore";
 
 interface RegisteredFood {
   id_registro: string;
@@ -31,6 +32,7 @@ interface FoodsResponse {
 
 const RegisteredFoods: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { addNotification } = useNotificationStore();
   const TIMEZONE = "America/Bogota";
   const [date, setDate] = useState<string>(
     new Date().toLocaleDateString("en-CA", { timeZone: TIMEZONE })
@@ -103,12 +105,25 @@ const RegisteredFoods: React.FC = () => {
       return;
     }
     try {
+
+      const foodToDelete = foodsData.foods[selectedFood.type][selectedFood.index];
+      const foodName = foodToDelete.nombre_comida;
+      
       const response = await axios.delete(
         `${import.meta.env.VITE_BACKEND_URL}/api/foods/delete`,
         {
           data: { email: userEmail, id_registro: selectedFood.id_registro },
         }
       );
+      
+      addNotification(
+        "Alimento eliminado",
+        `Has eliminado ${foodName} de tu registro de ${selectedFood.type.toLowerCase()}.`,
+        "success",
+        true,
+        "comida"
+      );
+      
       await Swal.fire({
         title: "¡Éxito!",
         text: "El alimento ha sido eliminado correctamente.",
@@ -130,6 +145,15 @@ const RegisteredFoods: React.FC = () => {
       const errorMessage =
         axiosError.response?.data?.error || "Error al eliminar la comida";
       setError(errorMessage);
+      
+      addNotification(
+        "Error al eliminar alimento",
+        errorMessage,
+        "error",
+        true,
+        "comida"
+      );
+      
       await Swal.fire({
         title: "¡Error!",
         text: errorMessage,
@@ -245,7 +269,7 @@ const RegisteredFoods: React.FC = () => {
       }`}
     >
       <div className="mb-6 w-full max-w-2xl">
-        <Link to="/dashboard" className="inline-block">
+        <Link to="/foodDashboard" className="inline-block">
           <button
             className={`flex items-center py-2 px-4 font-semibold rounded-full shadow-md transition-all duration-300 hover:-translate-y-1 z-10 ${
               isDarkMode

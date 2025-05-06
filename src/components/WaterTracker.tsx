@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import ButtonToolTip from "../components/ButtonToolTip";
 import { useTheme } from "../pages/ThemeContext";
+import { useNotificationStore } from "../store/notificationStore";
 
 const preloadImages = [BotellaVacia, Botella25, Botella75, Botella100];
 preloadImages.forEach((src) => {
@@ -112,6 +113,9 @@ const WaterTracker: React.FC = () => {
   const [goalUnit, setGoalUnit] = useState<"ml" | "lt">("ml");
   const [waterUnitStages, setWaterUnitStages] = useState<number[]>([]);
   const [isToday, setIsToday] = useState<boolean>(true);
+  const { addNotification } = useNotificationStore();
+  // Estado para rastrear si ya mostramos la notificación de mitad de objetivo
+  const [halfwayNotificationShown, setHalfwayNotificationShown] = useState<boolean>(false);
 
   // Nuevos estados para manejar el tamaño de la botella
   const [bottleSize, setBottleSize] = useState<number>(DEFAULT_BOTTLE_SIZE);
@@ -303,8 +307,15 @@ const WaterTracker: React.FC = () => {
       }));
       setShowBottleSetting(false);
       setError(null);
+      
+      // Mostrar notificación para el cambio de tamaño de botella
+      addNotification(
+        "Tamaño de botella actualizado",
+        `Has configurado el tamaño de tu botella a ${newSize} ml.`,
+        "info"
+      );
     }
-  }, [useCustomSize, customBottleSize, selectedBottleSize, saveBottleSize]);
+  }, [useCustomSize, customBottleSize, selectedBottleSize, saveBottleSize, addNotification]);
 
   const handleCustomSizeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -323,8 +334,45 @@ const WaterTracker: React.FC = () => {
       const newFilledWaterUnits = filledWaterUnits + 1;
       setFilledWaterUnits(newFilledWaterUnits);
       await saveWaterData(newFilledWaterUnits);
+      
+      // Forzar una notificación cada vez que se añade agua (para probar)
+      addNotification(
+        "💧 Agua registrada",
+        `Has añadido ${waterGoal.unitsPerBottle} ml de agua (${newFilledWaterUnits}/${totalWaterUnits} botellas)`,
+        "info",
+        true,
+        "agua" // Categoría para mostrar icono de gota
+      );
+      
+      // Verificar si se ha completado el objetivo de agua
+      if (newFilledWaterUnits === totalWaterUnits) {
+        console.log("[NotificacionAgua] Meta completada:", newFilledWaterUnits, "/", totalWaterUnits);
+        addNotification(
+          "🎉 ¡Objetivo de hidratación completado!",
+          `🏆 Has alcanzado tu meta diaria de ${waterGoal.goalMl} ml de agua. ¡Felicidades!`,
+          "success",
+          true,
+          "agua" // Categoría para mostrar icono de gota
+        );
+      } 
+      
+      // Verificar si ha llegado a la mitad del objetivo
+      const halfwayPoint = Math.ceil(totalWaterUnits / 2);
+      if (newFilledWaterUnits === halfwayPoint && !halfwayNotificationShown) {
+        console.log("[NotificacionAgua] Mitad del camino:", newFilledWaterUnits, "/", totalWaterUnits, "- Punto medio:", halfwayPoint);
+        // Marcar que ya mostramos la notificación de mitad de camino
+        setHalfwayNotificationShown(true);
+        // Notificación a mitad del objetivo
+        addNotification(
+          "👍 ¡Vas por buen camino!",
+          `💪 Has completado la mitad de tu meta diaria de agua (${Math.round(waterGoal.goalMl/2)} ml).`,
+          "info",
+          true,
+          "agua" // Categoría para mostrar icono de gota
+        );
+      }
     }
-  }, [filledWaterUnits, isToday, saveWaterData, totalWaterUnits]);
+  }, [filledWaterUnits, isToday, saveWaterData, totalWaterUnits, waterGoal.goalMl, waterGoal.unitsPerBottle, addNotification, halfwayNotificationShown]);
 
   const handleRemoveWaterUnit = useCallback(async () => {
     if (filledWaterUnits > 0 && isToday) {
@@ -339,6 +387,8 @@ const WaterTracker: React.FC = () => {
       const selectedDate = e.target.value;
       setDate(selectedDate);
       setIsToday(selectedDate === todayStr);
+      // Reiniciar el estado de la notificación a mitad de camino cuando cambiamos de día
+      setHalfwayNotificationShown(false);
     },
     [todayStr]
   );
@@ -388,8 +438,17 @@ const WaterTracker: React.FC = () => {
       setWaterGoal(newWaterGoal);
       setShowGoalSetting(false);
       setError(null);
+      // Reiniciar el estado de notificación de mitad de camino cuando se cambia la meta
+      setHalfwayNotificationShown(false);
+      
+      // Mostrar notificación de éxito
+      addNotification(
+        "Meta de agua actualizada",
+        `Tu nueva meta diaria de agua es ${goalInMl} ml.`,
+        "info"
+      );
     }
-  }, [goalInput, goalUnit, waterGoal.unitsPerBottle, saveWaterGoal]);
+  }, [goalInput, goalUnit, waterGoal.unitsPerBottle, saveWaterGoal, addNotification]);
 
   const handleRemoveGoal = useCallback(async () => {
     const saveSuccess = await saveWaterGoal(0);
@@ -405,8 +464,17 @@ const WaterTracker: React.FC = () => {
       await saveWaterData(0);
       setShowGoalSetting(false);
       setError(null);
+      // Reiniciar el estado de notificación de mitad de camino
+      setHalfwayNotificationShown(false);
+      
+      // Mostrar notificación cuando se elimina la meta
+      addNotification(
+        "Meta de agua eliminada",
+        "Has eliminado tu meta diaria de agua y se ha reiniciado tu progreso.",
+        "warning"
+      );
     }
-  }, [waterGoal.unitsPerBottle, saveWaterGoal, saveWaterData]);
+  }, [waterGoal.unitsPerBottle, saveWaterGoal, saveWaterData, addNotification]);
 
   const getDateLabel = useCallback(() => {
     const selectedDate = new Date(date + "T00:00:00");

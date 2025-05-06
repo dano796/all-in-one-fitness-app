@@ -3,12 +3,13 @@ import React, { useState, useEffect, useCallback } from "react";
 import ImageUploadDragDrop from "./ImageUploadDragDrop";
 import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios, { AxiosError } from "axios";
 import FoodItem from "./FoodItem";
 import { motion } from "framer-motion";
 import ButtonToolTip from "./ButtonToolTip";
 import { useTheme } from "../pages/ThemeContext";
+import { useNotificationStore } from "../store/notificationStore";
 
 interface FoodSearchIAProps {
   initialType?: string;
@@ -23,12 +24,12 @@ interface Food {
 
 const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
   const { isDarkMode } = useTheme();
+  const { addNotification } = useNotificationStore();
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [loadingAdd, setLoadingAdd] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>(
     initialType
       ? initialType.charAt(0).toUpperCase() + initialType.slice(1)
@@ -36,6 +37,7 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
   );
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -46,8 +48,6 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
       if (authError || !user) {
         setError("Debes iniciar sesión para analizar imágenes.");
         navigate("/login");
-      } else {
-        setUserEmail(user.email || "");
       }
     };
     checkAuth();
@@ -57,6 +57,13 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
     setUploadedImage(file);
     setResult(null);
     setError(null);
+    addNotification(
+      "Imagen cargada",
+      `La imagen "${file.name}" ha sido cargada con éxito.`,
+      "info",
+      false,
+      "comida"
+    );
     console.log("Imagen subida:", file.name);
   };
 
@@ -104,18 +111,34 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
       }
 
       setResult(data);
+      
+      addNotification(
+        "Análisis completado",
+        "La imagen ha sido analizada correctamente.",
+        "success",
+        true,
+        "comida"
+      );
     } catch (err) {
-      setError(
-        err instanceof Error && err.message.includes("No se pudo parsear")
-          ? "No se pudo identificar la comida en la imagen. Por favor, intenta con otra imagen más clara."
-          : err instanceof Error
-          ? err.message
-          : "Error al procesar la imagen con IA"
+      const errorMessage = err instanceof Error && err.message.includes("No se pudo parsear")
+        ? "No se pudo identificar la comida en la imagen. Por favor, intenta con otra imagen más clara."
+        : err instanceof Error
+        ? err.message
+        : "Error al procesar la imagen con IA";
+      
+      setError(errorMessage);
+      
+      addNotification(
+        "Error en el análisis",
+        errorMessage,
+        "error",
+        true,
+        "comida"
       );
     } finally {
       setLoading(false);
     }
-  }, [uploadedImage, selectedType]);
+  }, [uploadedImage, selectedType, addNotification]);
 
   const handleAddFood = useCallback(
     async (food: Food) => {
@@ -151,9 +174,17 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
       setError(null);
 
       try {
-        const response = await axios.post(
+        await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/api/foods/add`,
           requestBody
+        );
+        
+        addNotification(
+          "Alimento registrado",
+          `Has añadido ${food.food_name} a tu registro de ${normalizedType.toLowerCase()}.`,
+          "success",
+          true,
+          "comida"
         );
 
         await Swal.fire({
@@ -174,7 +205,10 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
         setUploadedImage(null);
         setResult(null);
         setError(null);
-        navigate(`/dashboard?type=${normalizedType}`, {
+        
+        const currentDate = date || new Date().toISOString().split('T')[0];
+        
+        navigate(`/comidas?type=${normalizedType.toLowerCase()}&date=${currentDate}`, {
           state: { fromAddButton: true },
         });
       } catch (err) {
@@ -182,6 +216,15 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
         const errorMessage =
           axiosError.response?.data?.error || "Error al agregar el alimento";
         setError(errorMessage);
+
+        addNotification(
+          "Error al agregar alimento",
+          errorMessage,
+          "error",
+          true,
+          "comida"
+        );
+
         await Swal.fire({
           title: "¡Error!",
           text: errorMessage,
@@ -204,16 +247,24 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
         setLoadingAdd(false);
       }
     },
-    [selectedType, navigate]
+    [selectedType, navigate, date, isDarkMode, addNotification]
   );
 
   const handleFoodClick = useCallback(
     (food: Food) => {
+      addNotification(
+        "Ajustar cantidad",
+        `Estás ajustando la cantidad de ${food.food_name}.`,
+        "info",
+        false,
+        "comida"
+      );
+      
       navigate("/food-quantity-adjust", {
         state: { food, type: selectedType },
       });
     },
-    [navigate, selectedType]
+    [navigate, selectedType, addNotification]
   );
 
   const infoText = {
@@ -285,7 +336,7 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
             }`}
           >
             Imagen cargada:{" "}
-            <span className="font-semibold">{uploadedImage.name}</span>
+            <span className="font-semibold">{uploadedImage?.name}</span>
           </p>
           <button
             onClick={handleCalculate}

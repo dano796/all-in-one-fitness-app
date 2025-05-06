@@ -6,6 +6,7 @@ import { supabase } from "../lib/supabaseClient";
 import { motion } from "framer-motion";
 import GalaxyBackground from "../components/GalaxyBackground";
 import { useTheme } from "../pages/ThemeContext";
+import { useNotificationStore } from "../store/notificationStore";
 
 interface Exercise {
   id: string;
@@ -78,6 +79,8 @@ const ExerciseList: React.FC = () => {
     "Sábado",
     "Domingo",
   ];
+  
+  const { addNotification } = useNotificationStore();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -150,6 +153,14 @@ const ExerciseList: React.FC = () => {
       ...prev,
       [exercise.id]: true,
     }));
+    
+    addNotification(
+      "🏋️‍♂️ Ejercicio añadido",
+      `${exercise.name} ha sido añadido a la rutina`,
+      "success",
+      true,
+      "ejercicio"
+    );
   };
 
   const handleRemoveExerciseFromRoutine = (exerciseId: string) => {
@@ -182,10 +193,27 @@ const ExerciseList: React.FC = () => {
         await axios.put(`${backendUrl}/api/routines/${routineId}`, {
           exercises: newRoutine.exercises,
         });
+        
+        addNotification(
+          "Rutina actualizada",
+          "Los ejercicios de la rutina se han actualizado correctamente",
+          "success",
+          true,
+          "ejercicio"
+        );
+        
         navigate(`/routine-details?id=${routineId}`);
       } catch (err) {
         console.error(err);
         setError("Error al actualizar la rutina");
+        
+        addNotification(
+          "Error",
+          "No se pudo actualizar la rutina. Inténtalo de nuevo.",
+          "error",
+          true,
+          "ejercicio"
+        );
       }
     } else {
       if (!newRoutine.day || !newRoutine.name || newRoutine.exercises.length === 0) {
@@ -200,10 +228,27 @@ const ExerciseList: React.FC = () => {
           name: newRoutine.name,
           exercises: newRoutine.exercises,
         });
+        
+        addNotification(
+          "Rutina creada",
+          `La rutina ${newRoutine.name} ha sido creada correctamente`,
+          "success",
+          true,
+          "ejercicio"
+        );
+        
         navigate("/routines");
       } catch (err) {
         console.error(err);
         setError("Error al guardar la rutina");
+        
+        addNotification(
+          "Error",
+          "No se pudo guardar la rutina. Inténtalo de nuevo.",
+          "error",
+          true,
+          "ejercicio"
+        );
       }
     }
   };
@@ -218,36 +263,6 @@ const ExerciseList: React.FC = () => {
 
   return (
     <>
-      <style>
-        {`
-          .custom-scroll::-webkit-scrollbar {
-            width: 8px;
-          }
-          .custom-scroll::-webkit-scrollbar-track {
-            background: ${isDarkMode ? '#3b4252' : '#e5e7eb'};
-            border-radius: 4px;
-          }
-          .custom-scroll::-webkit-scrollbar-thumb {
-            background: ${isDarkMode ? '#9ca3af' : '#6b7280'};
-            border-radius: 4px;
-          }
-          .custom-scroll::-webkit-scrollbar-thumb:hover {
-            background: ${isDarkMode ? '#b0b7c3' : '#4b5563'};
-          }
-          .custom-scroll {
-            scrollbar-width: thin;
-            scrollbar-color: ${isDarkMode ? '#9ca3af #3b4252' : '#6b7280 #e5e7eb'};
-          }
-          .hide-scroll::-webkit-scrollbar {
-            display: none;
-          }
-          .hide-scroll {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-        `}
-      </style>
-
       <div className={`relative flex flex-col gap-4 p-4 min-h-screen overflow-hidden z-10 ${isDarkMode ? 'bg-[#282c3c]' : 'bg-white-100'}`}>
         <GalaxyBackground />
 

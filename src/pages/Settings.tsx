@@ -17,7 +17,7 @@ import { useTheme } from "../pages/ThemeContext";
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
-  const { isDarkMode, toggleDarkMode } = useTheme(); // Usar el contexto
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [userEmail, setUserEmail] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
   const [notifications, setNotifications] = useState<boolean>(true);
