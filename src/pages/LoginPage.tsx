@@ -31,7 +31,7 @@ const LoginPage = () => {
         }
 
         if (user) {
-          navigate("/dashboard", { replace: true });
+          navigate("/Dashboard", { replace: true });
         }
       } catch (err) {
         console.error("Excepción al verificar la sesión:", err);
@@ -80,7 +80,7 @@ const LoginPage = () => {
         });
         const { data } = await supabase.auth.getUser();
         if (data.user) {
-          navigate("/dashboard", { replace: true });
+          navigate("/Dashboard", { replace: true });
         }
         await Swal.fire({
           title: "¡Éxito!",
@@ -253,11 +253,7 @@ const LoginPage = () => {
             </button>
             <div className="relative flex items-center justify-center my-4">
               <div className="flex-grow border-t border-gray-600"></div>
-              <span
-                className={`px-4 text-sm ${
-                  isDarkMode ? "text-gray-400" : "text-gray-600"
-                }`}
-              >
+              <span className={`px-4 text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
                 O inicia sesión con
               </span>
               <div className="flex-grow border-t border-gray-600"></div>
@@ -266,13 +262,9 @@ const LoginPage = () => {
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="flex items-center justify-center duration-300 hover:scale-110"
+                className="flex items-center justify-center w-28 h-8 rounded-lg transition-all duration-300 bg-[#4A5568] border border-gray-600 hover:bg-[#5A6678]"
               >
-                <img
-                  src="https://img.icons8.com/m_sharp/200/FFFFFF/google-logo.png"
-                  alt="Google Logo"
-                  className="w-5 h-5"
-                />
+                <img src="https://img.icons8.com/m_sharp/200/FFFFFF/google-logo.png" alt="Google Logo" className="w-6 h-6" />
               </button>
             </div>
           </form>
