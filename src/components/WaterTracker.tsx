@@ -19,7 +19,8 @@ preloadImages.forEach((src) => {
 });
 
 const TIMEZONE = "America/Bogota";
-const TOTAL_WATER_UNITS = 8;
+const DEFAULT_WATER_GOAL_ML = 2000; // Meta predeterminada en ml
+const DEFAULT_UNITS_PER_BOTTLE = 250; // ml por botella
 
 const WaterUnit: React.FC<{ stage: number }> = ({ stage }) => {
   const fillSpring = useSpring({
@@ -84,6 +85,11 @@ const WaterUnit: React.FC<{ stage: number }> = ({ stage }) => {
   );
 };
 
+interface WaterGoal {
+  goalMl: number;
+  unitsPerBottle: number;
+}
+
 const WaterTracker: React.FC = () => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
@@ -95,10 +101,18 @@ const WaterTracker: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [filledWaterUnits, setFilledWaterUnits] = useState<number>(0);
-  const [waterUnitStages, setWaterUnitStages] = useState<number[]>(
-    Array(TOTAL_WATER_UNITS).fill(0)
-  );
+  const [waterGoal, setWaterGoal] = useState<WaterGoal>({
+    goalMl: DEFAULT_WATER_GOAL_ML,
+    unitsPerBottle: DEFAULT_UNITS_PER_BOTTLE,
+  });
+  const [showGoalSetting, setShowGoalSetting] = useState<boolean>(false);
+  const [goalInput, setGoalInput] = useState<string>("");
+  const [goalUnit, setGoalUnit] = useState<"ml" | "lt">("ml");
+  const [waterUnitStages, setWaterUnitStages] = useState<number[]>([]);
   const [isToday, setIsToday] = useState<boolean>(true);
+
+  const totalWaterUnits =
+    Math.ceil(waterGoal.goalMl / waterGoal.unitsPerBottle) || 1;
 
   const checkAuth = useCallback(async () => {
     const {
@@ -125,6 +139,21 @@ const WaterTracker: React.FC = () => {
       );
       const aguasllenadas = response.data.aguasllenadas || 0;
       setFilledWaterUnits(aguasllenadas);
+
+      const goalResponse = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/water/get-goal`,
+        {
+          params: { email: userEmail },
+        }
+      );
+
+      if (goalResponse.data && goalResponse.data.waterGoal) {
+        setWaterGoal({
+          goalMl: goalResponse.data.waterGoal,
+          unitsPerBottle: DEFAULT_UNITS_PER_BOTTLE,
+        });
+      }
+
       setError(null);
     } catch (err) {
       console.log(err);
@@ -151,13 +180,33 @@ const WaterTracker: React.FC = () => {
     [userEmail, date]
   );
 
+  const saveWaterGoal = useCallback(
+    async (goalMl: number) => {
+      try {
+        await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/water/set-goal`,
+          {
+            email: userEmail,
+            waterGoal: goalMl,
+          }
+        );
+        return true;
+      } catch (err) {
+        console.log(err);
+        setError("Error al guardar el objetivo de agua.");
+        return false;
+      }
+    },
+    [userEmail]
+  );
+
   const handleAddWaterUnit = useCallback(async () => {
-    if (filledWaterUnits < TOTAL_WATER_UNITS && isToday) {
+    if (filledWaterUnits < totalWaterUnits && isToday) {
       const newFilledWaterUnits = filledWaterUnits + 1;
       setFilledWaterUnits(newFilledWaterUnits);
       await saveWaterData(newFilledWaterUnits);
     }
-  }, [filledWaterUnits, isToday, saveWaterData]);
+  }, [filledWaterUnits, isToday, saveWaterData, totalWaterUnits]);
 
   const handleRemoveWaterUnit = useCallback(async () => {
     if (filledWaterUnits > 0 && isToday) {
@@ -181,6 +230,65 @@ const WaterTracker: React.FC = () => {
       dateInputRef.current.showPicker();
     }
   }, []);
+
+  const handleGoalChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setGoalInput(e.target.value);
+    },
+    []
+  );
+
+  const handleUnitChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setGoalUnit(e.target.value as "ml" | "lt");
+    },
+    []
+  );
+
+  const handleSetGoal = useCallback(async () => {
+    if (!goalInput) {
+      setError("Por favor ingresa un valor para tu objetivo de agua.");
+      return;
+    }
+
+    const numValue = parseFloat(goalInput);
+    if (isNaN(numValue) || numValue <= 0) {
+      setError("Por favor ingresa un valor numérico válido.");
+      return;
+    }
+
+    const goalInMl = goalUnit === "lt" ? numValue * 1000 : numValue;
+
+    const saveSuccess = await saveWaterGoal(goalInMl);
+
+    if (saveSuccess) {
+      const newWaterGoal = {
+        goalMl: goalInMl,
+        unitsPerBottle: waterGoal.unitsPerBottle,
+      };
+
+      setWaterGoal(newWaterGoal);
+      setShowGoalSetting(false);
+      setError(null);
+    }
+  }, [goalInput, goalUnit, waterGoal.unitsPerBottle, saveWaterGoal]);
+
+  const handleRemoveGoal = useCallback(async () => {
+    const saveSuccess = await saveWaterGoal(0);
+
+    if (saveSuccess) {
+      const newWaterGoal = {
+        goalMl: 0,
+        unitsPerBottle: waterGoal.unitsPerBottle,
+      };
+
+      setWaterGoal(newWaterGoal);
+      setFilledWaterUnits(0);
+      await saveWaterData(0);
+      setShowGoalSetting(false);
+      setError(null);
+    }
+  }, [waterGoal.unitsPerBottle, saveWaterGoal, saveWaterData]);
 
   const getDateLabel = useCallback(() => {
     const selectedDate = new Date(date + "T00:00:00");
@@ -217,20 +325,27 @@ const WaterTracker: React.FC = () => {
   }, [userEmail, date, fetchWaterData]);
 
   useEffect(() => {
-    setWaterUnitStages((prevStages) =>
-      prevStages.map((_stage, i) => (i < filledWaterUnits ? 3 : 0))
+    setWaterUnitStages(
+      Array(totalWaterUnits)
+        .fill(0)
+        .map((_, i) => (i < filledWaterUnits ? 3 : 0))
     );
-  }, [filledWaterUnits]);
+  }, [filledWaterUnits, totalWaterUnits]);
 
-  const waterConsumed = filledWaterUnits * 250;
-  const waterGoal = TOTAL_WATER_UNITS * 250;
   const waterUnits = waterUnitStages.map((stage, index) => (
     <WaterUnit key={index} stage={stage} />
   ));
 
+  const waterConsumed = filledWaterUnits * waterGoal.unitsPerBottle;
+  const waterGoalTotal = waterGoal.goalMl;
+  const waterPercentage =
+    waterGoalTotal > 0
+      ? ((waterConsumed / waterGoalTotal) * 100).toFixed(0)
+      : "0";
+
   const infoText = {
     waterTrackerInfo:
-      "Seguimiento de tu consumo diario de agua. La meta recomendada es de 8 vasos (2000 ml) al día para mantener una hidratación adecuada.",
+      "Seguimiento de tu consumo diario de agua. Establece tu meta personalizada para mantener una hidratación adecuada.",
   };
 
   return (
@@ -301,16 +416,101 @@ const WaterTracker: React.FC = () => {
             {error}
           </motion.p>
         )}
-        <div className="flex items-center mb-6">
-          <h2
-            className={`text-xl font-semibold ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            } mr-2`}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <h2
+              className={`text-xl font-semibold ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              } mr-2`}
+            >
+              Control de Agua
+            </h2>
+            <ButtonToolTip content={infoText.waterTrackerInfo} />
+          </div>
+          <button
+            onClick={() => setShowGoalSetting(!showGoalSetting)}
+            className={`text-sm ${
+              isDarkMode
+                ? "text-[#ff9404] hover:text-[#e08503]"
+                : "text-orange-500 hover:text-orange-600"
+            } transition-colors duration-300`}
           >
-            Control de Agua
-          </h2>
-          <ButtonToolTip content={infoText.waterTrackerInfo} />
+            {showGoalSetting ? "Cancelar" : "Configurar Meta"}
+          </button>
         </div>
+
+        {showGoalSetting && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className={`rounded-lg p-4 mb-6 ${
+              isDarkMode ? "bg-[#4B5563]/50" : "bg-[#F8F9FA]"
+            }`}
+          >
+            <h3
+              className={`text-lg font-semibold mb-3 ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
+              Configurar Objetivo de Agua
+            </h3>
+            <div className="flex flex-wrap gap-3 items-center">
+              <input
+                type="number"
+                min="1"
+                placeholder="Cantidad"
+                value={goalInput}
+                onChange={handleGoalChange}
+                className={`px-3 py-2 rounded-lg border ${
+                  isDarkMode
+                    ? "bg-[#2D3242] text-white border-[#4B5563] focus:border-[#ff9404]"
+                    : "bg-white text-gray-900 border-gray-300 focus:border-[#ff9404]"
+                } focus:outline-none`}
+              />
+              <select
+                value={goalUnit}
+                onChange={handleUnitChange}
+                className={`px-3 py-2 rounded-lg border ${
+                  isDarkMode
+                    ? "bg-[#2D3242] text-white border-[#4B5563] focus:border-[#ff9404]"
+                    : "bg-white text-gray-900 border-gray-300 focus:border-[#ff9404]"
+                } focus:outline-none`}
+              >
+                <option value="ml">ml</option>
+                <option value="lt">lt</option>
+              </select>
+              <button
+                onClick={handleSetGoal}
+                className={`px-4 py-2 rounded-lg shadow ${
+                  isDarkMode
+                    ? "bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white"
+                    : "bg-gradient-to-br from-gray-200 to-gray-300 text-gray-900"
+                } hover:shadow-lg transition-all duration-300`}
+              >
+                Guardar
+              </button>
+              <button
+                onClick={handleRemoveGoal}
+                className={`px-4 py-2 rounded-lg shadow ${
+                  isDarkMode
+                    ? "bg-red-600/80 text-white"
+                    : "bg-red-500/80 text-white"
+                } hover:shadow-lg transition-all duration-300`}
+              >
+                Eliminar Meta
+              </button>
+            </div>
+            <p
+              className={`text-xs mt-2 ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
+              * Al eliminar la meta, se restablecerá a 0ml y se reiniciará tu
+              progreso actual.
+            </p>
+          </motion.div>
+        )}
 
         <div
           className={`rounded-lg p-6 mb-8 ${
@@ -330,48 +530,76 @@ const WaterTracker: React.FC = () => {
               isDarkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
-            {((waterConsumed / waterGoal) * 100).toFixed(0)}% de tu meta
+            Meta:{" "}
+            <span className="font-medium">
+              {waterGoalTotal > 0 ? `${waterGoalTotal} ml` : "No establecida"}
+            </span>
+            {waterGoalTotal > 0 ? ` (${waterPercentage}% completado)` : ""}
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-4 mb-10">
-          {waterUnits}
-        </div>
+        {waterGoalTotal > 0 ? (
+          <>
+            <div className="flex flex-wrap justify-center gap-4 mb-10">
+              {waterUnits}
+            </div>
 
-        <div className="flex justify-center space-x-6">
-          <button
-            onClick={handleRemoveWaterUnit}
-            disabled={filledWaterUnits === 0 || !isToday}
-            className={`px-4 py-2 text-base border-none rounded-lg shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 sm:text-base sm:px-4 sm:py-2 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none ${
-              isDarkMode
-                ? "bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white disabled:bg-[#4B5563]"
-                : "bg-gradient-to-br from-gray-200 to-gray-300 text-gray-900 disabled:bg-gray-400"
-            }`}
-          >
-            -
-          </button>
-          <button
-            onClick={handleAddWaterUnit}
-            disabled={filledWaterUnits === TOTAL_WATER_UNITS || !isToday}
-            className={`px-4 py-2 text-base border-none rounded-lg shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 sm:text-base sm:px-4 sm:py-2 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none ${
-              isDarkMode
-                ? "bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white disabled:bg-[#4B5563]"
-                : "bg-gradient-to-br from-gray-200 to-gray-300 text-gray-900 disabled:bg-gray-400"
-            }`}
-          >
-            +
-          </button>
-        </div>
+            <div className="flex justify-center space-x-6">
+              <button
+                onClick={handleRemoveWaterUnit}
+                disabled={filledWaterUnits === 0 || !isToday}
+                className={`px-4 py-2 text-base border-none rounded-lg shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 sm:text-base sm:px-4 sm:py-2 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none ${
+                  isDarkMode
+                    ? "bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white disabled:bg-[#4B5563]"
+                    : "bg-gradient-to-br from-gray-200 to-gray-300 text-gray-900 disabled:bg-gray-400"
+                }`}
+              >
+                -
+              </button>
+              <button
+                onClick={handleAddWaterUnit}
+                disabled={filledWaterUnits === totalWaterUnits || !isToday}
+                className={`px-4 py-2 text-base border-none rounded-lg shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 sm:text-base sm:px-4 sm:py-2 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none ${
+                  isDarkMode
+                    ? "bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white disabled:bg-[#4B5563]"
+                    : "bg-gradient-to-br from-gray-200 to-gray-300 text-gray-900 disabled:bg-gray-400"
+                }`}
+              >
+                +
+              </button>
+            </div>
 
-        <p
-          className={`text-sm mt-8 text-center ${
-            isDarkMode ? "text-gray-400" : "text-gray-600"
-          }`}
-        >
-          {filledWaterUnits === TOTAL_WATER_UNITS
-            ? "¡Meta alcanzada! Eres un maestro del agua 💧"
-            : "¡Sigue así, cada gota cuenta!"}
-        </p>
+            <p
+              className={`text-sm mt-8 text-center ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
+              {filledWaterUnits === totalWaterUnits
+                ? "¡Meta alcanzada! Eres un maestro del agua 💧"
+                : "¡Sigue así, cada gota cuenta!"}
+            </p>
+          </>
+        ) : (
+          <div className="text-center py-10">
+            <p
+              className={`text-lg font-semibold mb-4 ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
+              No has establecido una meta de agua
+            </p>
+            <button
+              onClick={() => setShowGoalSetting(true)}
+              className={`px-4 py-2 rounded-lg shadow ${
+                isDarkMode
+                  ? "bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white"
+                  : "bg-gradient-to-br from-gray-200 to-gray-300 text-gray-900"
+              } hover:shadow-lg transition-all duration-300`}
+            >
+              Establecer Meta
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

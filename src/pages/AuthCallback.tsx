@@ -114,7 +114,7 @@ const AuthCallback = () => {
             htmlContainer: "text-gray-400",
           },
         });
-        navigate("/Dashboard", { replace: true });
+        navigate("/dashboard", { replace: true });
       }
     };
 

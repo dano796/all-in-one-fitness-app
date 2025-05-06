@@ -39,6 +39,7 @@ interface DashboardData {
   calorieIntake: CalorieIntake;
   calorieGoal: number;
   waterIntake: number;
+  waterGoal?: number;
 }
 
 interface FoodsResponse {
@@ -62,8 +63,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const TIMEZONE = "America/Bogota";
   const today = new Date();
   const todayStr = today.toLocaleDateString("en-CA", { timeZone: TIMEZONE });
-  const TOTAL_WATER_UNITS = 8;
-  const WATER_PER_UNIT = 250;
+  const DEFAULT_WATER_GOAL_ML = 2000;
+  const DEFAULT_UNITS_PER_BOTTLE = 250;
   const dateInputRef = useRef<HTMLInputElement>(null);
 
   const [userEmail, setUserEmail] = useState<string>("");
@@ -77,6 +78,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     },
     calorieGoal: 2000,
     waterIntake: 0,
+    waterGoal: DEFAULT_WATER_GOAL_ML,
   });
   const [foodData, setFoodData] = useState<FoodsResponse>({
     foods: { Desayuno: [], Almuerzo: [], Merienda: [], Cena: [] },
@@ -155,15 +157,33 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           }),
         ]);
 
+        const waterGoalResponse = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/water/get-goal`,
+          {
+            params: { email: userEmail },
+          }
+        );
+
         const updatedDashboardData = { ...dashboardRes.data };
         if (goalRes.data.calorieGoal) {
           updatedDashboardData.calorieGoal = goalRes.data.calorieGoal;
         }
+
+        // Update water data with the actual goal from the server
         if (waterRes.data) {
-          updatedDashboardData.waterIntake =
-            (waterRes.data.aguasllenadas || 0) * WATER_PER_UNIT;
           setFilledWaterUnits(waterRes.data.aguasllenadas || 0);
+          const consumedWater =
+            (waterRes.data.aguasllenadas || 0) * DEFAULT_UNITS_PER_BOTTLE;
+          updatedDashboardData.waterIntake = consumedWater;
         }
+
+        // Set custom water goal if available
+        if (waterGoalResponse.data && waterGoalResponse.data.waterGoal) {
+          updatedDashboardData.waterGoal = waterGoalResponse.data.waterGoal;
+        } else {
+          updatedDashboardData.waterGoal = DEFAULT_WATER_GOAL_ML;
+        }
+
         setFoodData(foodsRes.data);
         setDashboardData(updatedDashboardData);
         setError(null);
@@ -328,14 +348,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   };
 
   const barData = date ? prepareWeeklyData() : [];
-  const waterGoal = TOTAL_WATER_UNITS * WATER_PER_UNIT;
-  const waterPercentage = Math.min(
-    (dashboardData.waterIntake / waterGoal) * 100,
-    100
-  );
 
   const getWaterMessage = () => {
-    if (filledWaterUnits === TOTAL_WATER_UNITS) {
+    const waterGoalUnits = Math.ceil(
+      (dashboardData.waterGoal || DEFAULT_WATER_GOAL_ML) /
+        DEFAULT_UNITS_PER_BOTTLE
+    );
+    if (filledWaterUnits === waterGoalUnits) {
       return "¡Meta alcanzada! Eres un maestro del agua 💧";
     } else {
       return "¡Sigue así, cada gota cuenta!";
@@ -346,7 +365,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     calorieIntake:
       "Muestra la ingesta calórica diaria y los macronutrientes (carbohidratos, proteínas y grasas) consumidos en relación con tus objetivos personalizados.",
     waterIntake:
-      "Rastrea tu consumo diario de agua. La meta es consumir 8 vasos de agua de 250 ml cada uno (2000 ml en total) para mantenerte bien hidratado.",
+      "Rastrea tu consumo diario de agua. La meta es consumir agua suficiente para mantenerte bien hidratado durante todo el día.",
     weeklyCalories:
       "Visualiza tu patrón de consumo calórico a lo largo de la semana actual, comparándolo con tu objetivo diario establecido.",
     macronutrients:
@@ -631,7 +650,22 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     isDarkMode ? "text-gray-400" : "text-gray-600"
                   }`}
                 >
-                  {waterPercentage.toFixed(0)}% de tu meta
+                  Meta:{" "}
+                  <span className="font-medium">
+                    {dashboardData.waterGoal
+                      ? `${dashboardData.waterGoal} ml`
+                      : "No establecida"}
+                  </span>
+                  {dashboardData.waterGoal
+                    ? ` (${Math.min(
+                        Math.round(
+                          (dashboardData.waterIntake /
+                            dashboardData.waterGoal) *
+                            100
+                        ),
+                        100
+                      )}% completado)`
+                    : ""}
                 </p>
               </div>
 
@@ -643,7 +677,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                       isDarkMode ? "text-white" : "text-gray-900"
                     }`}
                   >
-                    {Math.round(dashboardData.waterIntake)} ml / {waterGoal} ml
+                    {Math.round(dashboardData.waterIntake)} ml /{" "}
+                    {dashboardData.waterGoal || DEFAULT_WATER_GOAL_ML} ml
                   </p>
                 </div>
               </div>
@@ -655,7 +690,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               >
                 <div
                   className="bg-[#1E90FF] h-4 rounded-full transition-all duration-1000"
-                  style={{ width: `${waterPercentage}%` }}
+                  style={{
+                    width: `${Math.min(
+                      (dashboardData.waterIntake /
+                        (dashboardData.waterGoal || DEFAULT_WATER_GOAL_ML)) *
+                        100,
+                      100
+                    )}%`,
+                  }}
                 ></div>
               </div>
 
