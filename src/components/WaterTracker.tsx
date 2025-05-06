@@ -21,6 +21,8 @@ preloadImages.forEach((src) => {
 const TIMEZONE = "America/Bogota";
 const DEFAULT_WATER_GOAL_ML = 2000; // Meta predeterminada en ml
 const DEFAULT_UNITS_PER_BOTTLE = 250; // ml por botella
+const DEFAULT_BOTTLE_SIZE = 500; // Tamaño predeterminado de botella en ml
+const BOTTLE_SIZE_OPTIONS = [250, 350, 500, 750, 1000]; // Opciones de tamaño de botella en ml
 
 const WaterUnit: React.FC<{ stage: number }> = ({ stage }) => {
   const fillSpring = useSpring({
@@ -111,6 +113,14 @@ const WaterTracker: React.FC = () => {
   const [waterUnitStages, setWaterUnitStages] = useState<number[]>([]);
   const [isToday, setIsToday] = useState<boolean>(true);
 
+  // Nuevos estados para manejar el tamaño de la botella
+  const [bottleSize, setBottleSize] = useState<number>(DEFAULT_BOTTLE_SIZE);
+  const [showBottleSetting, setShowBottleSetting] = useState<boolean>(false);
+  const [selectedBottleSize, setSelectedBottleSize] =
+    useState<number>(DEFAULT_BOTTLE_SIZE);
+  const [customBottleSize, setCustomBottleSize] = useState<string>("");
+  const [useCustomSize, setUseCustomSize] = useState<boolean>(false);
+
   const totalWaterUnits =
     Math.ceil(waterGoal.goalMl / waterGoal.unitsPerBottle) || 1;
 
@@ -140,6 +150,17 @@ const WaterTracker: React.FC = () => {
       const aguasllenadas = response.data.aguasllenadas || 0;
       setFilledWaterUnits(aguasllenadas);
 
+      // También recuperamos el tamaño de botella si está disponible en la respuesta
+      if (response.data.tamano_botella && response.data.tamano_botella > 0) {
+        const bottleSizeFromData = response.data.tamano_botella;
+        setBottleSize(bottleSizeFromData);
+        setSelectedBottleSize(bottleSizeFromData);
+        setWaterGoal((prev) => ({
+          ...prev,
+          unitsPerBottle: bottleSizeFromData,
+        }));
+      }
+
       const goalResponse = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/water/get-goal`,
         {
@@ -148,10 +169,10 @@ const WaterTracker: React.FC = () => {
       );
 
       if (goalResponse.data && goalResponse.data.waterGoal) {
-        setWaterGoal({
+        setWaterGoal((prev) => ({
+          ...prev,
           goalMl: goalResponse.data.waterGoal,
-          unitsPerBottle: DEFAULT_UNITS_PER_BOTTLE,
-        });
+        }));
       }
 
       setError(null);
@@ -199,6 +220,103 @@ const WaterTracker: React.FC = () => {
     },
     [userEmail]
   );
+
+  const fetchBottleSize = useCallback(async () => {
+    if (!userEmail) return;
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/water/bottle-size`,
+        {
+          params: { email: userEmail },
+        }
+      );
+
+      if (response.data && response.data.tamano_botella) {
+        const size = response.data.tamano_botella;
+        setBottleSize(size);
+        setSelectedBottleSize(size);
+        setWaterGoal((prev) => ({
+          ...prev,
+          unitsPerBottle: size,
+        }));
+      }
+    } catch (err) {
+      console.log(err);
+      setError("Error al consultar el tamaño de botella.");
+    }
+  }, [userEmail]);
+
+  const saveBottleSize = useCallback(
+    async (size: number) => {
+      try {
+        await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/water/update`,
+          {
+            email: userEmail,
+            date: date,
+            aguasllenadas: filledWaterUnits,
+            tamano_botella: size,
+          }
+        );
+        return true;
+      } catch (err) {
+        console.log(err);
+        setError("Error al guardar el tamaño de botella.");
+        return false;
+      }
+    },
+    [userEmail, date, filledWaterUnits]
+  );
+
+  const handleSetBottleSize = useCallback(async () => {
+    let newSize: number;
+
+    if (useCustomSize) {
+      if (!customBottleSize) {
+        setError("Por favor ingresa un tamaño de botella personalizado.");
+        return;
+      }
+
+      const size = parseInt(customBottleSize);
+      if (isNaN(size) || size <= 0) {
+        setError("Por favor ingresa un valor numérico válido.");
+        return;
+      }
+
+      if (size < 100 || size > 2000) {
+        setError("El tamaño de botella debe estar entre 100 y 2000 ml.");
+        return;
+      }
+
+      newSize = size;
+    } else {
+      newSize = selectedBottleSize;
+    }
+
+    const saveSuccess = await saveBottleSize(newSize);
+
+    if (saveSuccess) {
+      setBottleSize(newSize);
+      setWaterGoal((prev) => ({
+        ...prev,
+        unitsPerBottle: newSize,
+      }));
+      setShowBottleSetting(false);
+      setError(null);
+    }
+  }, [useCustomSize, customBottleSize, selectedBottleSize, saveBottleSize]);
+
+  const handleCustomSizeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setCustomBottleSize(e.target.value);
+    },
+    []
+  );
+
+  const handleBottleSizeSelect = useCallback((size: number) => {
+    setSelectedBottleSize(size);
+    setUseCustomSize(false);
+  }, []);
 
   const handleAddWaterUnit = useCallback(async () => {
     if (filledWaterUnits < totalWaterUnits && isToday) {
@@ -321,6 +439,12 @@ const WaterTracker: React.FC = () => {
   }, [checkAuth]);
 
   useEffect(() => {
+    if (userEmail) {
+      fetchBottleSize();
+    }
+  }, [userEmail, fetchBottleSize]);
+
+  useEffect(() => {
     if (userEmail && date) fetchWaterData();
   }, [userEmail, date, fetchWaterData]);
 
@@ -427,17 +551,148 @@ const WaterTracker: React.FC = () => {
             </h2>
             <ButtonToolTip content={infoText.waterTrackerInfo} />
           </div>
-          <button
-            onClick={() => setShowGoalSetting(!showGoalSetting)}
-            className={`text-sm ${
-              isDarkMode
-                ? "text-[#ff9404] hover:text-[#e08503]"
-                : "text-orange-500 hover:text-orange-600"
-            } transition-colors duration-300`}
-          >
-            {showGoalSetting ? "Cancelar" : "Configurar Meta"}
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => {
+                setShowBottleSetting(!showBottleSetting);
+                setShowGoalSetting(false);
+              }}
+              className={`text-sm ${
+                isDarkMode
+                  ? "text-[#ff9404] hover:text-[#e08503]"
+                  : "text-orange-500 hover:text-orange-600"
+              } transition-colors duration-300`}
+            >
+              {showBottleSetting ? "Cancelar" : "Tamaño Botella"}
+            </button>
+            <button
+              onClick={() => {
+                setShowGoalSetting(!showGoalSetting);
+                setShowBottleSetting(false);
+              }}
+              className={`text-sm ${
+                isDarkMode
+                  ? "text-[#ff9404] hover:text-[#e08503]"
+                  : "text-orange-500 hover:text-orange-600"
+              } transition-colors duration-300`}
+            >
+              {showGoalSetting ? "Cancelar" : "Configurar Meta"}
+            </button>
+          </div>
         </div>
+
+        {showBottleSetting && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className={`rounded-lg p-4 mb-6 ${
+              isDarkMode ? "bg-[#4B5563]/50" : "bg-[#F8F9FA]"
+            }`}
+          >
+            <h3
+              className={`text-lg font-semibold mb-3 ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
+              Configurar Tamaño de Botella
+            </h3>
+            <p
+              className={`text-sm mb-3 ${
+                isDarkMode ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
+              Tamaño actual:{" "}
+              <span className="font-medium">{bottleSize} ml</span>
+            </p>
+
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {BOTTLE_SIZE_OPTIONS.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => handleBottleSizeSelect(size)}
+                    className={`px-3 py-2 rounded-lg border transition-all duration-300 ${
+                      !useCustomSize && selectedBottleSize === size
+                        ? isDarkMode
+                          ? "bg-[#ff9404] text-white border-[#e08503]"
+                          : "bg-orange-500 text-white border-orange-600"
+                        : isDarkMode
+                        ? "bg-[#2D3242] text-white border-[#4B5563] hover:bg-[#3B4252]"
+                        : "bg-white text-gray-900 border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    {size} ml
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="useCustomSize"
+                  checked={useCustomSize}
+                  onChange={() => setUseCustomSize(!useCustomSize)}
+                  className="h-4 w-4 rounded border-gray-300 text-[#ff9404] focus:ring-[#ff9404]"
+                />
+                <label
+                  htmlFor="useCustomSize"
+                  className={`text-sm ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  Usar tamaño personalizado
+                </label>
+              </div>
+
+              {useCustomSize && (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="number"
+                    min="100"
+                    max="2000"
+                    placeholder="Tamaño en ml"
+                    value={customBottleSize}
+                    onChange={handleCustomSizeChange}
+                    className={`px-3 py-2 rounded-lg border ${
+                      isDarkMode
+                        ? "bg-[#2D3242] text-white border-[#4B5563] focus:border-[#ff9404]"
+                        : "bg-white text-gray-900 border-gray-300 focus:border-[#ff9404]"
+                    } focus:outline-none`}
+                  />
+                  <span
+                    className={`text-sm ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    ml
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={handleSetBottleSize}
+                  className={`px-4 py-2 rounded-lg shadow ${
+                    isDarkMode
+                      ? "bg-gradient-to-br from-[#ff9404] to-[#e08503] text-white"
+                      : "bg-gradient-to-br from-gray-200 to-gray-300 text-gray-900"
+                  } hover:shadow-lg transition-all duration-300`}
+                >
+                  Guardar
+                </button>
+              </div>
+
+              <p
+                className={`text-xs mt-1 ${
+                  isDarkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                * El tamaño de botella debe estar entre 100 y 2000 ml.
+              </p>
+            </div>
+          </motion.div>
+        )}
 
         {showGoalSetting && (
           <motion.div

@@ -91,6 +91,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [filledWaterUnits, setFilledWaterUnits] = useState<number>(0);
+  const [bottleSize, setBottleSize] = useState<number>(
+    DEFAULT_UNITS_PER_BOTTLE
+  );
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -108,6 +111,33 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     };
     checkAuth();
   }, [navigate]);
+
+  // Recuperar el tamaño personalizado de la botella
+  useEffect(() => {
+    const fetchBottleSize = async () => {
+      if (!userEmail) return;
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/water/bottle-size`,
+          {
+            params: { email: userEmail },
+          }
+        );
+
+        if (response.data && response.data.tamano_botella) {
+          const size = response.data.tamano_botella;
+          setBottleSize(size);
+        }
+      } catch (err) {
+        console.log(err);
+        setError("Error al consultar el tamaño de botella.");
+      }
+    };
+
+    if (userEmail) {
+      fetchBottleSize();
+    }
+  }, [userEmail]);
 
   useEffect(() => {
     const calculateDateRange = () => {
@@ -172,9 +202,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         // Update water data with the actual goal from the server
         if (waterRes.data) {
           setFilledWaterUnits(waterRes.data.aguasllenadas || 0);
-          const consumedWater =
-            (waterRes.data.aguasllenadas || 0) * DEFAULT_UNITS_PER_BOTTLE;
+          // Usar el tamaño personalizado de botella para calcular el agua consumida
+          const consumedWater = (waterRes.data.aguasllenadas || 0) * bottleSize;
           updatedDashboardData.waterIntake = consumedWater;
+
+          // También actualizar el tamaño de botella si viene en la respuesta
+          if (
+            waterRes.data.tamano_botella &&
+            waterRes.data.tamano_botella > 0
+          ) {
+            setBottleSize(waterRes.data.tamano_botella);
+          }
         }
 
         // Set custom water goal if available
@@ -196,7 +234,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     };
 
     fetchDashboardData();
-  }, [userEmail, startDate, endDate, date]);
+  }, [userEmail, startDate, endDate, date, bottleSize]);
 
   useEffect(() => {
     const calculateNutrition = () => {
@@ -351,10 +389,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   const getWaterMessage = () => {
     const waterGoalUnits = Math.ceil(
-      (dashboardData.waterGoal || DEFAULT_WATER_GOAL_ML) /
-        DEFAULT_UNITS_PER_BOTTLE
+      (dashboardData.waterGoal || DEFAULT_WATER_GOAL_ML) / bottleSize
     );
-    if (filledWaterUnits === waterGoalUnits) {
+    if (filledWaterUnits >= waterGoalUnits) {
       return "¡Meta alcanzada! Eres un maestro del agua 💧";
     } else {
       return "¡Sigue así, cada gota cuenta!";
