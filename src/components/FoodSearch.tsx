@@ -426,7 +426,7 @@ const FoodSearch: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.8 }}
             >
-              <Link to="/comidas">
+              <Link to="/foodDashboard">
                 <button
                   className={`flex items-center py-2 px-3 sm:px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] ${
                     isDarkMode ? "text-white" : "text-gray-900"
