@@ -186,22 +186,6 @@ const RegisterPage = () => {
             htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
           },
         });
-
-        await Swal.fire({
-          title: "Verifica tu correo electrónico",
-          text: "Por favor revisa tu bandeja de entrada o la carpeta de spam y haz clic en el enlace de verificación que te enviamos a tu correo electrónico.",
-          icon: "info",
-          confirmButtonText: "Entendido",
-          confirmButtonColor: "#ff9400",
-          background: isDarkMode ? "#282c3c" : "#ffffff",
-          customClass: {
-            popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
-            icon: "custom-swal-icon",
-            title: isDarkMode ? "text-white" : "text-gray-900",
-            htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
-          },
-        });
-
         setContador(60);
         setPuedeReenviar(false);
         resetForm();
@@ -223,7 +207,7 @@ const RegisterPage = () => {
       });
       if (error) throw error;
     } catch (err) {
-      console.error("Error with Google signup:", err);
+      console.error("Error con el registro de Google:", err);
       await Swal.fire({
         title: "¡Error!",
         text: "Ocurrió un error al intentar registrarte con Google.",
@@ -438,7 +422,7 @@ const RegisterPage = () => {
                         : { opacity: 0, y: -10 }
                     }
                     transition={{ duration: 0.3 }}
-                    className={`absolute top-full left-0 mt-2 text-sm w-full z-10 ${
+                    className={`absolute top-full left-0 mt-2 text- w-full z-10 ${
                       isPasswordFocused
                         ? "opacity-100 translate-y-0"
                         : "opacity-0 -translate-y-2 pointer-events-none"

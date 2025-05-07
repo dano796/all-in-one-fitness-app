@@ -133,7 +133,7 @@ const LoginPage = () => {
       });
       if (error) throw error;
     } catch (err) {
-      console.error("Error with Google login:", err);
+      console.error("Error con el login de Google:", err);
       await Swal.fire({
         title: "¡Error!",
         text: "Ocurrió un error al intentar iniciar sesión con Google.",
@@ -276,7 +276,9 @@ const LoginPage = () => {
                     onClick={togglePasswordVisibility}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4, delay: 0.5 }}
+                    transition={{
+
+ duration: 0.4, delay: 0.5 }}
                     whileHover={{ scale: 1.1 }}
                     className="absolute inset-y-0 right-0 flex items-center pr-3 transition-colors duration-300 text-gray-400 hover:text-[#ff9404]"
                   >
