@@ -1,10 +1,12 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, RepeatType } from "framer-motion";
 import { useTheme } from "../pages/ThemeContext";
 
 const word = "ALL    IN    ONE".split("");
 
 import { Variants } from "framer-motion";
+
+const repeatType = "loop" as const; // Explicitly type as a valid literal
 
 const letterVariants: Variants = {
   hidden: { opacity: 0, x: -20 },
@@ -15,7 +17,7 @@ const letterVariants: Variants = {
       delay: i * 0.1,
       duration: 0.5,
       repeat: Infinity,
-      repeatType: "loop" as "loop", // Explicitly type as a valid literal
+      repeatType: "loop" as RepeatType, // Explicitly type as a valid literal
       repeatDelay: 1,
     },
   }),
