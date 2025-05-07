@@ -1,6 +1,8 @@
 // src/layouts/DashboardLayout.tsx
 import React from "react";
 import Sidebar from "../components/Sidebar";
+import NotificationCenter from "../components/NotificationCenter";
+import ImportantAlert from "../components/ImportantAlert";
 import { useTheme } from "../pages/ThemeContext";
 
 interface DashboardLayoutProps {
@@ -17,7 +19,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       } transition-colors duration-300`}
     >
       <Sidebar />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto relative">
+        <ImportantAlert />
+        <div className="absolute top-4 right-4 z-50">
+          <NotificationCenter />
+        </div>
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">{children}</div>
       </main>
     </div>

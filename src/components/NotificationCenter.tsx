@@ -10,6 +10,9 @@ const NotificationCenter: React.FC = () => {
   const notificationRef = useRef<HTMLDivElement>(null);
   const { isDarkMode } = useTheme();
 
+  // Filtrar las notificaciones persistentes del centro de notificaciones
+  const regularNotifications = notifications.filter(n => !n.isPersistent);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -51,7 +54,7 @@ const NotificationCenter: React.FC = () => {
         <div className={`absolute right-0 mt-2 w-80 ${isDarkMode ? 'bg-[#282c3c] border-[#3B4252]' : 'bg-[#F8F9FA] border-gray-300'} border rounded-md shadow-lg z-50`}>
           <div className={`flex justify-between items-center p-4 border-b ${isDarkMode ? 'border-[#3B4252]' : 'border-gray-300'}`}>
             <h3 className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Notificaciones</h3>
-            {notifications.length > 0 && (
+            {regularNotifications.length > 0 && (
               <button 
                 onClick={clearAll}
                 className="text-xs text-[#ff9404] hover:text-[#e08503]"
@@ -62,8 +65,8 @@ const NotificationCenter: React.FC = () => {
           </div>
           
           <div className="max-h-96 overflow-y-auto p-4">
-            {notifications.length > 0 ? (
-              notifications.map((notification) => (
+            {regularNotifications.length > 0 ? (
+              regularNotifications.map((notification) => (
                 <NotificationItem 
                   key={notification.id} 
                   notification={notification} 

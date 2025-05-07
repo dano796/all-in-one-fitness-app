@@ -15,6 +15,7 @@ import { ClipLoader } from "react-spinners";
 import { Recipe } from "../types";
 import { useTheme } from "../pages/ThemeContext";
 import ChatBot from "../components/ChatBot";
+import NotificationCenter from "./NotificationCenter";
 import { User } from "@supabase/supabase-js";
 
 const SearchRecipes: React.FC = () => {
@@ -164,16 +165,21 @@ const SearchRecipes: React.FC = () => {
   };
 
   return (
+    
     <div
       className={`relative min-h-screen overflow-hidden ${
         isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
       }`}
     >
+      <div className="absolute top-4 right-0 z-50">
+          <NotificationCenter />
+      </div>
       <div className="absolute inset-0 z-0">
         <GalaxyBackground />
       </div>
 
       <div className="relative z-10 p-4 mt-8 lg:mt-0 sm:p-6 space-y-4 sm:space-y-6">
+      
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <motion.div

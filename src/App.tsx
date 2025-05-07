@@ -13,6 +13,7 @@ import { ThemeProvider } from "./pages/ThemeContext";
 import ChatBot from "./components/ChatBot";
 import { useNotificationStore } from "./store/notificationStore";
 import ToastContainer from "./components/ToastContainer";
+import axios from "axios";
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -150,6 +151,37 @@ function App() {
   useEffect(() => {
     let mounted = true;
 
+    const checkCalorieGoal = async (email: string) => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`,
+          { params: { email } }
+        );
+        const hasCalorieGoal = response.data.calorieGoal !== null;
+        
+        if (!hasCalorieGoal) {
+          addNotification(
+            "⚠️ Límite de Calorías no Establecido",
+            "Es importante establecer tu límite diario de calorías para un mejor seguimiento de tu dieta. Haz clic aquí para configurarlo ahora.",
+            "warning",
+            true,
+            "calorie-goal",
+            true,
+            async () => {
+
+              const { data } = await axios.get(
+                `${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`,
+                { params: { email } }
+              );
+              return data.calorieGoal !== null;
+            }
+          );
+        }
+      } catch (error) {
+        console.error("Error checking calorie goal:", error);
+      }
+    };
+
     const fetchUser = async () => {
       const {
         data: { user },
@@ -160,6 +192,10 @@ function App() {
         setUser(user);
         setSessionId(user?.id || null);
         setIsLoading(false);
+        
+        if (user?.email) {
+          checkCalorieGoal(user.email);
+        }
       }
     };
 
@@ -168,7 +204,7 @@ function App() {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const currentUser = session?.user;
-        setUser(currentUser ?? null);
+        setUser(currentUser || null);
         setSessionId(currentUser?.id || null);
         setIsLoading(false);
         
@@ -179,6 +215,11 @@ function App() {
             "success"
           );
           
+          if (currentUser?.email) {
+            // Verificar el límite de calorías cada vez que el usuario inicia sesión
+            checkCalorieGoal(currentUser.email);
+          }
+
           setTimeout(() => {
             addNotification(
               "💧 Recordatorio",

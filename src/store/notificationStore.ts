@@ -12,6 +12,8 @@ export interface Notification {
   createdAt: Date;
   showAsToast?: boolean;
   category?: string;
+  isPersistent?: boolean;
+  dismissCondition?: () => Promise<boolean>;
 }
 
 interface NotificationState {
@@ -25,7 +27,9 @@ interface NotificationState {
     message: string,
     type?: NotificationType,
     showAsToast?: boolean,
-    category?: string
+    category?: string,
+    isPersistent?: boolean,
+    dismissCondition?: () => Promise<boolean>
   ) => void;
   
   markAsRead: (id: string) => void;
@@ -34,6 +38,7 @@ interface NotificationState {
   removeToast: (id: string) => void;
   clearAll: () => void;
   setSessionId: (sessionId: string | null) => void;
+  checkAndDismissNotification: (id: string) => Promise<void>;
 }
 
 export const useNotificationStore = create<NotificationState>((set, get) => ({
@@ -46,20 +51,26 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     if (get().sessionId !== sessionId) {
       set({ sessionId });
       if (!sessionId) {
-        // Limpiar notificaciones al cerrar sesión
         get().clearAll();
       }
     }
   },
 
-  addNotification: (title, message, type = "info", showAsToast = true, category = "") => {
+  addNotification: (
+    title, 
+    message, 
+    type = "info", 
+    showAsToast = true, 
+    category = "",
+    isPersistent = false,
+    dismissCondition
+  ) => {
     console.log(`[DEBUG] Añadiendo notificación: ${title} - ${message} - ${type} - showAsToast: ${showAsToast} - category: ${category}`);
     
     const existingNotification = get().notifications.find(
       n => n.title === title && n.message === message && n.type === type
     );
 
-    // Si ya existe una notificación idéntica, no la agregues
     if (existingNotification) {
       return;
     }
@@ -73,6 +84,8 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       createdAt: new Date(),
       showAsToast,
       category,
+      isPersistent,
+      dismissCondition
     };
 
     set((state) => ({
@@ -80,7 +93,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       unreadCount: state.unreadCount + 1,
     }));
 
-    if (showAsToast) {
+    if (showAsToast && !isPersistent) {
       set((state) => ({
         toastNotifications: [...state.toastNotifications, notification],
       }));
@@ -89,6 +102,16 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         setTimeout(() => {
           get().removeToast(notification.id);
         }, 6000);
+      }
+    }
+  },
+
+  checkAndDismissNotification: async (id: string) => {
+    const notification = get().notifications.find(n => n.id === id);
+    if (notification?.dismissCondition) {
+      const canDismiss = await notification.dismissCondition();
+      if (canDismiss) {
+        get().removeNotification(id);
       }
     }
   },
