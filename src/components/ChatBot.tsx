@@ -579,13 +579,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
           exit={{ opacity: 0, y: 50 }}
           transition={{ duration: 0.3 }}
           className={`relative w-[90vw] max-w-[400px] sm:w-[400px] h-[500px] sm:h-[550px] rounded-xl shadow-lg overflow-hidden ${
-            isDarkMode ? 'bg-[#282c3c]' : 'bg-[#F8F9FA]'
-          } transition-colors duration-300 flex flex-col border border-[#ff9404]`}
+            isDarkMode ? 'bg-[#282c3c] border border-gray-500' : 'bg-[#F8F9FA] border border-gray-300'
+          } transition-colors duration-300 flex flex-col `}
         >
           {/* Encabezado del chat */}
           <div
             className={`flex justify-between items-center p-4 sm:p-5 border-b ${
-              isDarkMode ? 'border-[#ff9404] bg-[#3B4252]' : 'border-gray-200 bg-white'
+              isDarkMode ? 'border-gray-500 bg-[#3B4252]' : 'border-gray-300 bg-white'
             } flex-shrink-0`}
           >
             <div className="flex items-center space-x-3">
@@ -634,10 +634,12 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
               initial={{ x: '-100%' }}
               animate={{ x: isSidebarOpen ? 0 : '-100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className={`absolute top-0 left-0 w-3/4 h-full bg-[#2D2D2D] text-white p-4 overflow-y-auto border-r border-[#ff9404] z-20`}
+              className={`absolute top-0 left-0 w-3/4 h-full text-white p-4 overflow-y-auto ${
+                isDarkMode ? "bg-[#282c3c] border-gray-500" : "bg-[#F8F9FA] border-gray-300"
+              } z-20`}
             >
               <div className="mb-4">
-                <h4 className="text-sm font-semibold text-gray-300">Conversaciones</h4>
+                <h4 className={`font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-900"}`}>Conversaciones</h4>
               </div>
               {conversations.length === 0 ? (
                 <p className="text-sm text-gray-400">No tienes conversaciones.</p>
@@ -648,8 +650,8 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
                     className={`p-2 mb-2 rounded-lg cursor-pointer group relative ${
                       currentConversationId === conv.id_conversacion
                         ? 'bg-[#ff9404] text-white'
-                        : 'bg-[#3B3B3B] hover:bg-[#4B4B4B]'
-                    } transition-colors duration-300`}
+                        : 'bg-[#4B5563] hover:bg-[#3f4853]'
+                    } transition-colors duration-200`}
                   >
                     {editingConversationId === conv.id_conversacion ? (
                       <div className="flex items-center space-x-2 w-full">
@@ -672,12 +674,12 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center justify-between w-full pl-1">
                         <div onClick={() => loadConversationMessages(conv.id_conversacion)} className="flex-1">
                           <p className="text-sm font-medium truncate">
                             {animatedTitles[conv.id_conversacion] || conv.titulo || 'Nueva conversación'}
                           </p>
-                          <p className="text-xs text-gray-400">{new Date(conv.fecha_creacion).toLocaleDateString()}</p>
+                          <p className="text-xs text-white">{new Date(conv.fecha_creacion).toLocaleDateString()}</p>
                         </div>
                         <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0">
                           <button
@@ -797,7 +799,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
               {user && !isIdLoading && (
                 <div
                   className={`flex items-center p-4 sm:p-5 border-t ${
-                    isDarkMode ? 'border-[#ff9404] bg-[#3B4252]' : 'border-gray-200 bg-white'
+                    isDarkMode ? 'border-gray-500 bg-[#3B4252]' : 'border-gray-300 bg-white'
                   } flex-shrink-0`}
                 >
                   <input
