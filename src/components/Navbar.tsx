@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabaseClient";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { useTheme } from "../pages/ThemeContext";
 import NotificationCenter from "./NotificationCenter";
+import { motion } from "framer-motion";
 
 type User = SupabaseUser;
 
@@ -21,58 +22,83 @@ const DesktopMenu: React.FC<{
       <div className="flex-1 flex justify-center">
         <ul className="flex space-x-6">
           <li>
-            <Link
-              to="/"
-              className={`hover:text-[#FF9500] font-semibold transition ${
-                isDarkMode ? "text-white" : "text-gray-900"
-              }`}
+            <motion.div
+              whileHover={{ scale: 1.075 }}
+              transition={{ duration: 0.2 }}
             >
-              Inicio
-            </Link>
+              <Link
+                to="/"
+                className={`hover:text-[#FF9500] font-semibold transition ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Inicio
+              </Link>
+            </motion.div>
           </li>
           <li>
-            <Link
-              to="/nosotros"
-              className={`hover:text-[#FF9500] font-semibold transition ${
-                isDarkMode ? "text-white" : "text-gray-900"
-              }`}
+            <motion.div
+              whileHover={{ scale: 1.075 }}
+              transition={{ duration: 0.2 }}
             >
-              Nosotros
-            </Link>
+              <Link
+                to="/nosotros"
+                className={`hover:text-[#FF9500] font-semibold transition ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Nosotros
+              </Link>
+            </motion.div>
           </li>
           <li>
-            <Link
-              to="/modulos"
-              className={`hover:text-[#FF9500] font-semibold transition ${
-                isDarkMode ? "text-white" : "text-gray-900"
-              }`}
+            <motion.div
+              whileHover={{ scale: 1.075 }}
+              transition={{ duration: 0.2 }}
             >
-              Módulos
-            </Link>
+              <Link
+                to="/modulos"
+                className={`hover:text-[#FF9500] font-semibold transition ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Módulos
+              </Link>
+            </motion.div>
           </li>
           <li>
-            <Link
-              to="/contacto"
-              className={`hover:text-[#FF9500] font-semibold transition ${
-                isDarkMode ? "text-white" : "text-gray-900"
-              }`}
+            <motion.div
+              whileHover={{ scale: 1.075 }}
+              transition={{ duration: 0.2 }}
             >
-              Contacto
-            </Link>
+              <Link
+                to="/contacto"
+                className={`hover:text-[#FF9500] font-semibold transition ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Contacto
+              </Link>
+            </motion.div>
           </li>
         </ul>
       </div>
       <div className="flex items-center space-x-4">
         {user && (
           <>
-            <Link
-              to="/dashboard"
-              className={`hover:text-[#FF9500] transition font-semibold ${
-                isDarkMode ? "text-white" : "text-gray-900"
-              }`}
+            <motion.div
+              whileHover={{ scale: 1.075 }}
+              transition={{ duration: 0.2 }}
             >
-              Dashboard
-            </Link>
+              <Link
+                to="/dashboard"
+                className={`hover:text-[#FF9500] transition font-semibold ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Dashboard
+              </Link>
+            </motion.div>
             <NotificationCenter />
           </>
         )}
@@ -92,8 +118,8 @@ const DesktopMenu: React.FC<{
               <div
                 className={`absolute right-0 mt-2 w-56 ${
                   isDarkMode
-                    ? "bg-[#2C2C2E] border-gray-600"
-                    : "bg-white border-gray-300"
+                    ? "bg-[#282c3c] border-[#3B4252]"
+                    : "bg-[#F8F9FA] border-gray-300"
                 } border rounded-lg shadow-lg p-4 z-10`}
               >
                 <div
@@ -177,53 +203,66 @@ const MobileMenu: React.FC<{
         isDarkMode ? "bg-[#282c3c] border-gray-700" : "bg-white border-gray-300"
       } font-medium border-t px-2 py-2`}
     >
-      <Link
-        to="/"
-        className={`block py-2 hover:text-[#FF9500] transition ${
-          isDarkMode ? "text-white" : "text-gray-900"
-        }`}
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        Inicio
-      </Link>
-      <Link
-        to="/nosotros"
-        className={`block py-2 hover:text-[#FF9500] transition ${
-          isDarkMode ? "text-white" : "text-gray-900"
-        }`}
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        Nosotros
-      </Link>
-      <Link
-        to="/modulos"
-        className={`block py-2 hover:text-[#FF9500] transition ${
-          isDarkMode ? "text-white" : "text-gray-900"
-        }`}
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        Módulos
-      </Link>
-      <Link
-        to="/contacto"
-        className={`block py-2 hover:text-[#FF9500] transition ${
-          isDarkMode ? "text-white" : "text-gray-900"
-        }`}
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        Contacto
-      </Link>
+      <motion.div whileHover={{ scale: 1.075 }} transition={{ duration: 0.2 }}>
+        <Link
+          to="/"
+          className={`block py-2 hover:text-[#FF9500] transition ${
+            isDarkMode ? "text-white" : "text-gray-900"
+          }`}
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          Inicio
+        </Link>
+      </motion.div>
+      <motion.div whileHover={{ scale: 1.075 }} transition={{ duration: 0.2 }}>
+        <Link
+          to="/nosotros"
+          className={`block py-2 hover:text-[#FF9500] transition ${
+            isDarkMode ? "text-white" : "text-gray-900"
+          }`}
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          Nosotros
+        </Link>
+      </motion.div>
+      <motion.div whileHover={{ scale: 1.075 }} transition={{ duration: 0.2 }}>
+        <Link
+          to="/modulos"
+          className={`block py-2 hover:text-[#FF9500] transition ${
+            isDarkMode ? "text-white" : "text-gray-900"
+          }`}
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          Módulos
+        </Link>
+      </motion.div>
+      <motion.div whileHover={{ scale: 1.075 }} transition={{ duration: 0.2 }}>
+        <Link
+          to="/contacto"
+          className={`block py-2 hover:text-[#FF9500] transition ${
+            isDarkMode ? "text-white" : "text-gray-900"
+          }`}
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          Contacto
+        </Link>
+      </motion.div>
       {user && (
         <>
-          <Link
-            to="/dashboard"
-            className={`block py-2 ${
-              isDarkMode ? "text-gray-300" : "text-gray-600"
-            } hover:text-[#FF9500] transition`}
-            onClick={() => setMobileMenuOpen(false)}
+          <motion.div
+            whileHover={{ scale: 1.075 }}
+            transition={{ duration: 0.2 }}
           >
-            Dashboard
-          </Link>
+            <Link
+              to="/dashboard"
+              className={`block py-2 ${
+                isDarkMode ? "text-gray-300" : "text-gray-600"
+              } hover:text-[#FF9500] transition`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Dashboard
+            </Link>
+          </motion.div>
           <div className="py-2">
             <NotificationCenter />
           </div>

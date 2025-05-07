@@ -48,7 +48,7 @@ const NotificationCenter: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className={`absolute right-0 mt-2 w-80 ${isDarkMode ? 'bg-[#282c3c] border-[#3B4252]' : 'bg-white border-gray-300'} border rounded-md shadow-lg z-50`}>
+        <div className={`absolute right-0 mt-2 w-80 ${isDarkMode ? 'bg-[#282c3c] border-[#3B4252]' : 'bg-[#F8F9FA] border-gray-300'} border rounded-md shadow-lg z-50`}>
           <div className={`flex justify-between items-center p-4 border-b ${isDarkMode ? 'border-[#3B4252]' : 'border-gray-300'}`}>
             <h3 className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Notificaciones</h3>
             {notifications.length > 0 && (

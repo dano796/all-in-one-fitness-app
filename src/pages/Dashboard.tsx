@@ -374,13 +374,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       }
     });
 
-    console.log("Datos del gráfico:", {
-      todayStr,
-      selectedDate: date,
-      weekDays,
-      dailyBreakdown: dashboardData.calorieIntake.dailyBreakdown,
-    });
-
     return weekDays;
   };
 

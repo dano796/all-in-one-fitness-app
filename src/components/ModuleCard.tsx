@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../pages/ThemeContext";
+import { motion } from "framer-motion";
 
 interface ModuleCardProps {
   icon: React.ReactNode;
@@ -38,6 +39,18 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
   className = "",
 }) => {
   const { isDarkMode } = useTheme();
+
+  // Button hover animation
+  const buttonVariants = {
+    hover: {
+      scale: 1.05,
+      transition: {
+        duration: 0.2,
+        ease: "easeOut",
+      },
+    },
+  };
+
   return (
     <div
       className={`rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full ${
@@ -58,9 +71,7 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
       >
         {title}
       </h3>
-      <p
-        className={`mb-4 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
-      >
+      <p className={`mb-4 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
         {description}
       </p>
       <ul className="space-y-2 flex-grow mb-6">
@@ -68,16 +79,18 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
           <FeatureItem key={index} feature={feature} index={index} />
         ))}
       </ul>
-      <Link
-        to={linkTo}
-        className={`mt-auto block text-center font-semibold py-2 px-4 rounded-lg transition ${
-          isDarkMode
-            ? "bg-[#FFFFFF] text-[#1C1C1E] hover:bg-[#FF9500]"
-            : "bg-gray-900 text-white hover:bg-[#FF9500]"
-        }`}
-      >
-        Comenzar
-      </Link>
+      <motion.div variants={buttonVariants} whileHover="hover">
+        <Link
+          to={linkTo}
+          className={`mt-auto block text-center font-semibold py-2 px-4 rounded-lg transition text-[#2a2e3f] ${
+            isDarkMode
+              ? "bg-[#FFFFFF] hover:bg-[#FF9500]"
+              : "bg-gray-900 hover:bg-[#FF9500]"
+          }`}
+        >
+          Comenzar
+        </Link>
+      </motion.div>
     </div>
   );
 };

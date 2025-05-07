@@ -44,6 +44,22 @@ const rightCarouselVariants = {
   },
 };
 
+const imageVariants = {
+  initial: { scale: 0.8, opacity: 0 },
+  animate: {
+    scale: 1,
+    opacity: 1,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+    },
+  },
+  whileHover: {
+    scale: 1.05,
+    transition: { duration: 0.3 },
+  },
+};
+
 const Carousel: React.FC<{
   items: string[];
   variants: typeof leftCarouselVariants;
@@ -60,7 +76,10 @@ const Carousel: React.FC<{
         src={image}
         alt={`${direction} carousel image ${index + 1}`}
         className="w-[80%] aspect-[3/4] object-cover rounded-lg mx-auto"
-        transition={{ duration: direction === "left" ? 1.5 : 1 }}
+        variants={imageVariants}
+        initial="initial"
+        animate="animate"
+        whileHover="whileHover"
       />
     ))}
   </motion.div>
@@ -96,14 +115,20 @@ const HeroSection: React.FC = () => {
   }, [fetchUser]);
 
   return (
-    <section
+    <motion.section
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
       className={`container mx-auto px-8 mb-12 lg:px-16 lg:mb-0 text-left ${
         isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
       }`}
     >
       <div className="lg:grid lg:grid-cols-2 gap-12 items-start">
         <div className="flex flex-col justify-center h-full">
-          <h1
+          <motion.h1
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className={`text-6xl xl:text-7xl font-bold mt-10 lg:mt-10 xl:mt-12 mb-8 ${
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
@@ -111,23 +136,37 @@ const HeroSection: React.FC = () => {
             All In One
             <br />
             Fitness App
-          </h1>
-          <p
+          </motion.h1>
+          <motion.p
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
             className={`text-xl mb-8 ${
               isDarkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
             Tu compañero integral para un estilo de vida saludable. Monitorea
             calorías, entrenamientos, hidratación y más, todo en un solo lugar.
-          </p>
-          <Link
-            to={user ? "/dashboard" : "/registro"}
-            className="text-lg px-8 py-3 w-fit rounded-lg bg-[#ff9404] text-white font-semibold hover:text-[#1C1C1E] transition"
+          </motion.p>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
           >
-            {user ? "Ir al Dashboard" : "Comienza Ahora"}
-          </Link>
+            <Link
+              to={user ? "/dashboard" : "/registro"}
+              className="text-lg px-8 py-3 w-fit rounded-lg bg-[#ff9404] text-white font-semibold hover:text-[#2a2e3f] transition ease-linear"
+            >
+              {user ? "Ir al Dashboard" : "Comienza Ahora"}
+            </Link>
+          </motion.div>
         </div>
-        <div className="hidden lg:block rounded-xl aspect-square overflow-hidden relative">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="hidden lg:block rounded-xl aspect-square overflow-hidden relative"
+        >
           <div className="w-full h-full grid grid-cols-2 gap-4 p-6">
             <Carousel
               items={carouselItemsLeft}
@@ -140,9 +179,9 @@ const HeroSection: React.FC = () => {
               direction="right"
             />
           </div>
-        </div>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 
