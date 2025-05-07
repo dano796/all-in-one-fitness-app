@@ -18,6 +18,7 @@ interface NotificationState {
   notifications: Notification[];
   toastNotifications: Notification[];
   unreadCount: number;
+  sessionId: string | null;
   
   addNotification: (
     title: string,
@@ -32,16 +33,37 @@ interface NotificationState {
   removeNotification: (id: string) => void;
   removeToast: (id: string) => void;
   clearAll: () => void;
+  setSessionId: (sessionId: string | null) => void;
 }
 
 export const useNotificationStore = create<NotificationState>((set, get) => ({
   notifications: [],
   toastNotifications: [],
   unreadCount: 0,
+  sessionId: null,
+
+  setSessionId: (sessionId: string | null) => {
+    if (get().sessionId !== sessionId) {
+      set({ sessionId });
+      if (!sessionId) {
+        // Limpiar notificaciones al cerrar sesión
+        get().clearAll();
+      }
+    }
+  },
 
   addNotification: (title, message, type = "info", showAsToast = true, category = "") => {
     console.log(`[DEBUG] Añadiendo notificación: ${title} - ${message} - ${type} - showAsToast: ${showAsToast} - category: ${category}`);
     
+    const existingNotification = get().notifications.find(
+      n => n.title === title && n.message === message && n.type === type
+    );
+
+    // Si ya existe una notificación idéntica, no la agregues
+    if (existingNotification) {
+      return;
+    }
+
     const notification: Notification = {
       id: uuidv4(),
       title,

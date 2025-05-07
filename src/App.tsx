@@ -145,7 +145,7 @@ const protectedRoutes = [
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { addNotification } = useNotificationStore();
+  const { addNotification, setSessionId } = useNotificationStore();
 
   useEffect(() => {
     let mounted = true;
@@ -158,23 +158,18 @@ function App() {
 
       if (mounted) {
         setUser(user);
+        setSessionId(user?.id || null);
         setIsLoading(false);
-        
-        if (user) {
-          addNotification(
-            "🎉 ¡Bienvenido de nuevo!",
-            "💪 Te damos la bienvenida a tu app de fitness todo en uno.",
-            "success"
-          );
-        }
       }
     };
 
     fetchUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
+      async (event, session) => {
+        const currentUser = session?.user;
+        setUser(currentUser ?? null);
+        setSessionId(currentUser?.id || null);
         setIsLoading(false);
         
         if (event === 'SIGNED_IN') {
@@ -205,7 +200,7 @@ function App() {
       mounted = false;
       authListener.subscription.unsubscribe();
     };
-  }, [addNotification]);
+  }, [addNotification, setSessionId]);
 
   const renderRoutes = () => (
     <Routes>
