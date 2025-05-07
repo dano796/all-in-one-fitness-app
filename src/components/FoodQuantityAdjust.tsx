@@ -71,7 +71,12 @@ const FoodQuantityAdjust: React.FC = () => {
   const { isDarkMode } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const { food, type } = location.state || {};
+  const { food, type, isEdit, registryId } = location.state as { 
+    food: Food;
+    type: string;
+    isEdit?: boolean;
+    registryId?: string;
+  } || {};
   const [userEmail, setUserEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<string>("100");
@@ -92,55 +97,22 @@ const FoodQuantityAdjust: React.FC = () => {
     }
   );
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-      if (authError || !user) {
-        setError("Debes iniciar sesión para ajustar alimentos.");
-        navigate("/login");
-      } else {
-        setUserEmail(user.email || "");
+  const evaluateFraction = useCallback((value: string): number => {
+    const fractionMatch = value.match(/^(\d+)(?:\/(\d+))?$/);
+    if (fractionMatch) {
+      const whole = parseInt(fractionMatch[1], 10);
+      const numerator = fractionMatch[2]
+        ? parseInt(fractionMatch[2], 10)
+        : null;
+      if (numerator) {
+        return whole / numerator;
       }
-    };
-    checkAuth();
-
-    if (food) {
-      const parsedValues = parseFoodDescription(food.food_description);
-      setNutritionalValues(parsedValues);
-
-      if (parsedValues.perg) {
-        setFixedUnit("g");
-        setUnitLabel("g");
-        setQuantity(parsedValues.perg.toString());
-        setDisplayQuantity(parsedValues.perg.toString());
-      } else if (parsedValues.peroz) {
-        setFixedUnit("oz");
-        setUnitLabel("fl oz");
-        setQuantity(parsedValues.peroz.toString());
-        setDisplayQuantity(
-          evaluateFraction(parsedValues.peroz.toString()).toString()
-        );
-      } else if (parsedValues.percup) {
-        setFixedUnit("cup");
-        setUnitLabel("cup");
-        setQuantity(parsedValues.percup.toString());
-        setDisplayQuantity(
-          evaluateFraction(parsedValues.percup.toString()).toString()
-        );
-      } else if (parsedValues.peru) {
-        setFixedUnit("unit");
-        const perMatchUnit = food.food_description.match(/Per\s+\d+\s*(\w+)/i);
-        setUnitLabel(perMatchUnit ? perMatchUnit[1] : "unit");
-        setQuantity(parsedValues.peru.toString());
-        setDisplayQuantity(parsedValues.peru.toString());
-      }
+      return whole;
     }
-  }, [food, navigate]);
+    return parseFloat(value) || 0;
+  }, []);
 
-  const parseFoodDescription = (description: string): NutritionalValues => {
+  const parseFoodDescription = useCallback((description: string): NutritionalValues => {
     const result: NutritionalValues = {
       calories: null,
       fat: null,
@@ -191,35 +163,55 @@ const FoodQuantityAdjust: React.FC = () => {
     });
 
     return result;
-  };
+  }, [evaluateFraction]);
 
-  const parseFraction = (value: string): string => {
-    const fractionMatch = value.match(/^(\d+)(?:\/(\d+))?$/);
-    if (fractionMatch) {
-      const whole = fractionMatch[1];
-      const numerator = fractionMatch[2] ? fractionMatch[2] : null;
-      if (numerator) {
-        return `${whole}/${numerator}`;
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+      if (authError || !user) {
+        setError("Debes iniciar sesión para ajustar alimentos.");
+        navigate("/login");
+      } else {
+        setUserEmail(user.email || "");
       }
-      return whole;
-    }
-    return value;
-  };
+    };
+    checkAuth();
 
-  const evaluateFraction = useCallback((value: string): number => {
-    const fractionMatch = value.match(/^(\d+)(?:\/(\d+))?$/);
-    if (fractionMatch) {
-      const whole = parseInt(fractionMatch[1], 10);
-      const numerator = fractionMatch[2]
-        ? parseInt(fractionMatch[2], 10)
-        : null;
-      if (numerator) {
-        return whole / numerator;
+    if (food) {
+      const parsedValues = parseFoodDescription(food.food_description);
+      setNutritionalValues(parsedValues);
+
+      if (parsedValues.perg) {
+        setFixedUnit("g");
+        setUnitLabel("g");
+        setQuantity(parsedValues.perg.toString());
+        setDisplayQuantity(parsedValues.perg.toString());
+      } else if (parsedValues.peroz) {
+        setFixedUnit("oz");
+        setUnitLabel("fl oz");
+        setQuantity(parsedValues.peroz.toString());
+        setDisplayQuantity(
+          evaluateFraction(parsedValues.peroz.toString()).toString()
+        );
+      } else if (parsedValues.percup) {
+        setFixedUnit("cup");
+        setUnitLabel("cup");
+        setQuantity(parsedValues.percup.toString());
+        setDisplayQuantity(
+          evaluateFraction(parsedValues.percup.toString()).toString()
+        );
+      } else if (parsedValues.peru) {
+        setFixedUnit("unit");
+        const perMatchUnit = food.food_description.match(/Per\s+\d+\s*(\w+)/i);
+        setUnitLabel(perMatchUnit ? perMatchUnit[1] : "unit");
+        setQuantity(parsedValues.peru.toString());
+        setDisplayQuantity(parsedValues.peru.toString());
       }
-      return whole;
     }
-    return parseFloat(value) || 0;
-  }, []);
+  }, [food, navigate, evaluateFraction, parseFoodDescription]);
 
   const convertToFraction = useCallback(
     (value: number, forceFractions: boolean = false): string => {
@@ -340,7 +332,7 @@ const FoodQuantityAdjust: React.FC = () => {
             : originalValues.peru,
       });
     },
-    [food, fixedUnit, evaluateFraction]
+    [food, fixedUnit, evaluateFraction, parseFoodDescription]
   );
 
   const handleQuantityChange = useCallback(
@@ -410,23 +402,34 @@ const FoodQuantityAdjust: React.FC = () => {
       adjustedDescription = `Per ${displayQuantityForDescription} ${unitLabel} - Calories: ${formattedCalories}kcal | Fat: ${formattedFat}g | Carbs: ${formattedCarbs}g | Protein: ${formattedProtein}g`;
     }
 
-    const requestBody = {
-      email: userEmail,
-      food_id: food.food_id,
-      food_name: food.food_name,
-      food_description: adjustedDescription,
-      type: normalizedType,
-    };
-
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/foods/add`,
-        requestBody
-      );
+      const endpoint = isEdit ? "/api/foods/update" : "/api/foods/add";
+      const requestBody = isEdit ? {
+        email: userEmail,
+        food_id: food.food_id,
+        food_name: food.food_name,
+        food_description: adjustedDescription,
+        type: normalizedType,
+        id_registro: registryId
+      } : {
+        email: userEmail,
+        food_id: food.food_id,
+        food_name: food.food_name,
+        food_description: adjustedDescription,
+        type: normalizedType
+      };
 
+      await axios({
+        method: isEdit ? "put" : "post",
+        url: `${import.meta.env.VITE_BACKEND_URL}${endpoint}`,
+        data: requestBody
+      });
+
+      const actionText = isEdit ? "actualizado" : "añadido";
+      
       addNotification(
-        "Alimento registrado",
-        `Has añadido ${food.food_name} a tu registro de ${normalizedType.toLowerCase()}.`,
+        isEdit ? "Alimento actualizado" : "Alimento registrado",
+        `Has ${actionText} ${food.food_name} en tu registro de ${normalizedType.toLowerCase()}.`,
         "success",
         true,
         "comida"
@@ -434,7 +437,7 @@ const FoodQuantityAdjust: React.FC = () => {
 
       await Swal.fire({
         title: "¡Éxito!",
-        text: "La comida ha sido registrada exitosamente.",
+        text: `La comida ha sido ${actionText} exitosamente.`,
         icon: "success",
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#ff9400",
@@ -456,11 +459,11 @@ const FoodQuantityAdjust: React.FC = () => {
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
       const errorMessage =
-        axiosError.response?.data?.error || "Error al agregar el alimento";
+        axiosError.response?.data?.error || `Error al ${isEdit ? "actualizar" : "agregar"} el alimento`;
       setError(errorMessage);
       
       addNotification(
-        "Error al registrar alimento",
+        isEdit ? "Error al actualizar alimento" : "Error al registrar alimento",
         errorMessage,
         "error",
         true,
@@ -482,8 +485,7 @@ const FoodQuantityAdjust: React.FC = () => {
         },
       });
     }
-  }, [food,type, userEmail, quantity, fixedUnit, unitLabel, nutritionalValues, convertToFraction, evaluateFraction, navigate, addNotification, isDarkMode,
-  ]);
+  }, [food,type, userEmail, quantity, fixedUnit, unitLabel, nutritionalValues, convertToFraction, evaluateFraction, navigate, addNotification, isDarkMode, isEdit, registryId, location.search]);
 
   if (!food || !type) {
     navigate("/foodsearch", { state: { fromAddButton: true } });
