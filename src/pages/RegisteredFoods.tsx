@@ -1,10 +1,10 @@
 // src/pages/RegisteredFoods.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios, { AxiosError } from "axios";
 import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
-import { FaArrowLeft, FaTrash } from "react-icons/fa";
-import { Link, useSearchParams } from "react-router-dom";
+import { FaArrowLeft, FaTrash, FaEdit } from "react-icons/fa";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useTheme } from "../pages/ThemeContext";
 import { useNotificationStore } from "../store/notificationStore";
 
@@ -15,6 +15,7 @@ interface RegisteredFood {
   descripcion: string;
   fecha: string;
   isEditable: boolean;
+  tipo: string;
 }
 
 interface OrganizedFoods {
@@ -58,6 +59,7 @@ const RegisteredFoods: React.FC = () => {
           .toLowerCase()) as keyof OrganizedFoods)
     : null;
   const dateParam = searchParams.get("date") || date;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -74,7 +76,7 @@ const RegisteredFoods: React.FC = () => {
     checkAuth();
   }, []);
 
-  const fetchFoods = async () => {
+  const fetchFoods = useCallback(async () => {
     if (!userEmail || !dateParam) return;
     try {
       const response = await axios.get<FoodsResponse>(
@@ -92,12 +94,12 @@ const RegisteredFoods: React.FC = () => {
           "Error al consultar las comidas registradas"
       );
     }
-  };
+  }, [userEmail, dateParam]);
 
   useEffect(() => {
     setDate(dateParam);
     if (userEmail && dateParam) fetchFoods();
-  }, [userEmail, dateParam]);
+  }, [userEmail, dateParam, fetchFoods]);
 
   const handleDeleteFood = async () => {
     if (!selectedFood) {
@@ -105,11 +107,10 @@ const RegisteredFoods: React.FC = () => {
       return;
     }
     try {
-
       const foodToDelete = foodsData.foods[selectedFood.type][selectedFood.index];
       const foodName = foodToDelete.nombre_comida;
       
-      const response = await axios.delete(
+      await axios.delete(
         `${import.meta.env.VITE_BACKEND_URL}/api/foods/delete`,
         {
           data: { email: userEmail, id_registro: selectedFood.id_registro },
@@ -173,6 +174,23 @@ const RegisteredFoods: React.FC = () => {
         },
       });
     }
+  };
+
+  const handleEditFood = (food: RegisteredFood) => {
+    if (!food.isEditable) return;
+    
+    navigate("/food-quantity-adjust", {
+      state: { 
+        food: {
+          food_id: food.id_comida,
+          food_name: food.nombre_comida,
+          food_description: food.descripcion
+        }, 
+        type: food.tipo,
+        isEdit: true,
+        registryId: food.id_registro
+      },
+    });
   };
 
   const renderFoodSection = (type: keyof OrganizedFoods, label: string) => {
@@ -245,6 +263,18 @@ const RegisteredFoods: React.FC = () => {
                       {food.descripcion}
                     </p>
                   </div>
+                  {food.isEditable && (
+                    <button
+                      onClick={() => handleEditFood(food)}
+                      className={`p-2 rounded-full transition-colors duration-200 ${
+                        isDarkMode 
+                          ? "hover:bg-[#3B4252] text-gray-400 hover:text-[#FF6B35]" 
+                          : "hover:bg-gray-100 text-gray-600 hover:text-orange-500"
+                      }`}
+                    >
+                      <FaEdit className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
