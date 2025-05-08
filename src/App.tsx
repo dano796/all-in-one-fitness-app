@@ -36,7 +36,7 @@ const RMProgressPage = lazy(() => import("./pages/RMProgressPage"));
 const Settings = lazy(() => import("./pages/Settings"));
 const FoodSearchIAPage = lazy(() => import("./pages/FoodSearchIAPage"));
 const SearchRecipes = lazy(() => import("./components/SearchRecipes"));
-
+const AuthCallback = lazy(() => import("./pages/AuthCallback.tsx"));
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -168,7 +168,6 @@ function App() {
             "calorie-goal",
             true,
             async () => {
-
               const { data } = await axios.get(
                 `${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`,
                 { params: { email } }
@@ -216,7 +215,6 @@ function App() {
           );
           
           if (currentUser?.email) {
-            // Verificar el límite de calorías cada vez que el usuario inicia sesión
             checkCalorieGoal(currentUser.email);
           }
 
@@ -254,6 +252,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
       </Route>
 
       {/* Protected Routes */}
