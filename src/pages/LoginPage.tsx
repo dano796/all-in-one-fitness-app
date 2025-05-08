@@ -180,7 +180,7 @@ const LoginPage = () => {
             isDarkMode ? "bg-[#3B4252]" : "bg-[#E9ECEF]"
           }`}
         >
-          <form className="space-y-6" onSubmit={handleLogin}>
+          <form className="space-y-5" onSubmit={handleLogin}>
             <motion.div
               initial={{ x: -30, opacity: 0 }}
               animate={isInView ? { x: 0, opacity: 1 } : { x: -30, opacity: 0 }}

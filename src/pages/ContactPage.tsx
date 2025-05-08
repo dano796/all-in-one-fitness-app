@@ -208,7 +208,7 @@ const ContactPage: React.FC = () => {
                 }
                 whileHover={{ scale: 1.025 }}
                 whileTap={{ scale: 0.975 }}
-                className="w-full py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg hover:text-[#2a2e3f] transition duration-300"
+                className="w-full py-2 px-4 bg-[#ff9404] text-white font-semibold rounded-lg hover:text-[#2a2e3f] transition-colors"
               >
                 Enviar Mensaje
               </motion.button>

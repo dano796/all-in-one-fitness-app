@@ -285,17 +285,25 @@ const RegisterPage = () => {
             isDarkMode ? "bg-[#3B4252]" : "bg-[#E9ECEF]"
           }`}
         >
-          <form className="space-y-6" onSubmit={handleRegister}>
+          <form className="space-y-5" onSubmit={handleRegister}>
             <motion.div
               initial={{ x: -30, opacity: 0 }}
               animate={isInView ? { x: 0, opacity: 1 } : { x: -30, opacity: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
             >
+              <label
+                htmlFor="password"
+                className={`block text-sm font-medium mb-1 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Nombre de usuario
+              </label>
               <input
                 type="text"
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
-                placeholder="NombreUsuario"
+                placeholder="Nombre de usuario"
                 className={`w-full px-4 py-2 rounded-lg border focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 transition-colors duration-300 ${
                   isDarkMode
                     ? `bg-[#282c3c] text-white ${
@@ -316,11 +324,19 @@ const RegisterPage = () => {
               animate={isInView ? { x: 0, opacity: 1 } : { x: -30, opacity: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
             >
+              <label
+                htmlFor="password"
+                className={`block text-sm font-medium mb-1 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Correo electrónico
+              </label>
               <input
                 type="email"
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
-                placeholder="example@email.com"
+                placeholder="tu@email.com"
                 className={`w-full px-4 py-2 rounded-lg border focus:ring-[1.5px] focus:ring-[#ff9404] focus:outline-none focus:border-0 transition-colors duration-300 ${
                   isDarkMode
                     ? `bg-[#282c3c] text-white ${
@@ -341,6 +357,14 @@ const RegisterPage = () => {
               animate={isInView ? { x: 0, opacity: 1 } : { x: -30, opacity: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}
             >
+              <label
+                htmlFor="password"
+                className={`block text-sm font-medium mb-1 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Contraseña
+              </label>
               <div
                 className="relative"
                 ref={passwordContainerRef}
@@ -594,6 +618,14 @@ const RegisterPage = () => {
               animate={isInView ? { x: 0, opacity: 1 } : { x: -30, opacity: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.6 }}
             >
+              <label
+                htmlFor="password"
+                className={`block text-sm font-medium mb-1 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                Confirmar contraseña
+              </label>
               <div
                 className="relative"
                 ref={confirmPasswordContainerRef}
@@ -722,7 +754,7 @@ const RegisterPage = () => {
               animate={isInView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
               whileHover={{ scale: 1.025 }}
               whileTap={{ scale: 0.975 }}
-              className="w-full py-2 font-semibold rounded-lg text-white transition-all duration-300 bg-[#ff9400] hover:text-[#282c3c]"
+              className="w-full py-2 font-semibold rounded-lg text-white transition-colors bg-[#ff9400] hover:text-[#282c3c]"
             >
               Crear Cuenta
             </motion.button>

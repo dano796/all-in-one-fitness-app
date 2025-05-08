@@ -29,7 +29,7 @@ const CalorieCalculatorLayout: React.FC<CalorieCalculatorLayoutProps> = ({
           }`}
         >
           {children}
-          <div className="absolute top-4 right-4 z-50">
+          <div className="absolute top-4 right-8 z-50">
             <NotificationCenter />
           </div>
         </div>
