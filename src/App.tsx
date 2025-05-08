@@ -14,7 +14,6 @@ import ChatBot from "./components/ChatBot";
 import { useNotificationStore } from "./store/notificationStore";
 import ToastContainer from "./components/ToastContainer";
 import axios from "axios";
-import Swal from "sweetalert2";
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -37,7 +36,7 @@ const RMProgressPage = lazy(() => import("./pages/RMProgressPage"));
 const Settings = lazy(() => import("./pages/Settings"));
 const FoodSearchIAPage = lazy(() => import("./pages/FoodSearchIAPage"));
 const SearchRecipes = lazy(() => import("./components/SearchRecipes"));
-const AuthCallback = lazy(() => import("./components/AuthCallback")); // Importar el componente separado
+
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -159,7 +158,7 @@ function App() {
           { params: { email } }
         );
         const hasCalorieGoal = response.data.calorieGoal !== null;
-
+        
         if (!hasCalorieGoal) {
           addNotification(
             "⚠️ Límite de Calorías no Establecido",
@@ -169,6 +168,7 @@ function App() {
             "calorie-goal",
             true,
             async () => {
+
               const { data } = await axios.get(
                 `${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`,
                 { params: { email } }
@@ -192,7 +192,7 @@ function App() {
         setUser(user);
         setSessionId(user?.id || null);
         setIsLoading(false);
-
+        
         if (user?.email) {
           checkCalorieGoal(user.email);
         }
@@ -207,15 +207,16 @@ function App() {
         setUser(currentUser || null);
         setSessionId(currentUser?.id || null);
         setIsLoading(false);
-
-        if (event === "SIGNED_IN") {
+        
+        if (event === 'SIGNED_IN') {
           addNotification(
             "✅ Sesión iniciada",
             "🔐 Has iniciado sesión correctamente.",
             "success"
           );
-
+          
           if (currentUser?.email) {
+            // Verificar el límite de calorías cada vez que el usuario inicia sesión
             checkCalorieGoal(currentUser.email);
           }
 
@@ -226,7 +227,7 @@ function App() {
               "info"
             );
           }, 3000);
-        } else if (event === "SIGNED_OUT") {
+        } else if (event === 'SIGNED_OUT') {
           addNotification(
             "👋 Sesión cerrada",
             "🔒 Has cerrado sesión correctamente.",
@@ -253,7 +254,6 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
       </Route>
 
       {/* Protected Routes */}
@@ -301,7 +301,7 @@ function App() {
             {renderRoutes()}
             {isLoading && <Loader />}
             <ChatBot user={user} />
-            <ToastContainer />
+            <ToastContainer /> 
           </div>
         </Suspense>
       </ThemeProvider>
