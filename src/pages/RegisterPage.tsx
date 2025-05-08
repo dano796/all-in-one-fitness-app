@@ -186,6 +186,22 @@ const RegisterPage = () => {
             htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
           },
         });
+
+        await Swal.fire({
+          title: "Verifica tu correo electrónico",
+          text: "Por favor revisa tu bandeja de entrada o la carpeta de spam y haz clic en el enlace de verificación que te enviamos a tu correo electrónico.",
+          icon: "info",
+          confirmButtonText: "Entendido",
+          confirmButtonColor: "#ff9400",
+          background: isDarkMode ? "#282c3c" : "#ffffff",
+          customClass: {
+            popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
+            icon: "custom-swal-icon",
+            title: isDarkMode ? "text-white" : "text-gray-900",
+            htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
+          },
+        });
+
         setContador(60);
         setPuedeReenviar(false);
         resetForm();
