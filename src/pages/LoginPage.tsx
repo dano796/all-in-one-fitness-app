@@ -34,7 +34,7 @@ const LoginPage = () => {
         }
 
         if (user) {
-          navigate("/Dashboard", { replace: true });
+          navigate("/dashboard", { replace: true });
         }
       } catch (err) {
         console.error("Excepción al verificar la sesión:", err);
@@ -81,7 +81,7 @@ const LoginPage = () => {
         });
         const { data } = await supabase.auth.getUser();
         if (data.user) {
-          navigate("/Dashboard", { replace: true });
+          navigate("/dashboard", { replace: true });
         }
         await Swal.fire({
           title: "¡Éxito!",

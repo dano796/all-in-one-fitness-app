@@ -52,7 +52,7 @@ const RegisterPage = () => {
           error,
         } = await supabase.auth.getUser();
         if (error) return;
-        if (user) navigate("/Dashboard", { replace: true });
+        if (user) navigate("/dashboard", { replace: true });
       } catch (err) {
         console.error("Excepción al verificar la sesión:", err);
       }
