@@ -40,7 +40,6 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
 }) => {
   const { isDarkMode } = useTheme();
 
-  // Button hover animation
   const buttonVariants = {
     hover: {
       scale: 1.05,
@@ -85,7 +84,7 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
           className={`mt-auto block text-center font-semibold py-2 px-4 rounded-lg transition text-[#2a2e3f] ${
             isDarkMode
               ? "bg-[#FFFFFF] hover:bg-[#FF9500]"
-              : "bg-gray-900 hover:bg-[#FF9500]"
+              : "bg-[#FF9500] text-white hover:text-[#2a2e3f]"
           }`}
         >
           Comenzar

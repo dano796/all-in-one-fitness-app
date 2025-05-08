@@ -53,13 +53,13 @@ const GoalCard: React.FC<{
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className={`p-4 rounded-lg cursor-pointer transition-all duration-300 hover:bg-[#F8F9FA] ${
+      className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
         isDarkMode
-          ? `bg-[#282c3c] ${
+          ? `bg-[#2D3242] ${
               isSelected
                 ? "border-2 border-[#ff9404]"
                 : "border border-gray-600"
-            } hover:bg-[#2f3447]`
+            } hover:bg-[#282c3c]`
           : `bg-white ${
               isSelected
                 ? "border-2 border-[#ff9404]"
