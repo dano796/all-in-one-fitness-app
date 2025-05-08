@@ -1,8 +1,8 @@
-// src/pages/RegisterPage.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import Swal from "sweetalert2";
+import { motion, useInView } from "framer-motion";
 import { supabase } from "../lib/supabaseClient";
 import { FaCheck } from "react-icons/fa";
 import { useTheme } from "./ThemeContext";
@@ -29,6 +29,8 @@ const RegisterPage = () => {
   const passwordContainerRef = useRef<HTMLDivElement>(null);
   const confirmPasswordContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -184,6 +186,22 @@ const RegisterPage = () => {
             htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
           },
         });
+
+        await Swal.fire({
+          title: "Verifica tu correo electrónico",
+          text: "Por favor revisa tu bandeja de entrada o la carpeta de spam y haz clic en el enlace de verificación que te enviamos a tu correo electrónico.",
+          icon: "info",
+          confirmButtonText: "Entendido",
+          confirmButtonColor: "#ff9400",
+          background: isDarkMode ? "#282c3c" : "#ffffff",
+          customClass: {
+            popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
+            icon: "custom-swal-icon",
+            title: isDarkMode ? "text-white" : "text-gray-900",
+            htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
+          },
+        });
+
         setContador(60);
         setPuedeReenviar(false);
         resetForm();
@@ -239,22 +257,40 @@ const RegisterPage = () => {
   };
 
   return (
-    <div
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0 }}
+      animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+      transition={{ duration: 0.8 }}
       className={`container mx-auto px-8 py-16 transition-colors duration-300 ${
         isDarkMode ? "bg-[#282c3c] text-white" : "bg-[#F8F9FA] text-[#212529]"
       }`}
     >
       <div className="max-w-md mx-auto">
-        <h1 className="text-5xl font-bold mb-8 pb-3 text-center">
+        <motion.h1
+          initial={{ y: -30, opacity: 0 }}
+          animate={isInView ? { y: 0, opacity: 1 } : { y: -30, opacity: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-5xl font-bold mb-8 pb-3 text-center"
+        >
           Crear Cuenta
-        </h1>
-        <div
+        </motion.h1>
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={
+            isInView ? { scale: 1, opacity: 1 } : { scale: 0.95, opacity: 0 }
+          }
+          transition={{ duration: 0.6, delay: 0.2 }}
           className={`rounded-xl p-8 shadow-sm ${
             isDarkMode ? "bg-[#3B4252]" : "bg-[#E9ECEF]"
           }`}
         >
           <form className="space-y-6" onSubmit={handleRegister}>
-            <div>
+            <motion.div
+              initial={{ x: -30, opacity: 0 }}
+              animate={isInView ? { x: 0, opacity: 1 } : { x: -30, opacity: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+            >
               <input
                 type="text"
                 value={usuario}
@@ -274,8 +310,12 @@ const RegisterPage = () => {
               {errors.usuario && errors.usuario !== "required" && (
                 <p className="text-red-500 text-sm mt-1">{errors.usuario}</p>
               )}
-            </div>
-            <div>
+            </motion.div>
+            <motion.div
+              initial={{ x: -30, opacity: 0 }}
+              animate={isInView ? { x: 0, opacity: 1 } : { x: -30, opacity: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
+            >
               <input
                 type="email"
                 value={correo}
@@ -295,8 +335,12 @@ const RegisterPage = () => {
               {errors.correo && errors.correo !== "required" && (
                 <p className="text-red-500 text-sm mt-1">{errors.correo}</p>
               )}
-            </div>
-            <div>
+            </motion.div>
+            <motion.div
+              initial={{ x: -30, opacity: 0 }}
+              animate={isInView ? { x: 0, opacity: 1 } : { x: -30, opacity: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}
+            >
               <div
                 className="relative"
                 ref={passwordContainerRef}
@@ -324,11 +368,14 @@ const RegisterPage = () => {
                   }`}
                   required
                 />
-                <button
+                <motion.button
                   type="button"
                   onClick={togglePasswordVisibility}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4, delay: 0.6 }}
+                  whileHover={{ scale: 1.1 }}
                   className="absolute inset-y-0 right-0 flex items-center pr-3"
-                  style={{ top: "50%", transform: "translateY(-50%)" }}
                 >
                   {showPassword ? (
                     <EyeOff
@@ -345,8 +392,15 @@ const RegisterPage = () => {
                       }`}
                     />
                   )}
-                </button>
-                <div
+                </motion.button>
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={
+                    isPasswordFocused
+                      ? { opacity: 1, y: 0 }
+                      : { opacity: 0, y: -10 }
+                  }
+                  transition={{ duration: 0.3 }}
                   className={`absolute top-full left-0 mt-2 text-sm w-full transition-all duration-300 ease-in-out z-10 ${
                     isPasswordFocused
                       ? "opacity-100 translate-y-0"
@@ -529,13 +583,17 @@ const RegisterPage = () => {
                       </span>
                     </li>
                   </ul>
-                </div>
+                </motion.div>
               </div>
               {errors.contraseña && errors.contraseña !== "required" && (
                 <p className="text-red-500 text-sm mt-1">{errors.contraseña}</p>
               )}
-            </div>
-            <div>
+            </motion.div>
+            <motion.div
+              initial={{ x: -30, opacity: 0 }}
+              animate={isInView ? { x: 0, opacity: 1 } : { x: -30, opacity: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.6 }}
+            >
               <div
                 className="relative"
                 ref={confirmPasswordContainerRef}
@@ -562,11 +620,14 @@ const RegisterPage = () => {
                   }`}
                   required
                 />
-                <button
+                <motion.button
                   type="button"
                   onClick={toggleConfirmPasswordVisibility}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4, delay: 0.7 }}
+                  whileHover={{ scale: 1.1 }}
                   className="absolute inset-y-0 right-0 flex items-center pr-3"
-                  style={{ top: "50%", transform: "translateY(-50%)" }}
                 >
                   {showConfirmPassword ? (
                     <EyeOff
@@ -583,7 +644,7 @@ const RegisterPage = () => {
                       }`}
                     />
                   )}
-                </button>
+                </motion.button>
               </div>
               {errors.confirmarContraseña &&
                 errors.confirmarContraseña !== "required" && (
@@ -591,8 +652,13 @@ const RegisterPage = () => {
                     {errors.confirmarContraseña}
                   </p>
                 )}
-            </div>
-            <div className="flex items-center text-sm">
+            </motion.div>
+            <motion.div
+              initial={{ x: -30, opacity: 0 }}
+              animate={isInView ? { x: 0, opacity: 1 } : { x: -30, opacity: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.7 }}
+              className="flex items-center text-sm"
+            >
               <input
                 type="checkbox"
                 id="terms"
@@ -604,7 +670,10 @@ const RegisterPage = () => {
                 htmlFor="terms"
                 className="flex items-center cursor-pointer"
               >
-                <span
+                <motion.span
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.4, delay: 0.8 }}
                   className={`w-4 h-4 mr-2 rounded border flex items-center justify-center transition-all duration-200 ${
                     isDarkMode
                       ? `${
@@ -626,7 +695,7 @@ const RegisterPage = () => {
                       } text-[10px]`}
                     />
                   )}
-                </span>
+                </motion.span>
                 <span
                   className={`${
                     errors.terms
@@ -646,27 +715,37 @@ const RegisterPage = () => {
               {errors.terms && (
                 <p className="text-red-500 text-sm mt-1 ml-6">{errors.terms}</p>
               )}
-            </div>
-            <button
+            </motion.div>
+            <motion.button
               type="submit"
+              initial={{ y: 20, opacity: 0 }}
+              animate={isInView ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
+              whileHover={{ scale: 1.025 }}
+              whileTap={{ scale: 0.975 }}
               className="w-full py-2 font-semibold rounded-lg text-white transition-all duration-300 bg-[#ff9400] hover:text-[#282c3c]"
             >
               Crear Cuenta
-            </button>
+            </motion.button>
           </form>
-          <p
-            className={`mt-4 text-center text-sm ${
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 1.1 }}
+            className={`mt-6 text-center text-sm space-y-2 ${
               isDarkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
             ¿Ya tienes una cuenta?{" "}
-            <Link to="/login" className="text-[#ff9400] hover:underline">
+            <Link
+              to="/login"
+              className="font-medium text-[#ff9400] hover:underline"
+            >
               Inicia sesión aquí
             </Link>
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
