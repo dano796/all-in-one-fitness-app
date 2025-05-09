@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense, lazy } from "react";
+import { useEffect, useState, Suspense, lazy } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -36,7 +36,7 @@ const RMProgressPage = lazy(() => import("./pages/RMProgressPage"));
 const Settings = lazy(() => import("./pages/Settings"));
 const FoodSearchIAPage = lazy(() => import("./pages/FoodSearchIAPage"));
 const SearchRecipes = lazy(() => import("./components/SearchRecipes"));
-
+const SubscriptionPlans = lazy(() => import("./components/SubscriptionPlans"));
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -141,6 +141,11 @@ const protectedRoutes = [
     layout: RecipeSearchLayout,
     component: SearchRecipes,
   },
+  {
+    path: "/subscription-plans",
+    layout: DashboardLayout,
+    component: SubscriptionPlans,
+  },
 ];
 
 function App() {
@@ -158,7 +163,7 @@ function App() {
           { params: { email } }
         );
         const hasCalorieGoal = response.data.calorieGoal !== null;
-        
+
         if (!hasCalorieGoal) {
           addNotification(
             "⚠️ Límite de Calorías no Establecido",
@@ -168,7 +173,6 @@ function App() {
             "calorie-goal",
             true,
             async () => {
-
               const { data } = await axios.get(
                 `${import.meta.env.VITE_BACKEND_URL}/api/get-calorie-goal`,
                 { params: { email } }
@@ -192,7 +196,7 @@ function App() {
         setUser(user);
         setSessionId(user?.id || null);
         setIsLoading(false);
-        
+
         if (user?.email) {
           checkCalorieGoal(user.email);
         }
@@ -207,16 +211,15 @@ function App() {
         setUser(currentUser || null);
         setSessionId(currentUser?.id || null);
         setIsLoading(false);
-        
+
         if (event === 'SIGNED_IN') {
           addNotification(
             "✅ Sesión iniciada",
             "🔐 Has iniciado sesión correctamente.",
             "success"
           );
-          
+
           if (currentUser?.email) {
-            // Verificar el límite de calorías cada vez que el usuario inicia sesión
             checkCalorieGoal(currentUser.email);
           }
 
@@ -264,7 +267,7 @@ function App() {
           element={
             <ProtectedRoute user={user}>
               <Layout>
-                <Component user={null} />
+                <Component user={user} />
               </Layout>
             </ProtectedRoute>
           }
@@ -301,7 +304,7 @@ function App() {
             {renderRoutes()}
             {isLoading && <Loader />}
             <ChatBot user={user} />
-            <ToastContainer /> 
+            <ToastContainer />
           </div>
         </Suspense>
       </ThemeProvider>

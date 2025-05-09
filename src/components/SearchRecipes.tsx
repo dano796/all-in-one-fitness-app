@@ -120,14 +120,14 @@ const SearchRecipes: React.FC = () => {
   };
 
   const handleOpenChatBot = (recipe: Recipe) => {
+    setSelectedRecipe(recipe);
     const ingredients =
       recipe.recipe_ingredients?.ingredient
         ?.map((ing: any) => {
           if (typeof ing === "string") {
             return ing;
           } else {
-            let ingredientText =
-              ing.ingredient_name || "Ingrediente desconocido";
+            let ingredientText = ing.ingredient_name || "Ingrediente desconocido";
             if (ing.quantity && ing.measurement_description) {
               ingredientText += ` (${ing.quantity} ${ing.measurement_description})`;
             }
@@ -138,10 +138,11 @@ const SearchRecipes: React.FC = () => {
           }
         })
         .join(", ") || "Ingredientes no disponibles";
-
+  
     const message = `¿Cómo puedo preparar una receta de "${recipe.recipe_name}" con los siguientes ingredientes: ${ingredients}? Por favor, dame instrucciones detalladas paso a paso.`;
     setInitialChatMessage(message);
     setIsChatBotOpen(true);
+    setCurrentConversationId(null); // Forzar la creación de una nueva conversación
   };
 
   const infoText = {
@@ -403,7 +404,10 @@ const SearchRecipes: React.FC = () => {
 
                 <div className="flex justify-center mb-4">
                   <button
-                    onClick={() => handleOpenChatBot(selectedRecipe)}
+                    onClick={() => {
+                      handleOpenChatBot(selectedRecipe);
+                      handleClose(); // Close the modal when opening the chatbot
+                    }}
                     className="flex items-center py-2 px-4 bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white font-semibold rounded-full shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300"
                   >
                     ¿Quieres saber cómo prepararla?

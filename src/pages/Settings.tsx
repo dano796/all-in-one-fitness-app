@@ -9,11 +9,13 @@ import {
   Sun,
   Globe,
   Dumbbell,
+  CreditCard,
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import GalaxyBackground from "../components/GalaxyBackground";
 import { motion } from "framer-motion";
 import { useTheme } from "../pages/ThemeContext";
+import axios from "axios";
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ const Settings: React.FC = () => {
   const [measurementUnit, setMeasurementUnit] = useState<"metric" | "imperial">(
     "metric"
   );
+  const [hasSubscription, setHasSubscription] = useState<boolean | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -40,6 +43,7 @@ const Settings: React.FC = () => {
       } else {
         setUserEmail(user.email || "");
         fetchUserSettings(user.email || "");
+        fetchSubscription(user.email || "");
       }
     };
 
@@ -67,6 +71,21 @@ const Settings: React.FC = () => {
       setErrorMsg("Error al cargar los ajustes de usuario.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchSubscription = async (email: string) => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/get-user-subscription`, {
+        params: { email },
+      });
+
+      const data = response.data;
+      setHasSubscription(data.Suscripcion);
+    } catch (error) {
+      console.error('Error fetching subscription:', error);
+      setHasSubscription(null);
+      setErrorMsg("Error al cargar el estado de la suscripción.");
     }
   };
 
@@ -363,7 +382,7 @@ const Settings: React.FC = () => {
                       type="checkbox"
                       className="sr-only peer"
                       checked={isDarkMode}
-                      onChange={toggleDarkMode} // Usar la función del contexto
+                      onChange={toggleDarkMode}
                     />
                     <div
                       className={`w-11 h-6 ${
@@ -372,6 +391,39 @@ const Settings: React.FC = () => {
                     ></div>
                   </label>
                 </div>
+              </div>
+
+              <hr
+                className={`my-6 ${
+                  isDarkMode ? "border-gray-600" : "border-gray-200"
+                }`}
+              />
+
+              <h2 className="text-xl font-semibold mb-6 flex items-center">
+                <CreditCard className="h-5 w-5 mr-2 text-[#ff9404]" />
+                Mi Suscripción
+              </h2>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <CreditCard className="h-5 w-5 mr-3 text-[#ff9404]" />
+                  <div>
+                    <p className="font-medium">Mi plan</p>
+                    <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                      {hasSubscription === null
+                        ? "Cargando..."
+                        : hasSubscription
+                        ? "Premium"
+                        : "Gratuito"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate("/subscription-plans")}
+                  className="px-4 py-1.5 bg-[#ff9404] text-white rounded-md hover:bg-[#e08503] transition-colors duration-300"
+                >
+                  Mejorar
+                </button>
               </div>
             </div>
 

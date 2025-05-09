@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Trash2, CheckCircle, X, ChevronDown, ChevronUp, Clock, Camera } from "lucide-react";
+import { ChevronLeft, Trash2, CheckCircle, X, ChevronDown, ChevronUp, Clock } from "lucide-react";
 import axios from "axios";
 import GalaxyBackground from "../components/GalaxyBackground";
 import { Progress } from "@/components/ui/progress";
@@ -10,6 +10,8 @@ import timerEndSound from "../assets/sounds/timer-end.mp3.wav";
 import * as tf from '@tensorflow/tfjs';
 import * as posedetection from '@tensorflow-models/pose-detection';
 import { useNotificationStore } from "../store/notificationStore";
+import { User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabaseClient';
 
 interface Routine {
   id: string;
@@ -31,12 +33,11 @@ interface Exercise {
   note?: string;
 }
 
-interface VideoDevice {
-  deviceId: string;
-  label: string;
+interface RoutineDetailsProps {
+  user: User | null;
 }
 
-const RoutineDetails: React.FC = () => {
+const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,9 +58,11 @@ const RoutineDetails: React.FC = () => {
   );
   const [activeAnalysisExerciseId, setActiveAnalysisExerciseId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string>("");
-  const [videoDevices, setVideoDevices] = useState<VideoDevice[]>([]);
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
-  const [isCameraModalOpen, setIsCameraModalOpen] = useState<boolean>(false);
+  const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null);
+  const [isCheckingSubscription, setIsCheckingSubscription] = useState<boolean>(false);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState<boolean>(false);
+  const [idusuario, setIdusuario] = useState<number | null>(null);
+  const [isIdLoading, setIsIdLoading] = useState<boolean>(false);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -72,9 +75,47 @@ const RoutineDetails: React.FC = () => {
 
   const queryParams = new URLSearchParams(location.search);
   const routineId = queryParams.get("id");
-  const userEmail = queryParams.get("email") || "";
+  const userEmail = user?.email || queryParams.get("email") || "";
 
   const isToday = selectedDate === new Date().toLocaleDateString("en-CA");
+
+  // Verificar idusuario y suscripción al cargar el componente
+  useEffect(() => {
+    const fetchIdUsuarioAndSubscription = async () => {
+      if (!user || !user.email) {
+        setIdusuario(null);
+        setIsSubscribed(null);
+        setIsIdLoading(false);
+        console.log('No user provided, resetting idusuario and isSubscribed');
+        setFeedback('Por favor, inicia sesión para usar el análisis de ejercicios.');
+        return;
+      }
+
+      setIsIdLoading(true);
+      setIsCheckingSubscription(true);
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/get-user-subscription`, {
+          params: { email: user.email },
+        });
+
+        const data = response.data;
+        console.log('User data fetched:', data);
+        setIdusuario(data.idusuario);
+        setIsSubscribed(data.Suscripcion);
+        console.log('isSubscribed set to:', data.Suscripcion);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setFeedback('Error al obtener tu información de usuario. Por favor, intenta de nuevo más tarde.');
+        setIdusuario(null);
+        setIsSubscribed(false);
+      } finally {
+        setIsIdLoading(false);
+        setIsCheckingSubscription(false);
+      }
+    };
+
+    fetchIdUsuarioAndSubscription();
+  }, [user]);
 
   // Mapeo de ejercicios a reglas de evaluación
   const exerciseRules: { [key: string]: (keypoints: posedetection.Keypoint[]) => string } = {
@@ -339,7 +380,6 @@ const RoutineDetails: React.FC = () => {
       setIsTimerModalOpen(false);
       setTimerCompleted(true);
       timerSound.play().catch((err) => console.error("Error al reproducir el sonido:", err));
-      // Mostrar notificación cuando el temporizador de descanso se completa
       addNotification(
         "⏰ Descanso completado",
         "🏋️‍♂️ ¡Es hora de continuar con tu rutina!",
@@ -358,57 +398,17 @@ const RoutineDetails: React.FC = () => {
   }, [isTimerRunning, timer, addNotification]);
 
   useEffect(() => {
-    async function getVideoDevices() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        stream.getTracks().forEach(track => track.stop());
-
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices
-          .filter((device) => device.kind === 'videoinput')
-          .map((device) => ({
-            deviceId: device.deviceId,
-            label: device.label || `Cámara ${device.deviceId.slice(0, 5)}`,
-          }));
-
-        if (videoDevices.length === 0) {
-          setFeedback("No se encontraron dispositivos de video. Conecta una cámara e intenta de nuevo.");
-          return;
-        }
-
-        setVideoDevices(videoDevices);
-        setSelectedDeviceId(videoDevices[0].deviceId);
-      } catch (err) {
-        console.error("Error al enumerar dispositivos:", err);
-        if (err instanceof Error && err.name === 'NotAllowedError') {
-          setFeedback("Permiso denegado para acceder a la cámara. Otorga permisos en la configuración del navegador.");
-        } else if (err instanceof Error && err.name === 'NotFoundError') {
-          setFeedback("No se encontraron cámaras. Conecta una cámara e intenta de nuevo.");
-        } else {
-          if (err instanceof Error) {
-            setFeedback("Error al acceder a los dispositivos de video: " + err.message);
-          } else {
-            setFeedback("Error al acceder a los dispositivos de video.");
-          }
-        }
-      }
-    }
-    getVideoDevices();
-  }, []);
-
-  useEffect(() => {
-    if (activeAnalysisExerciseId && videoRef.current) {
+    console.log('Camera useEffect triggered', { activeAnalysisExerciseId, isSubscribed });
+    if (activeAnalysisExerciseId && videoRef.current && isSubscribed) {
       async function setupCamera() {
         try {
+          console.log('Setting up camera...');
           if (videoRef.current.srcObject) {
             const oldStream = videoRef.current.srcObject as MediaStream;
             oldStream.getTracks().forEach(track => track.stop());
           }
           const constraints: MediaStreamConstraints = {
-            video: {
-              deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
-              facingMode: 'user',
-            },
+            video: { facingMode: 'user' },
           };
           const stream = await navigator.mediaDevices.getUserMedia(constraints);
           if (videoRef.current) {
@@ -439,7 +439,7 @@ const RoutineDetails: React.FC = () => {
       }
       isDetectingRef.current = false;
     };
-  }, [activeAnalysisExerciseId, selectedDeviceId]);
+  }, [activeAnalysisExerciseId, isSubscribed]);
 
   async function loadPoseDetector() {
     try {
@@ -492,7 +492,7 @@ const RoutineDetails: React.FC = () => {
       isDetectingRef.current = false;
       setTimeout(() => {
         if (activeAnalysisExerciseId) detectPose();
-      }, 500); // Reducir frecuencia a 2 FPS para estabilidad
+      }, 500);
     }
   }
 
@@ -516,7 +516,7 @@ const RoutineDetails: React.FC = () => {
   function analyzeExercise(keypoints: posedetection.Keypoint[]) {
     if (editedExercises[currentExerciseIndex]) {
       const exerciseName = editedExercises[currentExerciseIndex].name.toLowerCase();
-      console.log("Analizando ejercicio:", exerciseName); // Registro en consola
+      console.log("Analizando ejercicio:", exerciseName);
       let ruleKey = 'default';
       if (exerciseName.includes('squat') || exerciseName.includes('sentadilla')) {
         ruleKey = 'squat';
@@ -817,13 +817,24 @@ const RoutineDetails: React.FC = () => {
       : "bg-gray-200 text-gray-900 hover:bg-gray-300"
   }`;
 
-  const cameraIconStyle = `p-2 rounded-full border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 ${
+  const modalButtonStyle = `px-6 py-3 font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 ${
     isDarkMode
       ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
       : "bg-gray-200 text-gray-900 hover:bg-gray-300"
   }`;
 
-  if (loading) {
+  const handleAnalyzeExercise = (exerciseIndex: number, exerciseId: string) => {
+    console.log('handleAnalyzeExercise called', { isSubscribed, exerciseIndex, exerciseId });
+    if (isSubscribed) {
+      setCurrentExerciseIndex(exerciseIndex);
+      setActiveAnalysisExerciseId(exerciseId);
+      setFeedback("");
+    } else {
+      setIsSubscriptionModalOpen(true);
+    }
+  };
+
+  if (loading || isCheckingSubscription || isIdLoading) {
     return (
       <div className={`flex items-center justify-center min-h-screen ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
         Cargando...
@@ -835,6 +846,14 @@ const RoutineDetails: React.FC = () => {
     return (
       <div className={`flex items-center justify-center min-h-screen ${isDarkMode ? "text-red-400" : "text-red-600"}`}>
         {error || "Rutina no encontrada."}
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className={`flex items-center justify-center min-h-screen ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+        Debes iniciar sesión para ver los detalles de la rutina.
       </div>
     );
   }
@@ -1121,25 +1140,13 @@ const RoutineDetails: React.FC = () => {
                 {isToday && (
                   <div className="mt-4 flex flex-col gap-2">
                     <button
-                      onClick={() => {
-                        setCurrentExerciseIndex(exerciseIndex);
-                        setActiveAnalysisExerciseId(exercise.id);
-                        setFeedback(""); // Limpiar feedback al iniciar un nuevo análisis
-                      }}
+                      onClick={() => handleAnalyzeExercise(exerciseIndex, exercise.id)}
                       className={cameraButtonStyle}
                     >
                       Analizar Ejercicio
                     </button>
                     {activeAnalysisExerciseId === exercise.id && (
-                      <div className="relative mt-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <button
-                            onClick={() => setIsCameraModalOpen(true)}
-                            className={cameraIconStyle}
-                          >
-                            <Camera className="w-6 h-6" />
-                          </button>
-                        </div>
+                      <div className={`relative mt-4 ${!isSubscribed ? "blur-md" : ""}`}>
                         <video ref={videoRef} className="w-full max-w-md rounded-lg" />
                         <canvas
                           ref={canvasRef}
@@ -1151,7 +1158,7 @@ const RoutineDetails: React.FC = () => {
                         <button
                           onClick={() => {
                             setActiveAnalysisExerciseId(null);
-                            setFeedback(""); // Limpiar feedback al detener
+                            setFeedback("");
                           }}
                           className={cameraButtonStyle}
                         >
@@ -1250,7 +1257,7 @@ const RoutineDetails: React.FC = () => {
         </AnimatePresence>
 
         <AnimatePresence>
-          {isCameraModalOpen && (
+          {isSubscriptionModalOpen && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1263,33 +1270,24 @@ const RoutineDetails: React.FC = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`rounded-2xl p-6 w-11/12 max-w-sm relative shadow-2xl border ${isDarkMode ? "bg-gradient-to-br from-gray-700 to-gray-800 border-white/10" : "bg-white border-gray-300"}`}
+                className={`rounded-2xl p-6 w-11/12 max-w-md relative shadow-2xl border ${isDarkMode ? "bg-gradient-to-br from-gray-700 to-gray-800 border-white/10" : "bg-white border-gray-300"}`}
               >
                 <button
-                  onClick={() => setIsCameraModalOpen(false)}
+                  onClick={() => setIsSubscriptionModalOpen(false)}
                   className={`absolute top-4 right-4 transition-colors ${isDarkMode ? "text-white hover:text-red-500" : "text-gray-900 hover:text-red-600"}`}
                 >
                   <X className="w-6 h-6" />
                 </button>
-                <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>Seleccionar Cámara</h2>
-                <select
-                  value={selectedDeviceId}
-                  onChange={(e) => {
-                    setSelectedDeviceId(e.target.value);
-                    setIsCameraModalOpen(false);
-                  }}
-                  className={`w-full p-3 rounded-lg border text-base transition-all duration-300 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] ${isDarkMode ? "bg-[#4B5563] text-white border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
+                <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>Función Premium</h2>
+                <p className={`mb-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                  El análisis de ejercicios con cámara es una función exclusiva para usuarios Premium. ¡Obtén una suscripción para desbloquear esta y otras funciones avanzadas!
+                </p>
+                <button
+                  onClick={() => navigate(`/subscription-plans?email=${encodeURIComponent(userEmail)}`)}
+                  className={modalButtonStyle}
                 >
-                  {videoDevices.length === 0 ? (
-                    <option value="">No hay cámaras disponibles</option>
-                  ) : (
-                    videoDevices.map((device) => (
-                      <option key={device.deviceId} value={device.deviceId}>
-                        {device.label}
-                      </option>
-                    ))
-                  )}
-                </select>
+                  Ver planes
+                </button>
               </motion.div>
             </motion.div>
           )}
