@@ -75,7 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       totalCarbs: 0,
       dailyBreakdown: [],
     },
-    calorieGoal: 2000,
+    calorieGoal: 1000,
     waterIntake: 0,
     waterGoal: DEFAULT_WATER_GOAL_ML,
   });

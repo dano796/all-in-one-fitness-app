@@ -172,9 +172,9 @@ const FoodDashboard: React.FC = () => {
   const handleSetCustomCalorieGoal = async () => {
     const goal = parseInt(customCalorieGoal, 10);
     const inputElement = document.getElementById("customCalorieGoal");
-    if (isNaN(goal) || goal < 2000) {
+    if (isNaN(goal) || goal < 1000) {
       setCalorieGoalError(
-        "El límite de calorías debe ser un número mayor o igual a 2000."
+        "El límite de calorías debe ser un número mayor o igual a 1000."
       );
       inputElement?.classList.add("error");
       return;
@@ -664,7 +664,7 @@ const FoodDashboard: React.FC = () => {
                     ? "border-gray-500 bg-[#2D3242] text-gray-200 focus:border-[#ff9404]"
                     : "border-gray-300 bg-white text-gray-900 focus:border-[#ff9404]"
                 }`}
-                placeholder="2000+"
+                placeholder="1000+"
               />
               <button
                 onClick={handleSetCustomCalorieGoal}
