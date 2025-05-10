@@ -6,14 +6,24 @@ interface OfflineData {
   timestamp: number;
 }
 
+interface PendingSyncRequest {
+  url: string;
+  method: string;
+  headers: HeadersInit;
+  body: any;
+  timestamp: number;
+}
+
 class OfflineSyncManager {
   private static instance: OfflineSyncManager;
   private offlineData: Map<string, OfflineData> = new Map();
+  private pendingSyncRequests: Map<string, PendingSyncRequest> = new Map();
   private isOnline: boolean = navigator.onLine;
 
   private constructor() {
     this.initializeEventListeners();
     this.loadOfflineData();
+    this.loadPendingSyncRequests();
   }
 
   public static getInstance(): OfflineSyncManager {
@@ -41,6 +51,19 @@ class OfflineSyncManager {
     }
   }
 
+  private async loadPendingSyncRequests() {
+    try {
+      const storedRequests = localStorage.getItem('pendingSyncRequests');
+      if (storedRequests) {
+        const parsedRequests = JSON.parse(storedRequests);
+        this.pendingSyncRequests = new Map(Object.entries(parsedRequests));
+        console.log('[OfflineSync] Peticiones pendientes cargadas:', parsedRequests);
+      }
+    } catch (error) {
+      console.error('Error loading pending sync requests:', error);
+    }
+  }
+
   private async saveOfflineData() {
     try {
       const dataToStore = Object.fromEntries(this.offlineData);
@@ -50,19 +73,57 @@ class OfflineSyncManager {
     }
   }
 
+  private async savePendingSyncRequests() {
+    try {
+      const requestsToStore = Object.fromEntries(this.pendingSyncRequests);
+      localStorage.setItem('pendingSyncRequests', JSON.stringify(requestsToStore));
+    } catch (error) {
+      console.error('Error saving pending sync requests:', error);
+    }
+  }
+
   private handleOnline() {
+    console.log('[OfflineSync] Conexión recuperada, sincronizando datos...');
     this.isOnline = true;
+    
+    // Mostrar notificación
+    this.showNotification(
+      '✅ Conexión restaurada',
+      'Estás en línea. Sincronizando datos guardados localmente...',
+      'success'
+    );
+    
+    // Iniciar sincronización
     this.syncData();
   }
 
   private handleOffline() {
+    console.log('[OfflineSync] Conexión perdida, entrando en modo offline');
     this.isOnline = false;
-    const { addNotification } = useNotificationStore.getState();
-    addNotification(
+    
+    // Mostrar notificación
+    this.showNotification(
       '⚠️ Modo Offline',
       'Estás trabajando sin conexión. Los cambios se sincronizarán cuando vuelvas a estar en línea.',
       'warning'
     );
+  }
+
+  private showNotification(title: string, message: string, type: 'success' | 'warning' | 'error' | 'info') {
+    // Usar setTimeout para permitir que el store se inicialice correctamente
+    setTimeout(() => {
+      try {
+        // Asegurar que el store exista antes de usarlo
+        if (useNotificationStore && typeof useNotificationStore.getState === 'function') {
+          const { addNotification } = useNotificationStore.getState();
+          if (typeof addNotification === 'function') {
+            addNotification(title, message, type);
+          }
+        }
+      } catch (error) {
+        console.error('[OfflineSync] Error mostrando notificación:', error);
+      }
+    }, 500);
   }
 
   public async storeData(key: string, data: any) {
@@ -89,6 +150,13 @@ class OfflineSyncManager {
     }
   }
 
+  public async storePendingRequest(key: string, request: PendingSyncRequest) {
+    this.pendingSyncRequests.set(key, request);
+    await this.savePendingSyncRequests();
+    
+    console.log(`[OfflineSync] Petición guardada para sincronización posterior: ${key}`);
+  }
+
   public async getData(key: string): Promise<any | null> {
     const offlineData = this.offlineData.get(key);
     return offlineData ? offlineData.data : null;
@@ -97,68 +165,121 @@ class OfflineSyncManager {
   private async syncData() {
     if (!this.isOnline) return;
 
-    const { addNotification } = useNotificationStore.getState();
-    const syncPromises: Promise<void>[] = [];
-    const failedSyncs: string[] = [];
-
-    if (this.offlineData.size > 0) {
-      console.log('[OfflineSync] Intentando sincronizar los siguientes datos:');
-      for (const [key, offlineData] of this.offlineData) {
-        console.log('Clave:', key, 'Datos:', offlineData);
-      }
-    } else {
-      console.log('[OfflineSync] No hay datos pendientes de sincronizar.');
+    let notificationStore;
+    try {
+      notificationStore = useNotificationStore.getState();
+    } catch (error) {
+      console.error('[OfflineSync] Error obteniendo el store de notificaciones:', error);
+      // Continuar sin mostrar notificaciones
     }
 
-    for (const [key, offlineData] of this.offlineData) {
-      try {
-        const response = await fetch(key, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(offlineData.data),
-        });
+    const syncPromises: Promise<void>[] = [];
+    const failedSyncs: string[] = [];
+    let syncSuccessCount = 0;
 
-        console.log(`[OfflineSync] Respuesta al sincronizar ${key}:`, response.status, response.statusText);
+    // Primero sincronizamos las peticiones pendientes
+    if (this.pendingSyncRequests.size > 0) {
+      console.log('[OfflineSync] Sincronizando peticiones pendientes:', this.pendingSyncRequests.size);
+      
+      for (const [key, request] of this.pendingSyncRequests) {
+        try {
+          const response = await fetch(request.url, {
+            method: request.method,
+            headers: {
+              'Content-Type': 'application/json',
+              ...request.headers,
+            },
+            body: JSON.stringify(request.body),
+          });
 
-        if (response.ok) {
-          this.offlineData.delete(key);
-          syncPromises.push(Promise.resolve());
-        } else {
+          if (response.ok) {
+            console.log(`[OfflineSync] Petición sincronizada con éxito: ${key}`);
+            this.pendingSyncRequests.delete(key);
+            syncSuccessCount++;
+            syncPromises.push(Promise.resolve());
+          } else {
+            console.error(`[OfflineSync] Error al sincronizar petición ${key}: ${response.status} ${response.statusText}`);
+            failedSyncs.push(key);
+            syncPromises.push(Promise.reject(new Error(`HTTP error: ${response.status}`)));
+          }
+        } catch (error) {
+          console.error(`[OfflineSync] Error sincronizando petición ${key}:`, error);
           failedSyncs.push(key);
-          throw new Error(`Failed to sync data for key: ${key}`);
+          syncPromises.push(Promise.reject(error));
         }
-      } catch (error) {
-        console.error(`[OfflineSync] Error sincronizando la clave ${key}:`, error);
-        failedSyncs.push(key);
-        syncPromises.push(Promise.reject(error));
+      }
+      
+      // Guardar el estado actualizado de peticiones pendientes
+      await this.savePendingSyncRequests();
+    }
+
+    // Sincronizar datos normales si es necesario
+    if (this.offlineData.size > 0) {
+      console.log('[OfflineSync] Sincronizando datos:', this.offlineData.size);
+      
+      for (const [key, offlineData] of this.offlineData) {
+        // Solo sincronizamos datos que representan llamadas a la API
+        if (key.startsWith('http')) {
+          try {
+            const response = await fetch(key, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(offlineData.data),
+            });
+
+            if (response.ok) {
+              console.log(`[OfflineSync] Datos sincronizados con éxito: ${key}`);
+              syncSuccessCount++;
+              syncPromises.push(Promise.resolve());
+            } else {
+              console.error(`[OfflineSync] Error al sincronizar datos ${key}: ${response.status} ${response.statusText}`);
+              failedSyncs.push(key);
+              syncPromises.push(Promise.reject(new Error(`HTTP error: ${response.status}`)));
+            }
+          } catch (error) {
+            console.error(`[OfflineSync] Error sincronizando datos ${key}:`, error);
+            failedSyncs.push(key);
+            syncPromises.push(Promise.reject(error));
+          }
+        }
       }
     }
 
     try {
-      await Promise.all(syncPromises);
-      await this.saveOfflineData();
+      await Promise.allSettled(syncPromises);
       
-      if (this.offlineData.size === 0) {
-        addNotification(
-          '✅ Sincronización Completada',
-          'Todos los datos offline han sido sincronizados correctamente.',
-          'success'
-        );
-      } else if (failedSyncs.length > 0) {
-        addNotification(
-          '⚠️ Error de Sincronización',
-          'Algunos datos no pudieron ser sincronizados. Se intentará nuevamente cuando vuelvas a estar en línea.',
-          'error'
-        );
+      // Mostrar notificación apropiada basada en resultados
+      if (notificationStore && notificationStore.addNotification) {
+        if (syncSuccessCount > 0) {
+          if (failedSyncs.length === 0) {
+            notificationStore.addNotification(
+              '✅ Sincronización Completada',
+              `Se han sincronizado ${syncSuccessCount} elementos correctamente.`,
+              'success'
+            );
+          } else {
+            notificationStore.addNotification(
+              '⚠️ Sincronización Parcial',
+              `Se sincronizaron ${syncSuccessCount} elementos, pero ${failedSyncs.length} fallaron.`,
+              'warning'
+            );
+          }
+        } else if (failedSyncs.length > 0) {
+          notificationStore.addNotification(
+            '❌ Error de Sincronización',
+            'No se pudieron sincronizar los datos. Se intentará nuevamente más tarde.',
+            'error'
+          );
+        }
       }
     } catch (error) {
       console.error('[OfflineSync] Error general durante la sincronización:', error);
-      if (failedSyncs.length > 0) {
-        addNotification(
-          '⚠️ Error de Sincronización',
-          'Algunos datos no pudieron ser sincronizados. Se intentará nuevamente cuando vuelvas a estar en línea.',
+      if (notificationStore && notificationStore.addNotification) {
+        notificationStore.addNotification(
+          '❌ Error de Sincronización',
+          'Ocurrió un error durante la sincronización. Se intentará nuevamente más tarde.',
           'error'
         );
       }
@@ -171,6 +292,10 @@ class OfflineSyncManager {
 
   public getOfflineDataCount(): number {
     return this.offlineData.size;
+  }
+
+  public getPendingSyncRequestsCount(): number {
+    return this.pendingSyncRequests.size;
   }
 }
 

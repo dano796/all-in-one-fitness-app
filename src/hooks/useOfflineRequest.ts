@@ -26,23 +26,42 @@ export const useOfflineRequest = () => {
     setError(null);
 
     try {
-      // Si estamos offline y es una petición que puede ser guardada
-      if (!navigator.onLine && ['POST', 'PUT', 'DELETE'].includes(method)) {
-        await offlineSyncManager.storeData(offlineKey, {
-          url,
-          method,
-          headers,
-          body,
-          timestamp: Date.now(),
-        });
+      // Si estamos offline
+      if (!navigator.onLine) {
+        // Para peticiones GET, intentar obtener datos offline
+        if (method === 'GET') {
+          const offlineData = await offlineSyncManager.getData(offlineKey);
+          if (offlineData) {
+            addNotification(
+              '📱 Datos Offline',
+              'Se están mostrando los últimos datos guardados localmente.',
+              'warning'
+            );
+            return { success: true, data: offlineData, offline: true };
+          }
+          throw new Error('No hay datos offline disponibles');
+        }
+        
+        // Para otras peticiones, guardar para sincronización posterior
+        if (['POST', 'PUT', 'DELETE'].includes(method)) {
+          // Guardar la petición pendiente para sincronizar cuando vuelva la conexión
+          const requestId = `${method}-${offlineKey}-${Date.now()}`;
+          await offlineSyncManager.storePendingRequest(requestId, {
+            url,
+            method,
+            headers,
+            body,
+            timestamp: Date.now(),
+          });
 
-        addNotification(
-          '💾 Datos Guardados Offline',
-          'Los cambios se sincronizarán cuando vuelvas a estar en línea.',
-          'info'
-        );
+          addNotification(
+            '💾 Datos Guardados Offline',
+            'Los cambios se sincronizarán automáticamente cuando vuelvas a estar en línea.',
+            'info'
+          );
 
-        return { success: true, offline: true };
+          return { success: true, offline: true, pendingSync: true };
+        }
       }
 
       // Si estamos online, hacer la petición normal
@@ -60,20 +79,52 @@ export const useOfflineRequest = () => {
       }
 
       const data = await response.json();
-      return data;
+
+      // Guardar datos offline para peticiones GET exitosas
+      if (method === 'GET') {
+        await offlineSyncManager.storeData(offlineKey, data);
+      }
+
+      return { success: true, data, offline: false };
     } catch (error) {
-      setError(error as Error);
+      const typedError = error as Error;
+      setError(typedError);
+      console.error(`Error en petición ${method} a ${url}:`, typedError);
       
-      // Si hay un error y tenemos datos offline, intentar usarlos
-      if (['GET'].includes(method)) {
+      // Si hay un error de red y no es una petición GET, guardar para sincronización posterior
+      if (method !== 'GET' && (error instanceof TypeError || typedError?.message?.includes('network'))) {
+        try {
+          const requestId = `${method}-${offlineKey}-${Date.now()}`;
+          await offlineSyncManager.storePendingRequest(requestId, {
+            url,
+            method,
+            headers,
+            body,
+            timestamp: Date.now(),
+          });
+
+          addNotification(
+            '⚠️ Error de Conexión',
+            'No se pudo conectar con el servidor, pero los datos se han guardado localmente y se sincronizarán automáticamente más tarde.',
+            'warning'
+          );
+
+          return { success: true, offline: true, pendingSync: true, error: typedError.message };
+        } catch (storageError) {
+          console.error('Error al guardar petición para sincronización:', storageError);
+        }
+      }
+      
+      // Si hay un error y es una petición GET, intentar obtener datos offline
+      if (method === 'GET') {
         const offlineData = await offlineSyncManager.getData(offlineKey);
         if (offlineData) {
           addNotification(
-            '📱 Usando Datos Offline',
-            'Se están mostrando los últimos datos guardados localmente.',
+            '📱 Datos Offline',
+            'Se están mostrando los últimos datos guardados localmente debido a un error de conexión.',
             'warning'
           );
-          return offlineData;
+          return { success: true, data: offlineData, offline: true };
         }
       }
 
@@ -87,5 +138,6 @@ export const useOfflineRequest = () => {
     request,
     isLoading,
     error,
+    pendingSyncCount: offlineSyncManager.getPendingSyncRequestsCount(),
   };
 }; 

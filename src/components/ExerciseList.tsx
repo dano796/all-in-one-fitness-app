@@ -7,8 +7,7 @@ import { motion } from "framer-motion";
 import GalaxyBackground from "../components/GalaxyBackground";
 import { useTheme } from "../pages/ThemeContext";
 import { useNotificationStore } from "../store/notificationStore";
-import { useOfflineRequest } from '../hooks/useOfflineRequest';
-import { offlineSyncManager } from '../utils/offlineSync';
+import { useExercises } from "../hooks/useExercises";
 
 interface Exercise {
   id: string;
@@ -40,9 +39,6 @@ const ExerciseList: React.FC = () => {
   const routineId = location.state?.routineId || null;
   const existingExercises = location.state?.existingExercises || [];
 
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const [selectedBodyPart, setSelectedBodyPart] = useState<string>("");
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [newRoutine, setNewRoutine] = useState<{
@@ -56,8 +52,44 @@ const ExerciseList: React.FC = () => {
   });
   const [userEmail, setUserEmail] = useState<string>("");
   const [expandedExercises, setExpandedExercises] = useState<{ [key: string]: boolean }>({});
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  
+  const { addNotification } = useNotificationStore();
+  const { exercises, loading, error: exercisesError, fetchExercises } = useExercises();
+
+  // Escuchar eventos de conexión
+  useEffect(() => {
+    const handleOnline = () => {
+      addNotification(
+        "✅ Conexión restaurada",
+        "Ahora estás online. Los datos se han actualizado.",
+        "success"
+      );
+      
+      // Recargar datos si hay una parte del cuerpo seleccionada
+      if (selectedBodyPart) {
+        fetchExercises(selectedBodyPart, backendUrl);
+      }
+    };
+    
+    const handleOffline = () => {
+      addNotification(
+        "📱 Modo Offline",
+        "Estás en modo offline. Mostrando datos guardados localmente.",
+        "warning"
+      );
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [addNotification, selectedBodyPart, backendUrl, fetchExercises]);
 
   const bodyParts = [
     { value: "back", label: "Espalda" },
@@ -81,15 +113,12 @@ const ExerciseList: React.FC = () => {
     "Sábado",
     "Domingo",
   ];
-  
-  const { addNotification } = useNotificationStore();
-  const { request, isLoading: isRequestLoading } = useOfflineRequest();
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
-        setError("Debes iniciar sesión para crear una rutina.");
+        setLocalError("Debes iniciar sesión para crear una rutina.");
         navigate("/login");
       } else {
         setUserEmail(user.email || "");
@@ -98,100 +127,27 @@ const ExerciseList: React.FC = () => {
     checkAuth();
   }, [navigate]);
 
-  const fetchExercises = async () => {
-    try {
-      const result = await request(`${import.meta.env.VITE_BACKEND_URL}/api/exercises/get`, {
-        method: 'GET',
-        offlineKey: 'exercises-list'
-      });
-
-      if (result.success) {
-        setExercises(result.data);
-        if (result.offline) {
-          addNotification(
-            "📱 Datos Offline",
-            "Se están mostrando los últimos ejercicios guardados localmente.",
-            "warning"
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching exercises:", error);
-      // Intentar obtener datos offline
-      const offlineData = await offlineSyncManager.getData('exercises-list');
-      if (offlineData) {
-        setExercises(offlineData);
-        addNotification(
-          "📱 Datos Offline",
-          "Se están mostrando los últimos ejercicios guardados localmente.",
-          "warning"
-        );
-      }
+  const loadExercisesForBodyPart = useCallback(() => {
+    if (selectedBodyPart) {
+      fetchExercises(selectedBodyPart, backendUrl);
     }
-  };
-
-  const saveExercise = async (exerciseData: any) => {
-    try {
-      const result = await request(`${import.meta.env.VITE_BACKEND_URL}/api/exercises/save`, {
-        method: 'POST',
-        body: exerciseData,
-        offlineKey: 'exercises-list'
-      });
-
-      if (result.success) {
-        if (!result.offline) {
-          addNotification(
-            "✅ Ejercicio Guardado",
-            "El ejercicio ha sido guardado correctamente.",
-            "success"
-          );
-        }
-        await fetchExercises();
-      }
-    } catch (error) {
-      console.error("Error saving exercise:", error);
-      addNotification(
-        "⚠️ Error al Guardar",
-        "No se pudo guardar el ejercicio. Se guardará localmente.",
-        "error"
-      );
-    }
-  };
-
-  const deleteExercise = async (exerciseId: string) => {
-    try {
-      const result = await request(`${import.meta.env.VITE_BACKEND_URL}/api/exercises/delete`, {
-        method: 'DELETE',
-        body: { exerciseId },
-        offlineKey: 'exercises-list'
-      });
-
-      if (result.success) {
-        if (!result.offline) {
-          addNotification(
-            "✅ Ejercicio Eliminado",
-            "El ejercicio ha sido eliminado correctamente.",
-            "success"
-          );
-        }
-        await fetchExercises();
-      }
-    } catch (error) {
-      console.error("Error deleting exercise:", error);
-      addNotification(
-        "⚠️ Error al Eliminar",
-        "No se pudo eliminar el ejercicio. Se guardará localmente.",
-        "error"
-      );
-    }
-  };
+  }, [selectedBodyPart, backendUrl, fetchExercises]);
 
   useEffect(() => {
-    fetchExercises();
-  }, [fetchExercises]);
+    loadExercisesForBodyPart();
+  }, [loadExercisesForBodyPart]);
+
+  // Mostrar error del hook si existe
+  useEffect(() => {
+    if (exercisesError) {
+      setLocalError(exercisesError);
+    }
+  }, [exercisesError]);
 
   const handleBodyPartChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedBodyPart(e.target.value);
+    setSelectedExercise(null);
+    setLocalError(null); // Limpiar errores al cambiar selección
   };
 
   const handleExerciseClick = (exercise: Exercise) => {
@@ -247,7 +203,7 @@ const ExerciseList: React.FC = () => {
   const handleSaveRoutine = async () => {
     if (fromRoutineDetails) {
       if (newRoutine.exercises.length === 0) {
-        setError("Por favor, agrega al menos un ejercicio.");
+        setLocalError("Por favor, agrega al menos un ejercicio.");
         return;
       }
 
@@ -267,7 +223,7 @@ const ExerciseList: React.FC = () => {
         navigate(`/routine-details?id=${routineId}`);
       } catch (err) {
         console.error(err);
-        setError("Error al actualizar la rutina");
+        setLocalError("Error al actualizar la rutina");
         
         addNotification(
           "Error",
@@ -279,7 +235,7 @@ const ExerciseList: React.FC = () => {
       }
     } else {
       if (!newRoutine.day || !newRoutine.name || newRoutine.exercises.length === 0) {
-        setError("Por favor, completa todos los campos y agrega al menos un ejercicio.");
+        setLocalError("Por favor, completa todos los campos y agrega al menos un ejercicio.");
         return;
       }
 
@@ -302,7 +258,7 @@ const ExerciseList: React.FC = () => {
         navigate("/routines");
       } catch (err) {
         console.error(err);
-        setError("Error al guardar la rutina");
+        setLocalError("Error al guardar la rutina");
         
         addNotification(
           "Error",
@@ -449,17 +405,17 @@ const ExerciseList: React.FC = () => {
                   Cargando...
                 </motion.p>
               )}
-              {error && (
+              {localError && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.6 }}
                   className={`text-red-500 text-center text-base flex-1 flex items-center justify-center`}
                 >
-                  {error}
+                  {localError}
                 </motion.p>
               )}
-              {!loading && !error && selectedBodyPart && exercises.length > 0 && (
+              {!loading && !localError && selectedBodyPart && exercises.length > 0 && (
                 <div className="flex flex-col gap-3 flex-1 overflow-y-auto custom-scroll">
                   {exercises.map((exercise, index) => (
                     <motion.div
@@ -484,7 +440,7 @@ const ExerciseList: React.FC = () => {
                   ))}
                 </div>
               )}
-              {!loading && !error && selectedBodyPart && exercises.length === 0 && (
+              {!loading && !localError && selectedBodyPart && exercises.length === 0 && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
