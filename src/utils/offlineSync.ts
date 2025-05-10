@@ -12,13 +12,32 @@ interface PendingSyncRequest {
   headers: HeadersInit;
   body: any;
   timestamp: number;
+  routeType: string; // Para identificar el tipo de ruta (exercises, food, water, etc.)
+  retryCount: number; // Para intentos de sincronización
 }
+
+// Definir tipos de rutas soportadas para mejor organización
+type RouteType = 'exercises' | 'food' | 'water' | 'profile' | 'goals' | 'workouts' | 'progress' | 'other';
 
 class OfflineSyncManager {
   private static instance: OfflineSyncManager;
   private offlineData: Map<string, OfflineData> = new Map();
   private pendingSyncRequests: Map<string, PendingSyncRequest> = new Map();
   private isOnline: boolean = navigator.onLine;
+  private isSyncing: boolean = false;
+  private offlineRoutes: Set<string> = new Set([
+    '/api/exercises',
+    '/api/foods',
+    '/api/water',
+    '/api/profile',
+    '/api/goals',
+    '/api/workouts',
+    '/api/progress'
+  ]);
+  
+  // Cache para datos frecuentemente usados
+  private routeDataCache: Map<string, {data: any, expiresAt: number}> = new Map();
+  private cacheExpiryTime = 30 * 60 * 1000; // 30 minutos
 
   private constructor() {
     this.initializeEventListeners();
@@ -36,6 +55,20 @@ class OfflineSyncManager {
   private initializeEventListeners() {
     window.addEventListener('online', this.handleOnline.bind(this));
     window.addEventListener('offline', this.handleOffline.bind(this));
+    
+    // Verificar periódicamente la conexión y sincronizar si es necesario
+    setInterval(() => {
+      if (navigator.onLine && !this.isOnline) {
+        this.handleOnline();
+      } else if (!navigator.onLine && this.isOnline) {
+        this.handleOffline();
+      }
+      
+      // Intentar sincronizar periódicamente si hay solicitudes pendientes
+      if (navigator.onLine && this.pendingSyncRequests.size > 0 && !this.isSyncing) {
+        this.syncData();
+      }
+    }, 30000); // Cada 30 segundos
   }
 
   private async loadOfflineData() {
@@ -83,6 +116,8 @@ class OfflineSyncManager {
   }
 
   private handleOnline() {
+    if (this.isOnline) return; // Evitar doble procesamiento
+    
     console.log('[OfflineSync] Conexión recuperada, sincronizando datos...');
     this.isOnline = true;
     
@@ -98,6 +133,8 @@ class OfflineSyncManager {
   }
 
   private handleOffline() {
+    if (!this.isOnline) return; // Evitar doble procesamiento
+    
     console.log('[OfflineSync] Conexión perdida, entrando en modo offline');
     this.isOnline = false;
     
@@ -135,6 +172,12 @@ class OfflineSyncManager {
 
     this.offlineData.set(key, offlineData);
     await this.saveOfflineData();
+    
+    // Actualizar la caché
+    this.routeDataCache.set(key, {
+      data,
+      expiresAt: Date.now() + this.cacheExpiryTime
+    });
 
     if (this.isOnline) {
       await this.syncData();
@@ -150,105 +193,170 @@ class OfflineSyncManager {
     }
   }
 
-  public async storePendingRequest(key: string, request: PendingSyncRequest) {
-    this.pendingSyncRequests.set(key, request);
+  public async storePendingRequest(key: string, request: Omit<PendingSyncRequest, 'retryCount' | 'routeType'>) {
+    // Determinar el tipo de ruta
+    let routeType: RouteType = 'other';
+    
+    if (request.url.includes('/exercises')) routeType = 'exercises';
+    else if (request.url.includes('/foods')) routeType = 'food';
+    else if (request.url.includes('/water')) routeType = 'water';
+    else if (request.url.includes('/profile')) routeType = 'profile';
+    else if (request.url.includes('/goals')) routeType = 'goals';
+    else if (request.url.includes('/workouts')) routeType = 'workouts';
+    else if (request.url.includes('/progress')) routeType = 'progress';
+
+    const fullRequest: PendingSyncRequest = {
+      ...request,
+      routeType,
+      retryCount: 0
+    };
+    
+    this.pendingSyncRequests.set(key, fullRequest);
     await this.savePendingSyncRequests();
     
-    console.log(`[OfflineSync] Petición guardada para sincronización posterior: ${key}`);
+    console.log(`[OfflineSync] Petición guardada para sincronización posterior: ${key} (${routeType})`);
   }
 
   public async getData(key: string): Promise<any | null> {
+    // Primero verificar en la caché para respuestas rápidas
+    const cachedItem = this.routeDataCache.get(key);
+    if (cachedItem && cachedItem.expiresAt > Date.now()) {
+      return cachedItem.data;
+    }
+    
+    // Si no está en caché o expiró, buscar en offlineData
     const offlineData = this.offlineData.get(key);
-    return offlineData ? offlineData.data : null;
+    
+    if (offlineData) {
+      // Actualizar la caché
+      this.routeDataCache.set(key, {
+        data: offlineData.data,
+        expiresAt: Date.now() + this.cacheExpiryTime
+      });
+      return offlineData.data;
+    }
+    
+    return null;
+  }
+
+  public async prefetchRoute(route: string, params: any = {}) {
+    // Prefetch de datos para rutas específicas
+    if (!this.isOnline) return;
+    
+    try {
+      const queryParams = new URLSearchParams(params).toString();
+      const url = `${route}${queryParams ? '?' + queryParams : ''}`;
+      
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        await this.storeData(url, data);
+        console.log(`[OfflineSync] Prefetch completado para ruta: ${url}`);
+      }
+    } catch (error) {
+      console.error(`[OfflineSync] Error en prefetch de ruta ${route}:`, error);
+    }
   }
 
   private async syncData() {
-    if (!this.isOnline) return;
+    if (!this.isOnline || this.isSyncing) return;
+    this.isSyncing = true;
 
     let notificationStore;
     try {
       notificationStore = useNotificationStore.getState();
     } catch (error) {
       console.error('[OfflineSync] Error obteniendo el store de notificaciones:', error);
-      // Continuar sin mostrar notificaciones
     }
 
     const syncPromises: Promise<void>[] = [];
     const failedSyncs: string[] = [];
     let syncSuccessCount = 0;
 
-    // Primero sincronizamos las peticiones pendientes
-    if (this.pendingSyncRequests.size > 0) {
-      console.log('[OfflineSync] Sincronizando peticiones pendientes:', this.pendingSyncRequests.size);
+    try {
+      // Agrupar las solicitudes por tipo para sincronizar en orden correcto
+      const requestsByType: Record<RouteType, PendingSyncRequest[]> = {
+        profile: [],
+        goals: [],
+        exercises: [],
+        food: [],
+        water: [],
+        workouts: [],
+        progress: [],
+        other: []
+      };
       
+      // Organizar solicitudes por tipo
       for (const [key, request] of this.pendingSyncRequests) {
-        try {
-          const response = await fetch(request.url, {
-            method: request.method,
-            headers: {
-              'Content-Type': 'application/json',
-              ...request.headers,
-            },
-            body: JSON.stringify(request.body),
-          });
+        requestsByType[request.routeType as RouteType].push({...request, __key: key});
+      }
+      
+      // Orden de sincronización:
+      // 1. Datos de perfil primero (son la base)
+      // 2. Objetivos y ejercicios
+      // 3. Comidas, agua y entrenamientos
+      // 4. Progreso (que depende de los anteriores)
+      // 5. Otros
+      const syncOrder: RouteType[] = ['profile', 'goals', 'exercises', 'food', 'water', 'workouts', 'progress', 'other'];
+      
+      for (const routeType of syncOrder) {
+        const requests = requestsByType[routeType];
+        if (requests.length === 0) continue;
+        
+        console.log(`[OfflineSync] Sincronizando ${requests.length} peticiones de tipo: ${routeType}`);
+        
+        // Sincronizar cada solicitud de este tipo
+        for (const request of requests) {
+          const key = (request as any).__key;
+          
+          try {
+            const response = await fetch(request.url, {
+              method: request.method,
+              headers: {
+                'Content-Type': 'application/json',
+                ...request.headers,
+              },
+              body: JSON.stringify(request.body),
+            });
 
-          if (response.ok) {
-            console.log(`[OfflineSync] Petición sincronizada con éxito: ${key}`);
-            this.pendingSyncRequests.delete(key);
-            syncSuccessCount++;
-            syncPromises.push(Promise.resolve());
-          } else {
-            console.error(`[OfflineSync] Error al sincronizar petición ${key}: ${response.status} ${response.statusText}`);
-            failedSyncs.push(key);
-            syncPromises.push(Promise.reject(new Error(`HTTP error: ${response.status}`)));
+            if (response.ok) {
+              console.log(`[OfflineSync] Petición sincronizada con éxito: ${key}`);
+              this.pendingSyncRequests.delete(key);
+              syncSuccessCount++;
+            } else {
+              console.error(`[OfflineSync] Error al sincronizar petición ${key}: ${response.status} ${response.statusText}`);
+              
+              // Incrementar contador de reintentos
+              const updatedRequest = {...request};
+              updatedRequest.retryCount += 1;
+              
+              // Si superó el límite de reintentos, marcar como fallido definitivamente
+              if (updatedRequest.retryCount > 5) {
+                failedSyncs.push(key);
+                this.pendingSyncRequests.delete(key);
+              } else {
+                this.pendingSyncRequests.set(key, updatedRequest);
+              }
+            }
+          } catch (error) {
+            console.error(`[OfflineSync] Error sincronizando petición ${key}:`, error);
+            
+            // Incrementar contador de reintentos
+            const updatedRequest = {...request};
+            updatedRequest.retryCount += 1;
+            
+            if (updatedRequest.retryCount > 5) {
+              failedSyncs.push(key);
+              this.pendingSyncRequests.delete(key);
+            } else {
+              this.pendingSyncRequests.set(key, updatedRequest);
+            }
           }
-        } catch (error) {
-          console.error(`[OfflineSync] Error sincronizando petición ${key}:`, error);
-          failedSyncs.push(key);
-          syncPromises.push(Promise.reject(error));
         }
       }
       
       // Guardar el estado actualizado de peticiones pendientes
       await this.savePendingSyncRequests();
-    }
-
-    // Sincronizar datos normales si es necesario
-    if (this.offlineData.size > 0) {
-      console.log('[OfflineSync] Sincronizando datos:', this.offlineData.size);
-      
-      for (const [key, offlineData] of this.offlineData) {
-        // Solo sincronizamos datos que representan llamadas a la API
-        if (key.startsWith('http')) {
-          try {
-            const response = await fetch(key, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(offlineData.data),
-            });
-
-            if (response.ok) {
-              console.log(`[OfflineSync] Datos sincronizados con éxito: ${key}`);
-              syncSuccessCount++;
-              syncPromises.push(Promise.resolve());
-            } else {
-              console.error(`[OfflineSync] Error al sincronizar datos ${key}: ${response.status} ${response.statusText}`);
-              failedSyncs.push(key);
-              syncPromises.push(Promise.reject(new Error(`HTTP error: ${response.status}`)));
-            }
-          } catch (error) {
-            console.error(`[OfflineSync] Error sincronizando datos ${key}:`, error);
-            failedSyncs.push(key);
-            syncPromises.push(Promise.reject(error));
-          }
-        }
-      }
-    }
-
-    try {
-      await Promise.allSettled(syncPromises);
       
       // Mostrar notificación apropiada basada en resultados
       if (notificationStore && notificationStore.addNotification) {
@@ -283,6 +391,8 @@ class OfflineSyncManager {
           'error'
         );
       }
+    } finally {
+      this.isSyncing = false;
     }
   }
 
@@ -296,6 +406,29 @@ class OfflineSyncManager {
 
   public getPendingSyncRequestsCount(): number {
     return this.pendingSyncRequests.size;
+  }
+  
+  public registerOfflineRoute(route: string): void {
+    this.offlineRoutes.add(route);
+  }
+  
+  public isRouteOfflineSupported(route: string): boolean {
+    // Comprobar si alguna ruta registrada coincide con la ruta solicitada
+    for (const offlineRoute of this.offlineRoutes) {
+      if (route.includes(offlineRoute)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  public clearExpiredCache(): void {
+    const now = Date.now();
+    for (const [key, value] of this.routeDataCache.entries()) {
+      if (value.expiresAt < now) {
+        this.routeDataCache.delete(key);
+      }
+    }
   }
 }
 

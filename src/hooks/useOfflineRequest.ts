@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { offlineSyncManager } from '../utils/offlineSync';
 import { useNotificationStore } from '../store/notificationStore';
 
@@ -7,12 +7,36 @@ interface RequestOptions {
   headers?: HeadersInit;
   body?: any;
   offlineKey?: string;
+  prefetch?: boolean; // Nueva opción para prefetch de datos
+  routeType?: string; // Tipo de ruta para organizar la sincronización
 }
 
 export const useOfflineRequest = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const { addNotification } = useNotificationStore();
+  const [pendingSyncCount, setPendingSyncCount] = useState(offlineSyncManager.getPendingSyncRequestsCount());
+
+  // Monitorear cambios en el estado de la conexión
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    // Actualizar el contador de sincronizaciones pendientes periódicamente
+    const interval = setInterval(() => {
+      setPendingSyncCount(offlineSyncManager.getPendingSyncRequestsCount());
+    }, 10000);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      clearInterval(interval);
+    };
+  }, []);
 
   const request = useCallback(async (url: string, options: RequestOptions = {}) => {
     const {
@@ -20,13 +44,23 @@ export const useOfflineRequest = () => {
       headers = {},
       body,
       offlineKey = url,
+      prefetch = false,
+      routeType
     } = options;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // Si estamos offline
+      // Verificar si la ruta está soportada para modo offline
+      const isOfflineSupported = offlineSyncManager.isRouteOfflineSupported(url);
+      
+      // Si es una petición GET y se ha solicitado prefetch, intentar precargar
+      if (method === 'GET' && prefetch && navigator.onLine) {
+        offlineSyncManager.prefetchRoute(url, body);
+      }
+
+      // Si estamos offline o la ruta no es soportada en modo offline
       if (!navigator.onLine) {
         // Para peticiones GET, intentar obtener datos offline
         if (method === 'GET') {
@@ -39,7 +73,24 @@ export const useOfflineRequest = () => {
             );
             return { success: true, data: offlineData, offline: true };
           }
-          throw new Error('No hay datos offline disponibles');
+          
+          // Si no hay datos offline para esta ruta específica pero es importante mostrar algo
+          if (isOfflineSupported) {
+            throw new Error('No hay datos offline disponibles para esta ruta');
+          } else {
+            // Intentar buscar datos similares por tipo de ruta
+            // (este es un ejemplo, habría que implementar la lógica según las necesidades)
+            const fallbackData = await getFallbackData(url);
+            if (fallbackData) {
+              addNotification(
+                '📱 Datos Offline Limitados',
+                'Se están mostrando datos alternativos en modo offline.',
+                'warning'
+              );
+              return { success: true, data: fallbackData, offline: true, fallback: true };
+            }
+            throw new Error('Esta funcionalidad requiere conexión a internet');
+          }
         }
         
         // Para otras peticiones, guardar para sincronización posterior
@@ -53,6 +104,8 @@ export const useOfflineRequest = () => {
             body,
             timestamp: Date.now(),
           });
+
+          setPendingSyncCount(offlineSyncManager.getPendingSyncRequestsCount());
 
           addNotification(
             '💾 Datos Guardados Offline',
@@ -81,7 +134,7 @@ export const useOfflineRequest = () => {
       const data = await response.json();
 
       // Guardar datos offline para peticiones GET exitosas
-      if (method === 'GET') {
+      if (method === 'GET' && isOfflineSupported) {
         await offlineSyncManager.storeData(offlineKey, data);
       }
 
@@ -102,6 +155,8 @@ export const useOfflineRequest = () => {
             body,
             timestamp: Date.now(),
           });
+
+          setPendingSyncCount(offlineSyncManager.getPendingSyncRequestsCount());
 
           addNotification(
             '⚠️ Error de Conexión',
@@ -126,6 +181,17 @@ export const useOfflineRequest = () => {
           );
           return { success: true, data: offlineData, offline: true };
         }
+        
+        // Si no hay datos específicos, intentar buscar datos similares
+        const fallbackData = await getFallbackData(url);
+        if (fallbackData) {
+          addNotification(
+            '📱 Datos Alternativos',
+            'Se están mostrando datos alternativos debido a un error de conexión.',
+            'warning'
+          );
+          return { success: true, data: fallbackData, offline: true, fallback: true };
+        }
       }
 
       throw error;
@@ -134,10 +200,57 @@ export const useOfflineRequest = () => {
     }
   }, [addNotification]);
 
+  // Función para encontrar datos alternativos cuando no hay datos específicos
+  const getFallbackData = async (url: string): Promise<any | null> => {
+    // Esta función se puede personalizar según las necesidades de la aplicación
+    // Por ejemplo, si no hay datos de comidas para una fecha, mostrar datos de otra fecha
+    
+    try {
+      if (url.includes('/api/foods')) {
+        // Buscar datos de comidas de cualquier fecha disponible
+        const keys = Object.keys(localStorage);
+        const foodKeys = keys.filter(key => key.startsWith('food-'));
+        
+        if (foodKeys.length > 0) {
+          // Usar los datos más recientes
+          const mostRecentKey = foodKeys.sort().pop();
+          if (mostRecentKey) {
+            return JSON.parse(localStorage.getItem(mostRecentKey) || '{}');
+          }
+        }
+      } else if (url.includes('/api/exercises')) {
+        // Buscar ejercicios de cualquier parte del cuerpo
+        const keys = Object.keys(localStorage);
+        const exerciseKeys = keys.filter(key => key.startsWith('exercises-'));
+        
+        if (exerciseKeys.length > 0) {
+          // Usar cualquier conjunto de ejercicios disponible
+          const anyExerciseKey = exerciseKeys[0];
+          return JSON.parse(localStorage.getItem(anyExerciseKey) || '[]');
+        }
+      } else if (url.includes('/api/water')) {
+        // Datos básicos de agua para mostrar algo
+        return { history: [], recommendation: 2000 };
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error al buscar datos alternativos:', error);
+      return null;
+    }
+  };
+
+  // Función para marcar una ruta como soportada offline
+  const registerOfflineRoute = useCallback((route: string) => {
+    offlineSyncManager.registerOfflineRoute(route);
+  }, []);
+
   return {
     request,
     isLoading,
     error,
-    pendingSyncCount: offlineSyncManager.getPendingSyncRequestsCount(),
+    isOffline,
+    pendingSyncCount,
+    registerOfflineRoute
   };
 }; 

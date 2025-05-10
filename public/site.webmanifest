@@ -1,6 +1,7 @@
 {
   "name": "All In One Fitness App",
   "short_name": "All In One",
+  "description": "Aplicación completa para seguimiento fitness, nutrición y ejercicios con soporte offline",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -12,10 +13,45 @@
       "src": "/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
+  "start_url": "/dashboard",
   "theme_color": "#282c3c",
   "background_color": "#282c3c",
-  "display": "standalone"
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "es-ES",
+  "prefer_related_applications": false,
+  "categories": ["fitness", "health", "food", "sports"],
+  "screenshots": [
+    {
+      "src": "/previews/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    },
+    {
+      "src": "/previews/ejercicios-rutina.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    },
+    {
+      "src": "/previews/registro-alimentos.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ]
 }
