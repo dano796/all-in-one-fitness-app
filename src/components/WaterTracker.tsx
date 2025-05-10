@@ -12,6 +12,8 @@ import { motion } from "framer-motion";
 import ButtonToolTip from "../components/ButtonToolTip";
 import { useTheme } from "../pages/ThemeContext";
 import { useNotificationStore } from "../store/notificationStore";
+import { useOfflineRequest } from '../hooks/useOfflineRequest';
+import { offlineSyncManager } from '../utils/offlineSync';
 
 const preloadImages = [BotellaVacia, Botella25, Botella75, Botella100];
 preloadImages.forEach((src) => {
@@ -114,16 +116,14 @@ const WaterTracker: React.FC = () => {
   const [waterUnitStages, setWaterUnitStages] = useState<number[]>([]);
   const [isToday, setIsToday] = useState<boolean>(true);
   const { addNotification } = useNotificationStore();
-  // Estado para rastrear si ya mostramos la notificación de mitad de objetivo
   const [halfwayNotificationShown, setHalfwayNotificationShown] = useState<boolean>(false);
-
-  // Nuevos estados para manejar el tamaño de la botella
   const [bottleSize, setBottleSize] = useState<number>(DEFAULT_BOTTLE_SIZE);
   const [showBottleSetting, setShowBottleSetting] = useState<boolean>(false);
   const [selectedBottleSize, setSelectedBottleSize] =
     useState<number>(DEFAULT_BOTTLE_SIZE);
   const [customBottleSize, setCustomBottleSize] = useState<string>("");
   const [useCustomSize, setUseCustomSize] = useState<boolean>(false);
+  const { request, isLoading: isRequestLoading } = useOfflineRequest();
 
   const totalWaterUnits =
     Math.ceil(waterGoal.goalMl / waterGoal.unitsPerBottle) || 1;
@@ -142,49 +142,37 @@ const WaterTracker: React.FC = () => {
     }
   }, [navigate]);
 
-  const fetchWaterData = useCallback(async () => {
-    if (!userEmail || !date) return;
+  const fetchWaterData = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/water/user`,
-        {
-          params: { email: userEmail, date: date },
+      const result = await request(`${import.meta.env.VITE_BACKEND_URL}/api/water/get?email=${userEmail}&date=${date}`, {
+        method: 'GET',
+        offlineKey: `water-${date}-${userEmail}`
+      });
+
+      if (result.success) {
+        setFilledWaterUnits(result.amount || 0);
+        if (result.offline) {
+          addNotification(
+            "📱 Datos Offline",
+            "Se están mostrando los últimos datos guardados localmente.",
+            "warning"
+          );
         }
-      );
-      const aguasllenadas = response.data.aguasllenadas || 0;
-      setFilledWaterUnits(aguasllenadas);
-
-      // También recuperamos el tamaño de botella si está disponible en la respuesta
-      if (response.data.tamano_botella && response.data.tamano_botella > 0) {
-        const bottleSizeFromData = response.data.tamano_botella;
-        setBottleSize(bottleSizeFromData);
-        setSelectedBottleSize(bottleSizeFromData);
-        setWaterGoal((prev) => ({
-          ...prev,
-          unitsPerBottle: bottleSizeFromData,
-        }));
       }
-
-      const goalResponse = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/water/get-goal`,
-        {
-          params: { email: userEmail },
-        }
-      );
-
-      if (goalResponse.data && goalResponse.data.waterGoal) {
-        setWaterGoal((prev) => ({
-          ...prev,
-          goalMl: goalResponse.data.waterGoal,
-        }));
+    } catch (error) {
+      console.error("Error fetching water data:", error);
+      // Intentar obtener datos offline
+      const offlineData = await offlineSyncManager.getData(`water-${date}-${userEmail}`);
+      if (offlineData) {
+        setFilledWaterUnits(offlineData.amount || 0);
+        addNotification(
+          "📱 Datos Offline",
+          "Se están mostrando los últimos datos guardados localmente.",
+          "warning"
+        );
       }
-
-      setError(null);
-    } catch (err) {
-      console.log(err);
-      setError("Error al consultar los datos de agua.");
     }
-  }, [userEmail, date]);
+  };
 
   const saveWaterData = useCallback(
     async (aguasllenadas: number) => {
@@ -538,6 +526,38 @@ const WaterTracker: React.FC = () => {
   const infoText = {
     waterTrackerInfo:
       "Seguimiento de tu consumo diario de agua. Establece tu meta personalizada para mantener una hidratación adecuada.",
+  };
+
+  const updateWaterIntake = async (amount: number) => {
+    try {
+      const result = await request(`${import.meta.env.VITE_BACKEND_URL}/api/water/update`, {
+        method: 'POST',
+        body: {
+          email: userEmail,
+          amount,
+          date
+        },
+        offlineKey: `water-${date}-${userEmail}`
+      });
+
+      if (result.success) {
+        setFilledWaterUnits(amount);
+        if (!result.offline) {
+          addNotification(
+            "✅ Agua Registrada",
+            "Tu consumo de agua ha sido registrado correctamente.",
+            "success"
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error updating water intake:", error);
+      addNotification(
+        "⚠️ Error al Registrar",
+        "No se pudo registrar tu consumo de agua. Se guardará localmente.",
+        "error"
+      );
+    }
   };
 
   return (

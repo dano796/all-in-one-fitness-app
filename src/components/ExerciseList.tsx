@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import GalaxyBackground from "../components/GalaxyBackground";
 import { useTheme } from "../pages/ThemeContext";
 import { useNotificationStore } from "../store/notificationStore";
+import { useOfflineRequest } from '../hooks/useOfflineRequest';
+import { offlineSyncManager } from '../utils/offlineSync';
 
 interface Exercise {
   id: string;
@@ -81,6 +83,7 @@ const ExerciseList: React.FC = () => {
   ];
   
   const { addNotification } = useNotificationStore();
+  const { request, isLoading: isRequestLoading } = useOfflineRequest();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -95,34 +98,93 @@ const ExerciseList: React.FC = () => {
     checkAuth();
   }, [navigate]);
 
-  const fetchExercises = useCallback(async () => {
-    if (!selectedBodyPart) {
-      setExercises([]);
-      setSelectedExercise(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setExercises([]);
-    setSelectedExercise(null);
-
+  const fetchExercises = async () => {
     try {
-      const response = await axios.get<Exercise[]>(`${backendUrl}/api/exercises`, {
-        params: { bodyPart: selectedBodyPart, t: Date.now() },
-        headers: { "Content-Type": "application/json" },
+      const result = await request(`${import.meta.env.VITE_BACKEND_URL}/api/exercises/get`, {
+        method: 'GET',
+        offlineKey: 'exercises-list'
       });
-      setExercises(response.data);
-      if (response.data.length > 0) {
-        setSelectedExercise(response.data[0]);
+
+      if (result.success) {
+        setExercises(result.data);
+        if (result.offline) {
+          addNotification(
+            "📱 Datos Offline",
+            "Se están mostrando los últimos ejercicios guardados localmente.",
+            "warning"
+          );
+        }
       }
-    } catch (err) {
-      console.error(err);
-      setError("Error al consultar los ejercicios");
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching exercises:", error);
+      // Intentar obtener datos offline
+      const offlineData = await offlineSyncManager.getData('exercises-list');
+      if (offlineData) {
+        setExercises(offlineData);
+        addNotification(
+          "📱 Datos Offline",
+          "Se están mostrando los últimos ejercicios guardados localmente.",
+          "warning"
+        );
+      }
     }
-  }, [backendUrl, selectedBodyPart]);
+  };
+
+  const saveExercise = async (exerciseData: any) => {
+    try {
+      const result = await request(`${import.meta.env.VITE_BACKEND_URL}/api/exercises/save`, {
+        method: 'POST',
+        body: exerciseData,
+        offlineKey: 'exercises-list'
+      });
+
+      if (result.success) {
+        if (!result.offline) {
+          addNotification(
+            "✅ Ejercicio Guardado",
+            "El ejercicio ha sido guardado correctamente.",
+            "success"
+          );
+        }
+        await fetchExercises();
+      }
+    } catch (error) {
+      console.error("Error saving exercise:", error);
+      addNotification(
+        "⚠️ Error al Guardar",
+        "No se pudo guardar el ejercicio. Se guardará localmente.",
+        "error"
+      );
+    }
+  };
+
+  const deleteExercise = async (exerciseId: string) => {
+    try {
+      const result = await request(`${import.meta.env.VITE_BACKEND_URL}/api/exercises/delete`, {
+        method: 'DELETE',
+        body: { exerciseId },
+        offlineKey: 'exercises-list'
+      });
+
+      if (result.success) {
+        if (!result.offline) {
+          addNotification(
+            "✅ Ejercicio Eliminado",
+            "El ejercicio ha sido eliminado correctamente.",
+            "success"
+          );
+        }
+        await fetchExercises();
+      }
+    } catch (error) {
+      console.error("Error deleting exercise:", error);
+      addNotification(
+        "⚠️ Error al Eliminar",
+        "No se pudo eliminar el ejercicio. Se guardará localmente.",
+        "error"
+      );
+    }
+  };
 
   useEffect(() => {
     fetchExercises();

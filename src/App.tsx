@@ -13,7 +13,11 @@ import { ThemeProvider } from "./pages/ThemeContext";
 import ChatBot from "./components/ChatBot";
 import { useNotificationStore } from "./store/notificationStore";
 import ToastContainer from "./components/ToastContainer";
+import { ServiceWorkerUpdate } from "./components/pwa/ServiceWorkerUpdate";
 import axios from "axios";
+import { registerServiceWorker } from './utils/serviceWorkerRegistration';
+import { offlineSyncManager } from './utils/offlineSync';
+
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -187,18 +191,29 @@ function App() {
     };
 
     const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      if (mounted) {
-        setUser(user);
-        setSessionId(user?.id || null);
-        setIsLoading(false);
+        if (mounted) {
+          setUser(user);
+          setSessionId(user?.id || null);
+          setIsLoading(false);
 
-        if (user?.email) {
-          checkCalorieGoal(user.email);
+          if (user?.email) {
+            checkCalorieGoal(user.email);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        // Intentar obtener datos offline si hay error
+        const offlineUser = await offlineSyncManager.getData('user');
+        if (offlineUser) {
+          setUser(offlineUser);
+          setSessionId(offlineUser.id);
+          setIsLoading(false);
         }
       }
     };
@@ -208,6 +223,7 @@ function App() {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const currentUser = session?.user;
+        
         setUser(currentUser || null);
         setSessionId(currentUser?.id || null);
         setIsLoading(false);
@@ -240,11 +256,37 @@ function App() {
       }
     );
 
+    // Verificar estado de conexión
+    const handleOnline = () => {
+      addNotification(
+        "✅ Conexión Restaurada",
+        "Se ha restaurado la conexión a internet. Los datos offline se sincronizarán automáticamente.",
+        "success"
+      );
+    };
+
+    const handleOffline = () => {
+      addNotification(
+        "⚠️ Sin Conexión",
+        "Estás trabajando en modo offline. Los cambios se guardarán localmente y se sincronizarán cuando vuelvas a estar en línea.",
+        "warning"
+      );
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
     return () => {
       mounted = false;
       authListener.subscription.unsubscribe();
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, [addNotification, setSessionId]);
+
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
 
   const renderRoutes = () => (
     <Routes>
@@ -297,18 +339,19 @@ function App() {
   );
 
   return (
-    <Router>
-      <ThemeProvider>
+    <ThemeProvider>
+      <Router>
         <Suspense fallback={<Loader />}>
           <div className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
             {renderRoutes()}
             {isLoading && <Loader />}
             <ChatBot user={user} />
             <ToastContainer />
+            <ServiceWorkerUpdate />
           </div>
         </Suspense>
-      </ThemeProvider>
-    </Router>
+      </Router>
+    </ThemeProvider>
   );
 }
 

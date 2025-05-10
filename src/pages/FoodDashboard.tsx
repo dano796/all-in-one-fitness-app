@@ -23,6 +23,9 @@ import { motion } from "framer-motion";
 import GalaxyBackground from "../components/GalaxyBackground";
 import ButtonToolTip from "../components/ButtonToolTip";
 import { useTheme } from "../pages/ThemeContext";
+import { useOfflineRequest } from '../hooks/useOfflineRequest';
+import { offlineSyncManager } from '../utils/offlineSync';
+import { useNotificationStore } from '../store/notificationStore';
 
 ChartJS.register(
   CategoryScale,
@@ -94,6 +97,9 @@ const FoodDashboard: React.FC = () => {
   const [customCalorieGoal, setCustomCalorieGoal] = useState<string>("");
   const [calorieGoalError, setCalorieGoalError] = useState<string | null>(null);
   const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+  const { request, isLoading: isRequestLoading } = useOfflineRequest();
+  const { addNotification } = useNotificationStore();
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -455,6 +461,102 @@ const FoodDashboard: React.FC = () => {
       "Muestra tu resumen diario de calorías consumidas, restantes según tu límite diario establecido, y los macronutrientes (carbohidratos, proteínas y grasas) consumidos en relación con tus objetivos personalizados.",
     nutrition:
       "Muestra el desglose de tus comidas diarias. Puedes hacer clic en cada comida para ver detalles o agregar nuevos alimentos usando el botón '+' que aparece a la derecha.",
+  };
+
+  const fetchFoodData = async () => {
+    try {
+      const result = await request(`${import.meta.env.VITE_BACKEND_URL}/api/food/get-daily?email=${userEmail}&date=${selectedDate}`, {
+        method: 'GET',
+        offlineKey: `food-${selectedDate}-${userEmail}`
+      });
+
+      if (result.success) {
+        setFoodsData(result.data);
+        if (result.offline) {
+          addNotification(
+            "📱 Datos Offline",
+            "Se están mostrando los últimos datos guardados localmente.",
+            "warning"
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching food data:", error);
+      // Intentar obtener datos offline
+      const offlineData = await offlineSyncManager.getData(`food-${selectedDate}-${userEmail}`);
+      if (offlineData) {
+        setFoodsData(offlineData);
+        addNotification(
+          "📱 Datos Offline",
+          "Se están mostrando los últimos datos guardados localmente.",
+          "warning"
+        );
+      }
+    }
+  };
+
+  const addFood = async (foodData: any) => {
+    try {
+      const result = await request(`${import.meta.env.VITE_BACKEND_URL}/api/food/add`, {
+        method: 'POST',
+        body: {
+          ...foodData,
+          email: userEmail,
+          date: selectedDate
+        },
+        offlineKey: `food-${selectedDate}-${userEmail}`
+      });
+
+      if (result.success) {
+        if (!result.offline) {
+          addNotification(
+            "✅ Comida Registrada",
+            "Tu comida ha sido registrada correctamente.",
+            "success"
+          );
+        }
+        await fetchFoodData();
+      }
+    } catch (error) {
+      console.error("Error adding food:", error);
+      addNotification(
+        "⚠️ Error al Registrar",
+        "No se pudo registrar tu comida. Se guardará localmente.",
+        "error"
+      );
+    }
+  };
+
+  const removeFood = async (foodId: string) => {
+    try {
+      const result = await request(`${import.meta.env.VITE_BACKEND_URL}/api/food/remove`, {
+        method: 'DELETE',
+        body: {
+          foodId,
+          email: userEmail,
+          date: selectedDate
+        },
+        offlineKey: `food-${selectedDate}-${userEmail}`
+      });
+
+      if (result.success) {
+        if (!result.offline) {
+          addNotification(
+            "✅ Comida Eliminada",
+            "La comida ha sido eliminada correctamente.",
+            "success"
+          );
+        }
+        await fetchFoodData();
+      }
+    } catch (error) {
+      console.error("Error removing food:", error);
+      addNotification(
+        "⚠️ Error al Eliminar",
+        "No se pudo eliminar la comida. Se guardará localmente.",
+        "error"
+      );
+    }
   };
 
   return (
