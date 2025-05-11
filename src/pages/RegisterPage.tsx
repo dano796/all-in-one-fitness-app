@@ -159,7 +159,13 @@ const RegisterPage = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ usuario, correo, contraseña }),
+          body: JSON.stringify({
+            usuario,
+            correo,
+            contraseña,
+            termsAccepted: acceptedTerms,
+            termsAcceptedAt: new Date().toISOString(), // Registrar fecha de aceptación
+          }),
         }
       );
       const result = await response.json();
@@ -292,7 +298,7 @@ const RegisterPage = () => {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
             >
               <label
-                htmlFor="password"
+                htmlFor="username"
                 className={`block text-sm font-medium mb-1 ${
                   isDarkMode ? "text-gray-300" : "text-gray-700"
                 }`}
@@ -325,7 +331,7 @@ const RegisterPage = () => {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
             >
               <label
-                htmlFor="password"
+                htmlFor="email"
                 className={`block text-sm font-medium mb-1 ${
                   isDarkMode ? "text-gray-300" : "text-gray-700"
                 }`}
@@ -619,7 +625,7 @@ const RegisterPage = () => {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.6 }}
             >
               <label
-                htmlFor="password"
+                htmlFor="confirm-password"
                 className={`block text-sm font-medium mb-1 ${
                   isDarkMode ? "text-gray-300" : "text-gray-700"
                 }`}
@@ -739,9 +745,15 @@ const RegisterPage = () => {
                       : isDarkMode
                       ? "text-gray-400"
                       : "text-gray-500"
-                  } hover:text-[#ff9400] transition-colors duration-200`}
+                  } transition-colors duration-200`}
                 >
-                  Aceptar términos y condiciones
+                  Acepto los{" "}
+                  <Link
+                    to="/terms"
+                    className="font-medium text-[#ff9400] hover:underline"
+                  >
+                    Términos y Condiciones
+                  </Link>
                 </span>
               </label>
               {errors.terms && (
@@ -763,7 +775,26 @@ const RegisterPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: 1.1 }}
-            className={`mt-6 text-center text-sm space-y-2 ${
+            className={`mt-4 text-sm text-center ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            Al registrarte, autorizas el tratamiento de tus datos personales
+            conforme a nuestra{" "}
+            <Link
+              to="/terms"
+              className="font-medium text-[#ff9400] hover:underline"
+            >
+              Política de Tratamiento de Datos Personales
+            </Link>
+            . Puedes revocar esta autorización o ejercer tus derechos
+            contactándonos en aiofitnessapp@gmail.com.
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 1.2 }}
+            className={`mt-6 text-center text-sm ${
               isDarkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
@@ -781,4 +812,4 @@ const RegisterPage = () => {
   );
 };
 
-export default React.memo(RegisterPage);
+export default React.memo(RegisterPage);  

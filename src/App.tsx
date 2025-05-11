@@ -15,9 +15,8 @@ import { useNotificationStore } from "./store/notificationStore";
 import ToastContainer from "./components/ToastContainer";
 import { ServiceWorkerUpdate } from "./components/pwa/ServiceWorkerUpdate";
 import axios from "axios";
-import { registerServiceWorker } from './utils/serviceWorkerRegistration';
-import { offlineSyncManager } from './utils/offlineSync';
-
+import { registerServiceWorker } from "./utils/serviceWorkerRegistration";
+import { offlineSyncManager } from "./utils/offlineSync";
 
 // Lazy-loaded components
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -42,6 +41,7 @@ const FoodSearchIAPage = lazy(() => import("./pages/FoodSearchIAPage"));
 const SearchRecipes = lazy(() => import("./components/SearchRecipes"));
 const SubscriptionPlans = lazy(() => import("./components/SubscriptionPlans"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+const Terms = lazy(() => import("./components/terms")); // Nueva ruta para Terms
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -210,7 +210,7 @@ function App() {
       } catch (error) {
         console.error("Error fetching user:", error);
         // Intentar obtener datos offline si hay error
-        const offlineUser = await offlineSyncManager.getData('user');
+        const offlineUser = await offlineSyncManager.getData("user");
         if (offlineUser) {
           setUser(offlineUser);
           setSessionId(offlineUser.id);
@@ -224,12 +224,12 @@ function App() {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const currentUser = session?.user;
-        
+
         setUser(currentUser || null);
         setSessionId(currentUser?.id || null);
         setIsLoading(false);
 
-        if (event === 'SIGNED_IN') {
+        if (event === "SIGNED_IN") {
           addNotification(
             "✅ Sesión iniciada",
             "🔐 Has iniciado sesión correctamente.",
@@ -247,7 +247,7 @@ function App() {
               "info"
             );
           }, 3000);
-        } else if (event === 'SIGNED_OUT') {
+        } else if (event === "SIGNED_OUT") {
           addNotification(
             "👋 Sesión cerrada",
             "🔒 Has cerrado sesión correctamente.",
@@ -274,14 +274,14 @@ function App() {
       );
     };
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
       mounted = false;
       authListener.subscription.unsubscribe();
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, [addNotification, setSessionId]);
 
@@ -300,6 +300,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/terms" element={<Terms />} /> {/* Nueva ruta para Terms */}
       </Route>
 
       {/* Protected Routes */}
