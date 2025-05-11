@@ -124,7 +124,7 @@ const WaterTracker: React.FC = () => {
   const [useCustomSize, setUseCustomSize] = useState<boolean>(false);
   
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-  const { waterAmount, loading, error: waterError, fetchWaterData, updateWaterData } = useWaterTracker();
+  const { waterAmount, loading, error: waterError, isOnline, fetchWaterData, updateWaterData, updateWaterGoal, fetchWaterGoal } = useWaterTracker();
 
   const totalWaterUnits =
     Math.ceil(waterGoal.goalMl / waterGoal.unitsPerBottle) || 1;
@@ -156,6 +156,24 @@ const WaterTracker: React.FC = () => {
       setError("Error al cargar los datos de agua.");
     }
   }, [userEmail, date, backendUrl, fetchWaterData, waterAmount]);
+
+  const fetchWaterGoalInfo = useCallback(async () => {
+    if (!userEmail) return;
+    
+    try {
+      const goalMl = await fetchWaterGoal(userEmail, backendUrl);
+      if (goalMl !== null) {
+        setWaterGoal(prev => ({
+          ...prev,
+          goalMl
+        }));
+        console.log("[WaterTracker] Meta de agua cargada:", goalMl);
+      }
+    } catch (err) {
+      console.error("Error al obtener la meta de agua:", err);
+      setError("Error al consultar el objetivo de agua.");
+    }
+  }, [userEmail, backendUrl, fetchWaterGoal]);
 
   // Actualizar cuando cambie el waterAmount del hook
   useEffect(() => {
@@ -191,21 +209,15 @@ const WaterTracker: React.FC = () => {
   const saveWaterGoal = useCallback(
     async (goalMl: number) => {
       try {
-        await axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/api/water/set-goal`,
-          {
-            email: userEmail,
-            waterGoal: goalMl,
-          }
-        );
-        return true;
+        const success = await updateWaterGoal(userEmail, goalMl, backendUrl);
+        return success;
       } catch (err) {
         console.log(err);
         setError("Error al guardar el objetivo de agua.");
         return false;
       }
     },
-    [userEmail]
+    [userEmail, updateWaterGoal, backendUrl]
   );
 
   const fetchBottleSize = useCallback(async () => {
@@ -316,16 +328,12 @@ const WaterTracker: React.FC = () => {
     if (filledWaterUnits < totalWaterUnits && isToday) {
       const newFilledWaterUnits = filledWaterUnits + 1;
       setFilledWaterUnits(newFilledWaterUnits);
-      await saveWaterData(newFilledWaterUnits);
       
-      // Forzar una notificación cada vez que se añade agua (para probar)
-      addNotification(
-        "💧 Agua registrada",
-        `Has añadido ${waterGoal.unitsPerBottle} ml de agua (${newFilledWaterUnits}/${totalWaterUnits} botellas)`,
-        "info",
-        true,
-        "agua" // Categoría para mostrar icono de gota
-      );
+      // Usar updateWaterData del hook para soporte offline
+      await updateWaterData(userEmail, date, newFilledWaterUnits, backendUrl);
+      
+      // Las notificaciones se manejan ahora dentro del hook updateWaterData
+      // para diferenciar entre online y offline automáticamente
       
       // Verificar si se ha completado el objetivo de agua
       if (newFilledWaterUnits === totalWaterUnits) {
@@ -355,15 +363,17 @@ const WaterTracker: React.FC = () => {
         );
       }
     }
-  }, [filledWaterUnits, isToday, saveWaterData, totalWaterUnits, waterGoal.goalMl, waterGoal.unitsPerBottle, addNotification, halfwayNotificationShown]);
+  }, [filledWaterUnits, isToday, updateWaterData, totalWaterUnits, waterGoal.goalMl, userEmail, date, backendUrl, addNotification, halfwayNotificationShown]);
 
   const handleRemoveWaterUnit = useCallback(async () => {
     if (filledWaterUnits > 0 && isToday) {
       const newFilledWaterUnits = filledWaterUnits - 1;
       setFilledWaterUnits(newFilledWaterUnits);
-      await saveWaterData(newFilledWaterUnits);
+      
+      // Usar updateWaterData del hook para soporte offline
+      await updateWaterData(userEmail, date, newFilledWaterUnits, backendUrl);
     }
-  }, [filledWaterUnits, isToday, saveWaterData]);
+  }, [filledWaterUnits, isToday, updateWaterData, userEmail, date, backendUrl]);
 
   const handleDateChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -410,7 +420,8 @@ const WaterTracker: React.FC = () => {
 
     const goalInMl = goalUnit === "lt" ? numValue * 1000 : numValue;
 
-    const saveSuccess = await saveWaterGoal(goalInMl);
+    // Utilizar updateWaterGoal del hook para soporte offline
+    const saveSuccess = await updateWaterGoal(userEmail, goalInMl, backendUrl);
 
     if (saveSuccess) {
       const newWaterGoal = {
@@ -424,17 +435,13 @@ const WaterTracker: React.FC = () => {
       // Reiniciar el estado de notificación de mitad de camino cuando se cambia la meta
       setHalfwayNotificationShown(false);
       
-      // Mostrar notificación de éxito
-      addNotification(
-        "Meta de agua actualizada",
-        `Tu nueva meta diaria de agua es ${goalInMl} ml.`,
-        "info"
-      );
+      // La notificación ahora se maneja dentro del hook updateWaterGoal
     }
-  }, [goalInput, goalUnit, waterGoal.unitsPerBottle, saveWaterGoal, addNotification]);
+  }, [goalInput, goalUnit, waterGoal.unitsPerBottle, updateWaterGoal, userEmail, backendUrl]);
 
   const handleRemoveGoal = useCallback(async () => {
-    const saveSuccess = await saveWaterGoal(0);
+    // Utilizar updateWaterGoal del hook para soporte offline
+    const saveSuccess = await updateWaterGoal(userEmail, 0, backendUrl);
 
     if (saveSuccess) {
       const newWaterGoal = {
@@ -444,20 +451,15 @@ const WaterTracker: React.FC = () => {
 
       setWaterGoal(newWaterGoal);
       setFilledWaterUnits(0);
-      await saveWaterData(0);
+      await updateWaterData(userEmail, date, 0, backendUrl);
       setShowGoalSetting(false);
       setError(null);
       // Reiniciar el estado de notificación de mitad de camino
       setHalfwayNotificationShown(false);
       
-      // Mostrar notificación cuando se elimina la meta
-      addNotification(
-        "Meta de agua eliminada",
-        "Has eliminado tu meta diaria de agua y se ha reiniciado tu progreso.",
-        "warning"
-      );
+      // La notificación ahora se maneja dentro del hook updateWaterGoal
     }
-  }, [waterGoal.unitsPerBottle, saveWaterGoal, saveWaterData, addNotification]);
+  }, [waterGoal.unitsPerBottle, updateWaterGoal, updateWaterData, userEmail, date, backendUrl]);
 
   const getDateLabel = useCallback(() => {
     const selectedDate = new Date(date + "T00:00:00");
@@ -492,8 +494,9 @@ const WaterTracker: React.FC = () => {
   useEffect(() => {
     if (userEmail) {
       fetchBottleSize();
+      fetchWaterGoalInfo();
     }
-  }, [userEmail, fetchBottleSize]);
+  }, [userEmail, fetchBottleSize, fetchWaterGoalInfo]);
 
   useEffect(() => {
     if (userEmail && date) fetchWaterInfo();
@@ -537,6 +540,7 @@ const WaterTracker: React.FC = () => {
     newFilledUnits = Math.max(0, newFilledUnits);
     setFilledWaterUnits(newFilledUnits);
     
+    // Usar updateWaterData del hook para soporte offline
     await updateWaterData(userEmail, date, newFilledUnits, backendUrl);
     
     // Comprobar si alcanzó el objetivo del 50% y mostrar notificación
@@ -613,6 +617,18 @@ const WaterTracker: React.FC = () => {
             className="absolute opacity-0 w-0 h-0"
           />
         </motion.div>
+        
+        {/* Indicador de modo offline */}
+        {!isOnline && (
+          <div className="mt-2 flex justify-center items-center text-xs">
+            <span className="flex items-center">
+              <span className="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-1.5 animate-pulse"></span>
+              <span className={`${isDarkMode ? "text-yellow-400" : "text-yellow-600"}`}>
+                Modo Offline
+              </span>
+            </span>
+          </div>
+        )}
       </motion.div>
 
       <div
@@ -642,6 +658,17 @@ const WaterTracker: React.FC = () => {
             <ButtonToolTip content={infoText.waterTrackerInfo} />
           </div>
           <div className="flex space-x-2">
+            {/* Indicador de sincronización pendiente */}
+            {!isOnline && (
+              <button
+                disabled
+                className={`text-xs flex items-center px-2 py-1 rounded-full
+                ${isDarkMode ? "bg-yellow-500/20 text-yellow-300" : "bg-yellow-100 text-yellow-700"}`}
+              >
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-yellow-500 mr-1 animate-pulse"></span>
+                Datos guardados localmente
+              </button>
+            )}
             <button
               onClick={() => {
                 setShowBottleSetting(!showBottleSetting);

@@ -1,6 +1,6 @@
-const CACHE_NAME = 'all-in-one-fitness-v2';
-const DATA_CACHE_NAME = 'all-in-one-fitness-data-v2';
-const PENDING_REQUESTS_STORE = 'all-in-one-fitness-pending-v2';
+const CACHE_NAME = 'all-in-one-fitness-v3';
+const DATA_CACHE_NAME = 'all-in-one-fitness-data-v3';
+const PENDING_REQUESTS_STORE = 'all-in-one-fitness-pending-v3';
 
 // Rutas a cachear para soporte offline inmediato
 const urlsToCache = [
@@ -9,22 +9,61 @@ const urlsToCache = [
   '/web-app-manifest-192x192.png',
   '/web-app-manifest-512x512.png',
   '/manifest.json',
+  '/site.webmanifest',
   '/favicon-96x96.png',
   '/favicon.ico',
   '/favicon.svg',
+  '/apple-touch-icon.png',
+  '/sw-handler.js',
+  
+  // Páginas públicas
   '/login',
-  '/register',
+  '/registro',
+  '/reset-password',
+  '/nosotros',
+  '/modulos',
+  '/contacto',
+  
+  // Páginas de dashboard y funcionalidades principales
   '/dashboard',
-  '/exercises',
+  '/foodDashboard',
   '/food',
+  '/foodsearch',
+  '/foodsearchia',
+  '/food-quantity-adjust',
+  '/comidas',
   '/water',
+  '/routines',
+  '/routine-details',
+  '/ejercicios',
+  '/exercises',
   '/progress',
   '/workouts',
   '/profile',
   '/goals',
+  '/settings',
+  '/nutrition',
+  '/workout-history',
+  '/exercise-details',
+  '/rm-progress',
+  
+  // Calculadoras y herramientas
+  '/calorie-calculator',
+  '/onerm-calculator',
+  '/search-recipes',
+  '/subscription-plans',
+  
+  // Páginas especiales
+  '/offline.html',
+  
+  // Recursos estáticos
   '/static/js/main.bundle.js',
   '/static/js/vendors.bundle.js',
   '/static/css/main.css',
+  '/static/css/vendors.css',
+  '/static/fonts/**/*',
+  '/static/images/**/*',
+  '/static/icons/**/*'
 ];
 
 // Rutas de API que serán manejadas con una estrategia diferente
@@ -35,7 +74,15 @@ const apiRoutes = [
   '/api/profile',
   '/api/goals',
   '/api/workouts',
-  '/api/progress'
+  '/api/progress',
+  '/api/nutrition',
+  '/api/auth',
+  '/api/settings',
+  '/api/routines',
+  '/api/calories',
+  '/api/recipes',
+  '/api/get-calorie-goal',
+  '/api/subscription'
 ];
 
 // Instalación del service worker - ahora con precacheo ampliado
@@ -44,7 +91,11 @@ self.addEventListener('install', (event) => {
     Promise.all([
       caches.open(CACHE_NAME).then((cache) => {
         console.log('Cache de recursos abierto - precacheando archivos...');
-        return cache.addAll(urlsToCache);
+        return cache.addAll(urlsToCache).catch(error => {
+          console.error('Error durante el precacheo:', error);
+          // Continuar incluso si algunos archivos no se pudieron cachear
+          return Promise.resolve();
+        });
       }),
       caches.open(DATA_CACHE_NAME).then((cache) => {
         console.log('Cache de datos abierto');
@@ -124,6 +175,73 @@ self.addEventListener('message', (event) => {
       })
     );
   }
+  
+  // Trigger manual de sincronización
+  if (event.data && event.data.type === 'TRIGGER_SYNC') {
+    event.waitUntil(syncAllData().then(results => {
+      // Enviar los resultados de la sincronización al cliente
+      if (event.source) {
+        event.source.postMessage({
+          type: 'SYNC_COMPLETED',
+          timestamp: Date.now(),
+          results: results
+        });
+      }
+    }));
+  }
+  
+  // Obtener contador de cambios pendientes
+  if (event.data && event.data.type === 'GET_PENDING_CHANGES_COUNT') {
+    event.waitUntil(
+      getPendingChangesCount().then(count => {
+        // Enviar el recuento al cliente
+        if (event.source) {
+          event.source.postMessage({
+            type: 'PENDING_CHANGES_COUNT',
+            count: count
+          });
+        }
+      })
+    );
+  }
+  
+  // Actualizar contador de cambios pendientes desde cliente
+  if (event.data && event.data.type === 'UPDATE_PENDING_COUNT') {
+    console.log(`[SW] Contador de cambios pendientes actualizado: ${event.data.count}`);
+    // No es necesario hacer nada aquí, solo registrar
+  }
+  
+  // Obtener datos almacenados en caché
+  if (event.data && event.data.type === 'GET_CACHED_DATA') {
+    const key = event.data.key;
+    const port = event.ports && event.ports[0];
+    
+    if (!port) {
+      console.error('[SW] No se recibió puerto de comunicación para GET_CACHED_DATA');
+      return;
+    }
+    
+    event.waitUntil(
+      caches.open(DATA_CACHE_NAME).then(async (cache) => {
+        try {
+          const cachedResponse = await cache.match(new Request(key));
+          
+          if (cachedResponse) {
+            const data = await cachedResponse.json();
+            port.postMessage({ data });
+          } else {
+            port.postMessage({ data: null });
+          }
+        } catch (error) {
+          console.error('[SW] Error obteniendo datos en caché:', error);
+          port.postMessage({ error: error.message });
+        }
+      }).catch(error => {
+        console.error('[SW] Error accediendo a la caché:', error);
+        port.postMessage({ error: error.message });
+      })
+    );
+  }
 });
 
 // Sincronización en segundo plano
@@ -147,21 +265,41 @@ self.addEventListener('periodicsync', (event) => {
 // Función mejorada para sincronizar todos los datos pendientes
 async function syncAllData() {
   try {
-    await syncPendingRequests();
-    await syncData();
+    const requestResults = await syncPendingRequests();
+    const dataResults = await syncData();
+    
+    const results = {
+      requests: requestResults,
+      data: dataResults,
+      timestamp: Date.now()
+    };
     
     // Notificar a los clientes que la sincronización se completó
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
       client.postMessage({
         type: 'SYNC_COMPLETED',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        results: results
       });
     });
     
-    console.log('[SW] Sincronización completa realizada con éxito');
+    console.log('[SW] Sincronización completa realizada con éxito:', results);
+    return results;
   } catch (error) {
     console.error('[SW] Error en syncAllData:', error);
+    
+    // Notificar error a los clientes
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'SYNC_ERROR',
+        timestamp: Date.now(),
+        error: error.message
+      });
+    });
+    
+    throw error;
   }
 }
 
@@ -192,8 +330,26 @@ async function syncPendingRequests() {
       requestsByType[type].push({ request, data });
     }
     
-    // Orden de procesamiento: profile, goals, exercises, food, water, workouts, progress, other
-    const syncOrder = ['profile', 'goals', 'exercises', 'food', 'water', 'workouts', 'progress', 'other'];
+    // Orden de sincronización según dependencias y prioridad
+    const syncOrder = [
+      'auth', 
+      'profile', 
+      'settings',
+      'goals', 
+      'exercises', 
+      'food', 
+      'foods',
+      'water', 
+      'calories',
+      'nutrition',
+      'workouts', 
+      'routines',
+      'progress',
+      'recipes',
+      'subscription',
+      'other'
+    ];
+    
     const results = { success: 0, failure: 0 };
     
     for (const type of syncOrder) {
@@ -203,23 +359,79 @@ async function syncPendingRequests() {
       
       for (const { request, data } of requestsByType[type]) {
         try {
-          const syncResponse = await fetch(data.url, {
-            method: data.method,
-            headers: {
-              'Content-Type': 'application/json',
-              ...data.headers
-            },
-            body: JSON.stringify(data.body)
-          });
+          // Añadir cabeceras para indicar que es una sincronización
+          const headers = {
+            'Content-Type': 'application/json',
+            'X-Offline-Sync': 'true',
+            ...data.headers
+          };
           
-          if (syncResponse.ok) {
+          // Omitir información de caché en las cabeceras
+          delete headers['if-none-match'];
+          delete headers['if-modified-since'];
+          
+          // Intentar sincronizar con reintentos
+          let syncAttempts = 0;
+          let syncSucceeded = false;
+          let syncResponse;
+          
+          while (syncAttempts < 3 && !syncSucceeded) {
+            try {
+              syncResponse = await fetch(data.url, {
+                method: data.method,
+                headers: headers,
+                body: JSON.stringify(data.body),
+                // Añadir timeout para evitar esperas excesivas
+                signal: AbortSignal.timeout(10000) // 10 segundos de timeout
+              });
+              
+              if (syncResponse.ok) {
+                syncSucceeded = true;
+              } else {
+                // Esperar antes de reintentar
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                syncAttempts++;
+              }
+            } catch (fetchError) {
+              console.error(`[SW] Error en intento ${syncAttempts + 1}/3:`, fetchError);
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              syncAttempts++;
+            }
+          }
+          
+          if (syncSucceeded) {
             // Si la sincronización fue exitosa, eliminar del caché
             await cache.delete(request);
             results.success++;
             console.log(`[SW] Solicitud sincronizada correctamente: ${data.url}`);
+            
+            // Si es exitoso y hay datos de respuesta, actualizar caché de datos
+            try {
+              const responseData = await syncResponse.json();
+              if (responseData) {
+                const dataCache = await caches.open(DATA_CACHE_NAME);
+                
+                // Crear una clave de caché apropiada basada en la URL original
+                const urlObj = new URL(data.url);
+                // Eliminar parámetros de timestamp o cache-busting si existen
+                urlObj.searchParams.delete('_t');
+                urlObj.searchParams.delete('timestamp');
+                
+                await dataCache.put(
+                  new Request(urlObj.toString()),
+                  new Response(JSON.stringify(responseData), {
+                    headers: { 'Content-Type': 'application/json' }
+                  })
+                );
+                
+                console.log(`[SW] Datos actualizados en caché para: ${data.url}`);
+              }
+            } catch (cacheError) {
+              console.error('[SW] Error actualizando caché tras sincronización:', cacheError);
+            }
           } else {
             results.failure++;
-            console.error(`[SW] Error en sincronización: ${syncResponse.status} ${syncResponse.statusText}`);
+            console.error(`[SW] Error en sincronización después de 3 intentos: ${data.url}`);
           }
         } catch (error) {
           results.failure++;
@@ -227,6 +439,16 @@ async function syncPendingRequests() {
         }
       }
     }
+    
+    // Notificar a los clientes los resultados de la sincronización
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'SYNC_COMPLETED',
+        timestamp: Date.now(),
+        results: results
+      });
+    });
     
     console.log(`[SW] Sincronización completada. Éxitos: ${results.success}, Fallos: ${results.failure}`);
     return results;
@@ -314,11 +536,35 @@ self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate' || 
       event.request.destination === 'style' || 
       event.request.destination === 'script' || 
-      event.request.destination === 'image') {
+      event.request.destination === 'image' ||
+      event.request.destination === 'font') {
     
     event.respondWith(
-      // Estrategia: Stale-While-Revalidate
+      // Estrategia: Cache-First para assets estáticos, Network-First para navegación
       caches.match(event.request).then(cachedResponse => {
+        // Para assets estáticos, priorizar caché
+        if (event.request.destination === 'style' || 
+            event.request.destination === 'script' || 
+            event.request.destination === 'image' ||
+            event.request.destination === 'font') {
+          if (cachedResponse) {
+            // Revalidar en segundo plano
+            fetch(event.request)
+              .then(response => {
+                if (response && response.status === 200) {
+                  const responseToCache = response.clone();
+                  caches.open(CACHE_NAME).then(cache => {
+                    cache.put(event.request, responseToCache);
+                  });
+                }
+              })
+              .catch(error => console.log('[SW] Error actualizando caché:', error));
+            
+            return cachedResponse;
+          }
+        }
+        
+        // Para navegación o assets no encontrados en caché, intentar network primero
         const fetchPromise = fetch(event.request)
           .then(response => {
             // Cachear respuesta válida
@@ -335,11 +581,16 @@ self.addEventListener('fetch', (event) => {
             return null;
           });
 
-        return cachedResponse || fetchPromise;
+        // Para navegación, si hay caché la devolvemos mientras se carga la red
+        if (event.request.mode === 'navigate' && cachedResponse) {
+          return cachedResponse;
+        }
+        
+        return fetchPromise || caches.match('/offline.html');
       }).catch(() => {
         // Fallback a página offline para navegación
         if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+          return caches.match('/offline.html') || caches.match('/index.html');
         }
         return null;
       })
@@ -349,23 +600,30 @@ self.addEventListener('fetch', (event) => {
   
   // Para cualquier otra solicitud
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // No cachear respuestas de error
-        if (!response || response.status !== 200) {
-          return response;
+    caches.match(event.request)
+      .then(cachedResponse => {
+        if (cachedResponse) {
+          return cachedResponse;
         }
         
-        // Cachear respuesta exitosa
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseToCache);
-        });
-        return response;
-      })
-      .catch(() => {
-        // Intentar obtener del caché
-        return caches.match(event.request);
+        return fetch(event.request)
+          .then(response => {
+            // No cachear respuestas de error
+            if (!response || response.status !== 200) {
+              return response;
+            }
+            
+            // Cachear respuesta exitosa
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+            return response;
+          })
+          .catch(() => {
+            // Intentar obtener del caché nuevamente (por si acaso)
+            return caches.match(event.request);
+          });
       })
   );
 });
@@ -382,6 +640,17 @@ async function handleApiRequest(request) {
           const responseToCache = response.clone();
           const cache = await caches.open(DATA_CACHE_NAME);
           await cache.put(request, responseToCache);
+          
+          // Notificar a los clientes que hay nuevos datos
+          const clients = await self.clients.matchAll();
+          clients.forEach(client => {
+            client.postMessage({
+              type: 'API_DATA_UPDATED',
+              url: request.url,
+              timestamp: Date.now()
+            });
+          });
+          
           return response;
         } else {
           throw new Error('Error en respuesta API');
@@ -391,6 +660,16 @@ async function handleApiRequest(request) {
         // Si falla la red, buscar en caché
         const cachedResponse = await caches.match(request);
         if (cachedResponse) {
+          // Notificar que se están usando datos en caché
+          const clients = await self.clients.matchAll();
+          clients.forEach(client => {
+            client.postMessage({
+              type: 'USING_CACHED_DATA',
+              url: request.url,
+              timestamp: Date.now()
+            });
+          });
+          
           return cachedResponse;
         }
         
@@ -401,8 +680,36 @@ async function handleApiRequest(request) {
     // Para solicitudes de modificación (POST, PUT, DELETE)
     else if (['POST', 'PUT', 'DELETE'].includes(request.method)) {
       try {
+        // Verificar si es una sincronización desde offline (tiene cabecera especial)
+        const isOfflineSync = request.headers && request.headers.get('X-Offline-Sync') === 'true';
+        
         // Intentar hacer la solicitud a la red
-        const response = await fetch(request);
+        const response = await fetch(request.clone());
+        
+        // Si es una sincronización offline y fue exitosa, actualizar los datos en caché
+        if (isOfflineSync && response.ok) {
+          try {
+            const responseData = await response.clone().json();
+            const url = new URL(request.url);
+            
+            // Obtener la ruta base (sin parámetros) para guardar en caché
+            const basePath = `${url.origin}${url.pathname}`;
+            
+            // Guardar en caché para acceso offline futuro
+            const dataCache = await caches.open(DATA_CACHE_NAME);
+            await dataCache.put(
+              new Request(basePath),
+              new Response(JSON.stringify(responseData), {
+                headers: { 'Content-Type': 'application/json' }
+              })
+            );
+            
+            console.log(`[SW] Datos de sincronización guardados en caché: ${basePath}`);
+          } catch (cacheError) {
+            console.error('[SW] Error guardando datos sincronizados en caché:', cacheError);
+          }
+        }
+        
         return response;
       } catch (error) {
         console.log('[SW] Error en solicitud de modificación, guardando para sincronización:', error);
@@ -426,6 +733,17 @@ async function handleApiRequest(request) {
             headers: { 'Content-Type': 'application/json' }
           })
         );
+        
+        // Notificar a los clientes que hay solicitudes pendientes
+        const pendingCount = await getPendingChangesCount();
+        const clients = await self.clients.matchAll();
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'PENDING_CHANGES_COUNT',
+            count: pendingCount,
+            timestamp: Date.now()
+          });
+        });
         
         // Registrar para sincronización background si está disponible
         if ('SyncManager' in self) {
@@ -467,7 +785,12 @@ async function handleApiFallback(request) {
   
   // Determinar qué tipo de datos está solicitando
   if (url.pathname.includes('/api/exercises')) {
-    return new Response(JSON.stringify([]), {
+    return new Response(JSON.stringify({ 
+      exercises: [],
+      categories: ["Pecho", "Espalda", "Hombros", "Bíceps", "Tríceps", "Piernas", "Abdominales", "Cardio"],
+      success: true,
+      offline: true
+    }), {
       headers: { 'Content-Type': 'application/json' }
     });
   } 
@@ -475,7 +798,9 @@ async function handleApiFallback(request) {
     return new Response(JSON.stringify({
       foods: { Desayuno: [], Almuerzo: [], Merienda: [], Cena: [] },
       currentFoodType: null,
-      isToday: true
+      isToday: true,
+      success: true,
+      offline: true
     }), {
       headers: { 'Content-Type': 'application/json' }
     });
@@ -483,7 +808,113 @@ async function handleApiFallback(request) {
   else if (url.pathname.includes('/api/water')) {
     return new Response(JSON.stringify({
       history: [],
-      recommendation: 2000
+      recommendation: 2000,
+      today: { total: 0, goal: 2000, percentage: 0 },
+      success: true,
+      offline: true
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  else if (url.pathname.includes('/api/profile')) {
+    return new Response(JSON.stringify({
+      profile: null,
+      message: "Datos de perfil no disponibles en modo offline",
+      success: true,
+      offline: true
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  else if (url.pathname.includes('/api/goals')) {
+    return new Response(JSON.stringify({
+      goals: [],
+      message: "Metas no disponibles en modo offline",
+      success: true,
+      offline: true
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  else if (url.pathname.includes('/api/workouts')) {
+    return new Response(JSON.stringify({
+      workouts: [],
+      message: "Entrenamientos no disponibles en modo offline",
+      success: true,
+      offline: true
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  else if (url.pathname.includes('/api/progress')) {
+    return new Response(JSON.stringify({
+      progress: [],
+      message: "Datos de progreso no disponibles en modo offline",
+      success: true,
+      offline: true
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  else if (url.pathname.includes('/api/routines')) {
+    return new Response(JSON.stringify({
+      routines: [],
+      message: "Rutinas no disponibles en modo offline",
+      success: true,
+      offline: true
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  else if (url.pathname.includes('/api/get-calorie-goal')) {
+    return new Response(JSON.stringify({
+      calorieGoal: 2000, // Valor predeterminado
+      success: true,
+      offline: true
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  else if (url.pathname.includes('/api/calories')) {
+    return new Response(JSON.stringify({
+      calorieData: {
+        consumed: 0,
+        goal: 2000,
+        remaining: 2000
+      },
+      success: true,
+      offline: true
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  else if (url.pathname.includes('/api/recipes')) {
+    return new Response(JSON.stringify({
+      recipes: [],
+      message: "Recetas no disponibles en modo offline",
+      success: true,
+      offline: true
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  else if (url.pathname.includes('/api/subscription')) {
+    return new Response(JSON.stringify({
+      subscription: null,
+      isSubscribed: false,
+      message: "Información de suscripción no disponible en modo offline",
+      success: true,
+      offline: true
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  else if (url.pathname.includes('/api/auth')) {
+    return new Response(JSON.stringify({
+      message: "Operaciones de autenticación no disponibles en modo offline",
+      success: false,
+      offline: true,
+      requiresOnline: true
     }), {
       headers: { 'Content-Type': 'application/json' }
     });
@@ -498,4 +929,16 @@ async function handleApiFallback(request) {
     status: 200,
     headers: { 'Content-Type': 'application/json' }
   });
+}
+
+// Obtener el recuento de solicitudes pendientes
+async function getPendingChangesCount() {
+  try {
+    const cache = await caches.open(PENDING_REQUESTS_STORE);
+    const requests = await cache.keys();
+    return requests.length;
+  } catch (error) {
+    console.error('[SW] Error al obtener recuento de cambios pendientes:', error);
+    return 0;
+  }
 }

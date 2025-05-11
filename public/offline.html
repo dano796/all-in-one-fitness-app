@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modo Offline - All-In-One Fitness</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #282c3c;
+            margin-top: 0;
+        }
+        .icon {
+            font-size: 72px;
+            margin-bottom: 20px;
+            color: #282c3c;
+        }
+        p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .button {
+            background-color: #282c3c;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .button:hover {
+            background-color: #1e2231;
+        }
+        .features {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 15px;
+        }
+        .feature {
+            flex-basis: 45%;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">⚠️</div>
+        <h1>Modo Offline</h1>
+        <p>Parece que no tienes conexión a Internet en este momento. All-In-One Fitness funciona en modo offline con características limitadas.</p>
+        
+        <p>Puedes seguir utilizando las funciones que ya has sincronizado previamente.</p>
+        
+        <div class="features">
+            <div class="feature">✓ Ver ejercicios guardados</div>
+            <div class="feature">✓ Consultar tu diario de alimentación</div>
+            <div class="feature">✓ Registrar tu consumo de agua</div>
+            <div class="feature">✓ Ver tus últimos entrenamientos</div>
+        </div>
+        
+        <p>Todos los cambios que realices se sincronizarán automáticamente cuando recuperes la conexión.</p>
+        
+        <a href="/" class="button">Intentar nuevamente</a>
+    </div>
+
+    <script>
+        // Comprobar periódicamente si hay conexión
+        function checkConnection() {
+            if (navigator.onLine) {
+                // Si hay conexión, redirigir a la página principal
+                window.location.reload();
+            }
+        }
+        
+        // Comprobar cada 5 segundos
+        setInterval(checkConnection, 5000);
+        
+        // También comprobar cuando el botón es presionado
+        document.querySelector('.button').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (navigator.onLine) {
+                window.location.reload();
+            } else {
+                alert('Todavía no tienes conexión a Internet. Tus datos se sincronizarán automáticamente cuando la recuperes.');
+            }
+        });
+    </script>
+</body>
+</html> 

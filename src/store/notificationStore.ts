@@ -65,7 +65,6 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     isPersistent = false,
     dismissCondition
   ) => {
-    console.log(`[DEBUG] Añadiendo notificación: ${title} - ${message} - ${type} - showAsToast: ${showAsToast} - category: ${category}`);
     
     const existingNotification = get().notifications.find(
       n => n.title === title && n.message === message && n.type === type

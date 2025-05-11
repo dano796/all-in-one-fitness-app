@@ -7,12 +7,21 @@
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="All In One" />
+    <meta name="theme-color" content="#282c3c" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>All In One Fitness App</title>
+    <!-- Service Worker Handler -->
+    <script src="/sw-handler.js"></script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <noscript>
+      <div style="padding: 20px; text-align: center; font-family: sans-serif;">
+        <h1>JavaScript Desactivado</h1>
+        <p>Esta aplicación requiere JavaScript para funcionar. Por favor, actívalo en la configuración de tu navegador.</p>
+      </div>
+    </noscript>
   </body>
 </html>
