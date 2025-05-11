@@ -41,7 +41,7 @@ const FoodSearchIAPage = lazy(() => import("./pages/FoodSearchIAPage"));
 const SearchRecipes = lazy(() => import("./components/SearchRecipes"));
 const SubscriptionPlans = lazy(() => import("./components/SubscriptionPlans"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
-const Terms = lazy(() => import("./components/terms")); // Nueva ruta para Terms
+const Terms = lazy(() => import("./components/Terms")); // Nueva ruta para Terms
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
