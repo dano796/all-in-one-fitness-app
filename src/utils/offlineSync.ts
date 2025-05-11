@@ -66,7 +66,7 @@ class OfflineSyncManager {
       // Inicializar listeners de conexión
       this.initializeEventListeners();
       
-      console.log('[OfflineSync] Inicializado correctamente');
+      //console.log('[OfflineSync] Inicializado correctamente');
     } catch (error) {
       console.error('[OfflineSync] Error durante la inicialización:', error);
     }
@@ -100,7 +100,7 @@ class OfflineSyncManager {
       if (storedData) {
         const parsedData = JSON.parse(storedData);
         this.offlineData = new Map(Object.entries(parsedData));
-        console.log('[OfflineSync] Datos cargados desde localStorage:', this.offlineData.size, 'elementos');
+        //console.log('[OfflineSync] Datos cargados desde localStorage:', this.offlineData.size, 'elementos');
       }
     } catch (error) {
       console.error('Error loading offline data:', error);
@@ -113,7 +113,7 @@ class OfflineSyncManager {
       if (storedRequests) {
         const parsedRequests = JSON.parse(storedRequests);
         this.pendingSyncRequests = new Map(Object.entries(parsedRequests));
-        console.log('[OfflineSync] Peticiones pendientes cargadas:', this.pendingSyncRequests.size, 'elementos');
+        //console.log('[OfflineSync] Peticiones pendientes cargadas:', this.pendingSyncRequests.size, 'elementos');
       }
     } catch (error) {
       console.error('Error loading pending sync requests:', error);
@@ -139,17 +139,17 @@ class OfflineSyncManager {
   }
 
   private handleOnline() {
-    console.log('[OfflineSync] Conexión restablecida');
+    //console.log('[OfflineSync] Conexión restablecida');
     this.isOnline = true;
     
     if (this.pendingSyncRequests.size > 0) {
-      console.log(`[OfflineSync] Intentando sincronizar ${this.pendingSyncRequests.size} peticiones pendientes`);
+      //console.log(`[OfflineSync] Intentando sincronizar ${this.pendingSyncRequests.size} peticiones pendientes`);
       this.syncData();
     }
   }
 
   private handleOffline() {
-    console.log('[OfflineSync] Conexión perdida');
+    //console.log('[OfflineSync] Conexión perdida');
     this.isOnline = false;
   }
 
@@ -208,7 +208,7 @@ class OfflineSyncManager {
       this.pendingSyncRequests.set(key, fullRequest);
       await this.savePendingSyncRequests();
       
-      console.log(`[OfflineSync] Petición guardada para sincronización posterior: ${key} (${routeType})`);
+      //console.log(`[OfflineSync] Petición guardada para sincronización posterior: ${key} (${routeType})`);
       return true;
     } catch (error) {
       console.error('[OfflineSync] Error guardando petición pendiente:', error);
@@ -240,7 +240,7 @@ class OfflineSyncManager {
       try {
         const cachedData = await this.requestFromServiceWorker(key);
         if (cachedData) {
-          console.log(`[OfflineSync] Datos obtenidos del SW: ${key}`);
+          //console.log(`[OfflineSync] Datos obtenidos del SW: ${key}`);
           this.routeDataCache.set(key, {
             data: cachedData,
             expiresAt: Date.now() + this.cacheExpiryTime
@@ -248,7 +248,7 @@ class OfflineSyncManager {
           return cachedData;
         }
       } catch (error) {
-        console.error(`[OfflineSync] Error al solicitar datos del SW:`, error);
+        //console.error(`[OfflineSync] Error al solicitar datos del SW:`, error);
       }
     }
     
@@ -303,7 +303,7 @@ class OfflineSyncManager {
       if (response.ok) {
         const data = await response.json();
         await this.storeData(url, data);
-        console.log(`[OfflineSync] Prefetch completado para ruta: ${url}`);
+        //console.log(`[OfflineSync] Prefetch completado para ruta: ${url}`);
       }
     } catch (error) {
       console.error(`[OfflineSync] Error en prefetch de ruta ${route}:`, error);
@@ -312,16 +312,16 @@ class OfflineSyncManager {
 
   public async syncData() {
     if (this.isSyncing) {
-      console.log('[OfflineSync] Ya hay una sincronización en curso, ignorando...');
+      //console.log('[OfflineSync] Ya hay una sincronización en curso, ignorando...');
       return;
     }
     
     if (!navigator.onLine) {
-      console.log('[OfflineSync] No hay conexión, ignorando petición de sincronización');
+      //console.log('[OfflineSync] No hay conexión, ignorando petición de sincronización');
       return;
     }
     
-    console.log('[OfflineSync] Iniciando sincronización de datos offline');
+    //console.log('[OfflineSync] Iniciando sincronización de datos offline');
     this.isSyncing = true;
     
     let syncSuccessCount = 0;
@@ -342,7 +342,7 @@ class OfflineSyncManager {
       
       // Copiar las peticiones pendientes para evitar problemas de modificación durante iteración
       const pendingRequests = new Map(this.pendingSyncRequests);
-      console.log(`[OfflineSync] Procesando ${pendingRequests.size} peticiones pendientes`);
+      //console.log(`[OfflineSync] Procesando ${pendingRequests.size} peticiones pendientes`);
       
       // Organizar solicitudes por tipo
       for (const [key, request] of pendingRequests.entries()) {
@@ -356,12 +356,12 @@ class OfflineSyncManager {
         const requests = requestsByType[routeType];
         if (requests.length === 0) continue;
         
-        console.log(`[OfflineSync] Sincronizando ${requests.length} peticiones de tipo: ${routeType}`);
+        //console.log(`[OfflineSync] Sincronizando ${requests.length} peticiones de tipo: ${routeType}`);
         
         // Sincronizar cada solicitud de este tipo
         for (const request of requests) {
           if (!navigator.onLine) {
-            console.log('[OfflineSync] Conexión perdida durante sincronización, abortando...');
+            //console.log('[OfflineSync] Conexión perdida durante sincronización, abortando...');
             break;
           }
           
@@ -369,7 +369,7 @@ class OfflineSyncManager {
           if (!key) continue;
           
           try {
-            console.log(`[OfflineSync] Sincronizando petición: ${key}`);
+            //console.log(`[OfflineSync] Sincronizando petición: ${key}`);
             const response = await fetch(request.url, {
               method: request.method,
               headers: {
@@ -380,11 +380,11 @@ class OfflineSyncManager {
             });
 
             if (response.ok) {
-              console.log(`[OfflineSync] Petición sincronizada con éxito: ${key}`);
+              //console.log(`[OfflineSync] Petición sincronizada con éxito: ${key}`);
               this.pendingSyncRequests.delete(key);
               syncSuccessCount++;
             } else {
-              console.error(`[OfflineSync] Error al sincronizar petición ${key}: ${response.status} ${response.statusText}`);
+              //console.error(`[OfflineSync] Error al sincronizar petición ${key}: ${response.status} ${response.statusText}`);
               failedCount++;
               
               // Incrementar contador de reintentos
@@ -393,7 +393,7 @@ class OfflineSyncManager {
               
               // Si superó el límite de reintentos, eliminar la petición
               if (updatedRequest.retryCount > 3) {
-                console.warn(`[OfflineSync] Petición ${key} ha excedido el número máximo de reintentos, eliminando...`);
+                //console.warn(`[OfflineSync] Petición ${key} ha excedido el número máximo de reintentos, eliminando...`);
                 this.pendingSyncRequests.delete(key);
               } else {
                 this.pendingSyncRequests.set(key, updatedRequest);
@@ -445,7 +445,7 @@ class OfflineSyncManager {
         );
       }
       
-      console.log(`[OfflineSync] Sincronización completada: ${syncSuccessCount} exitosos, ${failedCount} fallidos`);
+      //console.log(`[OfflineSync] Sincronización completada: ${syncSuccessCount} exitosos, ${failedCount} fallidos`);
     } catch (error) {
       console.error('[OfflineSync] Error general durante la sincronización:', error);
       this.showNotification(
@@ -455,7 +455,7 @@ class OfflineSyncManager {
       );
     } finally {
       this.isSyncing = false;
-      console.log('[OfflineSync] Estado de sincronización finalizado');
+      //console.log('[OfflineSync] Estado de sincronización finalizado');
     }
   }
 

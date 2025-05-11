@@ -64,7 +64,7 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
       false,
       "comida"
     );
-    console.log("Imagen subida:", file.name);
+    //console.log("Imagen subida:", file.name);
   };
 
   const handleImageRemove = () => {
@@ -189,7 +189,7 @@ const FoodSearchIA: React.FC<FoodSearchIAProps> = ({ initialType, date }) => {
 
         await Swal.fire({
           title: "¡Éxito!",
-          text: "La comida ha sido registrada exitosamente.",
+          text: "El alimento ha sido registrado exitosamente.",
           icon: "success",
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9400",

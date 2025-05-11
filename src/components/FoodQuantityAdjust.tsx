@@ -71,31 +71,57 @@ const FoodQuantityAdjust: React.FC = () => {
   const { isDarkMode } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const { food, type, isEdit, registryId } = location.state as { 
-    food: Food;
-    type: string;
+  const { addNotification } = useNotificationStore();
+  
+  //console.log("FoodQuantityAdjust - Estado recibido:", location.state);
+  
+  // Extraer datos del estado con mejor manejo de tipos
+  const locationState = location.state || {};
+  const { 
+    food, 
+    type, 
+    isEdit, 
+    registryId, 
+    date 
+  } = locationState as { 
+    food?: Food;
+    type?: string;
     isEdit?: boolean;
     registryId?: string;
-  } || {};
+    date?: string;
+  };
+
+  // Early validation
+  useEffect(() => {
+    if (!food || !type) {
+      console.error("Datos incompletos:", { food, type, location });
+      addNotification(
+        "Error de navegación",
+        "No se recibieron los datos necesarios para ajustar la cantidad.",
+        "error",
+        false,
+        "comida"
+      );
+      navigate("/foodDashboard");
+    }
+  }, [food, type, location, addNotification, navigate]);
+
   const [userEmail, setUserEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<string>("100");
   const [displayQuantity, setDisplayQuantity] = useState<string>("100");
   const [fixedUnit, setFixedUnit] = useState<string>("g");
   const [unitLabel, setUnitLabel] = useState<string>("g");
-  const { addNotification } = useNotificationStore();
-  const [nutritionalValues, setNutritionalValues] = useState<NutritionalValues>(
-    {
-      calories: null,
-      fat: null,
-      carbs: null,
-      protein: null,
-      perg: null,
-      peroz: null,
-      percup: null,
-      peru: null,
-    }
-  );
+  const [nutritionalValues, setNutritionalValues] = useState<NutritionalValues>({
+    calories: null,
+    fat: null,
+    carbs: null,
+    protein: null,
+    perg: null,
+    peroz: null,
+    percup: null,
+    peru: null,
+  });
 
   const evaluateFraction = useCallback((value: string): number => {
     const fractionMatch = value.match(/^(\d+)(?:\/(\d+))?$/);
@@ -210,6 +236,8 @@ const FoodQuantityAdjust: React.FC = () => {
         setQuantity(parsedValues.peru.toString());
         setDisplayQuantity(parsedValues.peru.toString());
       }
+    } else {
+      console.error("No se recibió información del alimento");
     }
   }, [food, navigate, evaluateFraction, parseFoodDescription]);
 
@@ -255,6 +283,9 @@ const FoodQuantityAdjust: React.FC = () => {
 
   const recalculateNutritionalValues = useCallback(
     (newQuantity: string) => {
+      // Validación de seguridad para food
+      if (!food) return;
+      
       const originalValues = parseFoodDescription(food.food_description);
       let baseQuantity = 0;
 
@@ -451,7 +482,7 @@ const FoodQuantityAdjust: React.FC = () => {
       });
 
       const searchParams = new URLSearchParams(location.search);
-      const currentDate = searchParams.get("date") || new Date().toISOString().split('T')[0];
+      const currentDate = date || searchParams.get("date") || new Date().toLocaleString("en-CA", {timeZone: "America/Bogota"}).split(",")[0];
 
       navigate(`/comidas?type=${normalizedType.toLowerCase()}&date=${currentDate}`, {
         state: { fromAddButton: true },
@@ -485,18 +516,13 @@ const FoodQuantityAdjust: React.FC = () => {
         },
       });
     }
-  }, [food,type, userEmail, quantity, fixedUnit, unitLabel, nutritionalValues, convertToFraction, evaluateFraction, navigate, addNotification, isDarkMode, isEdit, registryId, location.search]);
-
-  if (!food || !type) {
-    navigate("/foodsearch", { state: { fromAddButton: true } });
-    return null;
-  }
+  }, [food,type, userEmail, quantity, fixedUnit, unitLabel, nutritionalValues, convertToFraction, evaluateFraction, navigate, addNotification, isDarkMode, isEdit, registryId, location.search, date]);
 
   return (
     <div className="mt-0">
       <div className="ml-0 mr-2 mt-0">
         <Link
-          to={`/foodsearch?type=${type}`}
+          to={`/foodsearch?type=${type || ""}`}
           state={{ fromAddButton: true }}
           className="inline-block"
         >
@@ -521,7 +547,7 @@ const FoodQuantityAdjust: React.FC = () => {
             isDarkMode ? "text-white" : "text-gray-900"
           }`}
         >
-          Ajustar Cantidad - {food.food_name}
+          Ajustar Cantidad - {food?.food_name || ""}
         </h2>
         {error && <p className="text-red-400 mt-2 text-xs">{error}</p>}
 

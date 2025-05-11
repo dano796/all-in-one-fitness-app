@@ -86,7 +86,7 @@ function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js')
       .then(registration => {
-        console.log('Service Worker registrado con éxito:', registration.scope);
+        //console.log('Service Worker registrado con éxito:', registration.scope);
         appState.serviceWorkerRegistered = true;
         
         // Comprobar si hay actualizaciones

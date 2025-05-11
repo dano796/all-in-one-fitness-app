@@ -90,7 +90,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     Promise.all([
       caches.open(CACHE_NAME).then((cache) => {
-        console.log('Cache de recursos abierto - precacheando archivos...');
+        //console.log('Cache de recursos abierto - precacheando archivos...');
         return cache.addAll(urlsToCache).catch(error => {
           console.error('Error durante el precacheo:', error);
           // Continuar incluso si algunos archivos no se pudieron cachear
@@ -98,7 +98,7 @@ self.addEventListener('install', (event) => {
         });
       }),
       caches.open(DATA_CACHE_NAME).then((cache) => {
-        console.log('Cache de datos abierto');
+        //console.log('Cache de datos abierto');
         return cache;
       })
     ]).then(() => self.skipWaiting())
@@ -116,13 +116,13 @@ self.addEventListener('activate', (event) => {
             cacheName !== DATA_CACHE_NAME && 
             cacheName !== PENDING_REQUESTS_STORE
           ) {
-            console.log('Eliminando cache antigua:', cacheName);
+            //console.log('Eliminando cache antigua:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(() => {
-      console.log('Service Worker activado y controlando la aplicación');
+      //console.log('Service Worker activado y controlando la aplicación');
       return self.clients.claim();
     })
   );
@@ -138,7 +138,7 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'STORE_OFFLINE_DATA') {
     event.waitUntil(
       caches.open(DATA_CACHE_NAME).then((cache) => {
-        console.log(`[SW] Guardando datos offline para: ${event.data.key}`);
+        //console.log(`[SW] Guardando datos offline para: ${event.data.key}`);
         return cache.put(
           new Request(event.data.key),
           new Response(JSON.stringify(event.data.data), {
@@ -154,7 +154,7 @@ self.addEventListener('message', (event) => {
     event.waitUntil(
       caches.open(PENDING_REQUESTS_STORE).then((cache) => {
         const requestKey = `${event.data.method}-${event.data.url}-${Date.now()}`;
-        console.log(`[SW] Guardando solicitud pendiente: ${requestKey}`);
+        //console.log(`[SW] Guardando solicitud pendiente: ${requestKey}`);
         return cache.put(
           new Request(requestKey),
           new Response(JSON.stringify({
@@ -207,7 +207,7 @@ self.addEventListener('message', (event) => {
   
   // Actualizar contador de cambios pendientes desde cliente
   if (event.data && event.data.type === 'UPDATE_PENDING_COUNT') {
-    console.log(`[SW] Contador de cambios pendientes actualizado: ${event.data.count}`);
+    //console.log(`[SW] Contador de cambios pendientes actualizado: ${event.data.count}`);
     // No es necesario hacer nada aquí, solo registrar
   }
   
@@ -217,7 +217,7 @@ self.addEventListener('message', (event) => {
     const port = event.ports && event.ports[0];
     
     if (!port) {
-      console.error('[SW] No se recibió puerto de comunicación para GET_CACHED_DATA');
+      //console.error('[SW] No se recibió puerto de comunicación para GET_CACHED_DATA');
       return;
     }
     
@@ -246,7 +246,7 @@ self.addEventListener('message', (event) => {
 
 // Sincronización en segundo plano
 self.addEventListener('sync', (event) => {
-  console.log(`[SW] Evento de sincronización recibido: ${event.tag}`);
+  //console.log(`[SW] Evento de sincronización recibido: ${event.tag}`);
   
   if (event.tag === 'sync-pending-requests') {
     event.waitUntil(syncPendingRequests());
@@ -284,7 +284,7 @@ async function syncAllData() {
       });
     });
     
-    console.log('[SW] Sincronización completa realizada con éxito:', results);
+    //console.log('[SW] Sincronización completa realizada con éxito:', results);
     return results;
   } catch (error) {
     console.error('[SW] Error en syncAllData:', error);
@@ -306,11 +306,11 @@ async function syncAllData() {
 // Procesamiento de solicitudes pendientes
 async function syncPendingRequests() {
   try {
-    console.log('[SW] Iniciando sincronización de solicitudes pendientes');
+    //console.log('[SW] Iniciando sincronización de solicitudes pendientes');
     const cache = await caches.open(PENDING_REQUESTS_STORE);
     const requests = await cache.keys();
     
-    console.log(`[SW] Encontradas ${requests.length} solicitudes pendientes`);
+    //console.log(`[SW] Encontradas ${requests.length} solicitudes pendientes`);
     
     // Agrupar solicitudes por tipo de ruta
     const requestsByType = {};
@@ -355,7 +355,7 @@ async function syncPendingRequests() {
     for (const type of syncOrder) {
       if (!requestsByType[type]) continue;
       
-      console.log(`[SW] Sincronizando ${requestsByType[type].length} solicitudes de tipo '${type}'`);
+      //console.log(`[SW] Sincronizando ${requestsByType[type].length} solicitudes de tipo '${type}'`);
       
       for (const { request, data } of requestsByType[type]) {
         try {
@@ -403,7 +403,7 @@ async function syncPendingRequests() {
             // Si la sincronización fue exitosa, eliminar del caché
             await cache.delete(request);
             results.success++;
-            console.log(`[SW] Solicitud sincronizada correctamente: ${data.url}`);
+            //console.log(`[SW] Solicitud sincronizada correctamente: ${data.url}`);
             
             // Si es exitoso y hay datos de respuesta, actualizar caché de datos
             try {
@@ -424,18 +424,18 @@ async function syncPendingRequests() {
                   })
                 );
                 
-                console.log(`[SW] Datos actualizados en caché para: ${data.url}`);
+                //console.log(`[SW] Datos actualizados en caché para: ${data.url}`);
               }
             } catch (cacheError) {
               console.error('[SW] Error actualizando caché tras sincronización:', cacheError);
             }
           } else {
             results.failure++;
-            console.error(`[SW] Error en sincronización después de 3 intentos: ${data.url}`);
+            //console.error(`[SW] Error en sincronización después de 3 intentos: ${data.url}`);
           }
         } catch (error) {
           results.failure++;
-          console.error(`[SW] Error al sincronizar solicitud:`, error);
+          //console.error(`[SW] Error al sincronizar solicitud:`, error);
         }
       }
     }
@@ -450,7 +450,7 @@ async function syncPendingRequests() {
       });
     });
     
-    console.log(`[SW] Sincronización completada. Éxitos: ${results.success}, Fallos: ${results.failure}`);
+    //console.log(`[SW] Sincronización completada. Éxitos: ${results.success}, Fallos: ${results.failure}`);
     return results;
   } catch (error) {
     console.error('[SW] Error en syncPendingRequests:', error);
@@ -470,7 +470,7 @@ async function syncData() {
       apiRoutes.some(route => request.url.includes(route))
     );
     
-    console.log(`[SW] Sincronizando ${apiRequests.length} datos en caché`);
+    //console.log(`[SW] Sincronizando ${apiRequests.length} datos en caché`);
     
     for (const request of apiRequests) {
       const response = await cache.match(request);
@@ -656,7 +656,7 @@ async function handleApiRequest(request) {
           throw new Error('Error en respuesta API');
         }
       } catch (networkError) {
-        console.log('[SW] Error de red, buscando en caché:', networkError);
+        //console.log('[SW] Error de red, buscando en caché:', networkError);
         // Si falla la red, buscar en caché
         const cachedResponse = await caches.match(request);
         if (cachedResponse) {
@@ -704,7 +704,7 @@ async function handleApiRequest(request) {
               })
             );
             
-            console.log(`[SW] Datos de sincronización guardados en caché: ${basePath}`);
+            //console.log(`[SW] Datos de sincronización guardados en caché: ${basePath}`);
           } catch (cacheError) {
             console.error('[SW] Error guardando datos sincronizados en caché:', cacheError);
           }
@@ -712,7 +712,7 @@ async function handleApiRequest(request) {
         
         return response;
       } catch (error) {
-        console.log('[SW] Error en solicitud de modificación, guardando para sincronización:', error);
+        //console.log('[SW] Error en solicitud de modificación, guardando para sincronización:', error);
         
         // Leer los datos de la solicitud
         const data = await request.clone().json();

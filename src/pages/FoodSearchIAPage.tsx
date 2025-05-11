@@ -30,7 +30,7 @@ const FoodSearchIAPage: React.FC<FoodSearchIAPageProps> = ({ user }) => {
       if (!user) {
         setHasSubscription(null);
         setIsIdLoading(false);
-        console.log('No user provided, resetting hasSubscription');
+        //console.log('No user provided, resetting hasSubscription');
         return;
       }
 
@@ -41,11 +41,11 @@ const FoodSearchIAPage: React.FC<FoodSearchIAPageProps> = ({ user }) => {
         });
 
         const data = response.data;
-        console.log('User data fetched:', data);
+        //console.log('User data fetched:', data);
         setHasSubscription(data.Suscripcion);
-        console.log('hasSubscription set to:', data.Suscripcion);
+        //console.log('hasSubscription set to:', data.Suscripcion);
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        //console.error('Error fetching user data:', error);
         setHasSubscription(null);
       } finally {
         setIsIdLoading(false);

@@ -27,11 +27,29 @@ const FoodSearch: React.FC = () => {
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [userEmail, setUserEmail] = useState<string>("");
   const [addingMultiple, setAddingMultiple] = useState<boolean>(false);
+  const [backendConnected, setBackendConnected] = useState<boolean>(true);
 
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
-  const type = searchParams.get("type") || "";
+  const locationState = location.state as { foodType?: string } || {};
+  const type = searchParams.get("type") || locationState.foodType || "";
+  
+  // Registrar información para debugging
+  useEffect(() => {
+
+    // Solo mostrar una advertencia si no hay tipo, pero no redirigir automáticamente
+    if (!type && !loading && !hasSearched) {
+      console.warn("No se ha especificado tipo de comida");
+      addNotification(
+        "Información",
+        "Si deseas agregar un alimento, primero selecciona un tipo de comida (Desayuno, Almuerzo, etc.)",
+        "info",
+        true,
+        "comida"
+      );
+    }
+  }, [type, searchParams, location.state, loading, hasSearched, addNotification]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -46,6 +64,19 @@ const FoodSearch: React.FC = () => {
       }
     };
     checkAuth();
+    
+    // Verificar conexión con el backend
+    const checkBackendConnection = async () => {
+      try {
+        await axios.get(`${import.meta.env.VITE_BACKEND_URL}/health`);
+        setBackendConnected(true);
+      } catch (err) {
+        console.error("Error al conectar con el backend:", err);
+        setBackendConnected(false);
+        setError("No se pudo conectar con el servidor. Por favor, verifica tu conexión a internet.");
+      }
+    };
+    checkBackendConnection();
   }, []);
 
   const handleSearch = useCallback(
@@ -57,6 +88,23 @@ const FoodSearch: React.FC = () => {
       e.preventDefault();
       if (!query.trim()) {
         setError("Por favor ingresa un término de búsqueda");
+        return;
+      }
+      
+      if (query.trim().length < 2) {
+        setError("El término de búsqueda debe tener al menos 2 caracteres");
+        return;
+      }
+      
+      if (!backendConnected) {
+        setError("No hay conexión con el servidor. Por favor, verifica tu conexión a internet.");
+        addNotification(
+          "Error de conexión",
+          "No se puede conectar con el servidor. Verifica tu conexión a internet.",
+          "error",
+          false,
+          "comida"
+        );
         return;
       }
 
@@ -80,8 +128,17 @@ const FoodSearch: React.FC = () => {
             params: { query, max_results: 10 },
           }
         );
-        const foodResults = response.data.foods?.food || [];
-        const formattedFoods = Array.isArray(foodResults) ? foodResults : [];
+        
+        let foodResults: Food[] = [];
+        if (response.data && response.data.foods) {
+          if (Array.isArray(response.data.foods.food)) {
+            foodResults = response.data.foods.food;
+          } else if (response.data.foods.food) {
+            foodResults = [response.data.foods.food];
+          }
+        }
+        
+        const formattedFoods = foodResults.filter((food: Food) => food !== null && food !== undefined);
         
         const updatedFoods = formattedFoods.map(food => ({
           ...food,
@@ -125,9 +182,24 @@ const FoodSearch: React.FC = () => {
         }
       } catch (err) {
         const axiosError = err as AxiosError<{ error?: string }>;
-        setError(
-          axiosError.response?.data?.error || "Error al buscar alimentos"
+        console.error('Error en la búsqueda de alimentos:', err);
+        
+        let errorMessage = "Error al buscar alimentos";
+        if (axiosError.response?.data?.error) {
+          errorMessage = axiosError.response.data.error;
+        } else if (axiosError.message) {
+          errorMessage = `Error: ${axiosError.message}`;
+        }
+        
+        setError(errorMessage);
+        addNotification(
+          "Error en la búsqueda",
+          errorMessage,
+          "error",
+          false,
+          "comida"
         );
+        
         await Swal.fire({
           title: "¡Error!",
           text: "No se pudo buscar el alimento. Por favor intente de nuevo.",
@@ -146,7 +218,7 @@ const FoodSearch: React.FC = () => {
         setLoading(false);
       }
     },
-    [query, selectedFoods, addNotification]
+    [query, selectedFoods, addNotification, isDarkMode, backendConnected]
   );
 
   const handleKeyDown = useCallback(
@@ -257,8 +329,8 @@ const FoodSearch: React.FC = () => {
         setHasSearched(false);
         
         // Obtener la fecha actual o usar la fecha de la URL
-        const searchParams = new URLSearchParams(location.search);
-        const currentDate = searchParams.get("date") || new Date().toISOString().split('T')[0];
+        const searchParams = new URLSearchParams(location.search); 
+        const currentDate = searchParams.get("date") || new Date().toLocaleString("en-CA", {timeZone: "America/Bogota"}).split(",")[0];
         
         navigate(`/comidas?type=${normalizedType.toLowerCase()}&date=${currentDate}`, {
           state: { fromAddButton: true },
@@ -291,6 +363,7 @@ const FoodSearch: React.FC = () => {
 
   const handleAddFood = useCallback(
     async (food: Food) => {
+      
       if (addingMultiple) {
         toggleFoodSelection(food);
         return;
@@ -305,13 +378,22 @@ const FoodSearch: React.FC = () => {
         return;
       }
 
+      // Comprobar el tipo con más detalle
       if (!type) {
-        setError(
-          "No se especificó el tipo de comida (Desayuno, Almuerzo, etc.)."
+        setError("No se especificó el tipo de comida (Desayuno, Almuerzo, etc.). Vuelve al panel y selecciona una comida.");
+        
+        // Intentar mostrar una notificación más clara
+        addNotification(
+          "Error al agregar alimento",
+          "No se especificó el tipo de comida (Desayuno, Almuerzo, etc.). Vuelve al panel y selecciona una comida.",
+          "error",
+          true,
+          "comida"
         );
         return;
       }
 
+      setLoading(true);
       const normalizedType =
         type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
@@ -324,6 +406,7 @@ const FoodSearch: React.FC = () => {
       };
 
       try {
+        
         await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/api/foods/add`,
           requestBody
@@ -365,10 +448,13 @@ const FoodSearch: React.FC = () => {
           state: { fromAddButton: true },
         });
       } catch (err) {
+        console.error("Error al agregar alimento:", err);
+        
         const axiosError = err as AxiosError<{ error?: string }>;
         const errorMessage =
           axiosError.response?.data?.error || "Error al agregar el alimento";
         setError(errorMessage);
+        
         await Swal.fire({
           title: "¡Error!",
           text: errorMessage,
@@ -383,25 +469,56 @@ const FoodSearch: React.FC = () => {
             htmlContainer: "custom-swal-text",
           },
         });
+      } finally {
+        setLoading(false);
       }
     },
-    [type, navigate, isDarkMode, addingMultiple, toggleFoodSelection]
+    [type, navigate, isDarkMode, addingMultiple, toggleFoodSelection, addNotification, location.search]
   );
 
   const handleFoodClick = useCallback(
     (food: Food) => {
+      try {
+        // Comprobar que el alimento tiene datos válidos
+        if (!food.food_id || !food.food_name || !food.food_description) {
+          setError("Error: Los datos del alimento están incompletos. Por favor, intenta otra búsqueda.");
+          return;
+        }
+        
+        // Comprobar que tenemos tipo de comida
+        if (!type) {
+          console.error("No se ha especificado el tipo de comida en la URL");
+          setError("No se especificó el tipo de comida (Desayuno, Almuerzo, etc.). Vuelve al panel y selecciona una comida.");
+          return;
+        }
+        
+        addNotification(
+          "Ajustar cantidad",
+          `Estás ajustando la cantidad de ${food.food_name}.`,
+          "info",
+          false,
+          "comida"
+        );
+        
+        // Obtener fecha actual o de la URL
+        const searchParams = new URLSearchParams(location.search);
+        const currentDate = searchParams.get("date") || new Date().toISOString().split('T')[0];
 
-      addNotification(
-        "Ajustar cantidad",
-        `Estás ajustando la cantidad de ${food.food_name}.`,
-        "info",
-        false,
-        "comida"
-      );
-      
-      navigate("/food-quantity-adjust", { state: { food, type } });
+        // Usar navigate con objeto history completo para evitar la pérdida de estado
+        navigate("/food-quantity-adjust", { 
+          state: { 
+            food, 
+            type,
+            date: currentDate
+          }, 
+          replace: false 
+        });
+      } catch (error) {
+        console.error("Error al navegar:", error);
+        setError("Error al ajustar la cantidad. Intenta de nuevo.");
+      }
     },
-    [navigate, type, addNotification]
+    [navigate, type, addNotification, location.search]
   );
 
   const toggleMultipleSelection = useCallback(() => {
@@ -537,6 +654,20 @@ const FoodSearch: React.FC = () => {
           </motion.div>
         </div>
 
+        {!backendConnected && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className={`text-center my-4 sm:my-6 max-w-5xl mx-auto ${
+              isDarkMode ? "bg-[#4A1A1A] text-red-300" : "bg-red-100 text-red-800"
+            } p-3 sm:p-4 rounded-lg`}
+          >
+            <p className="text-sm sm:text-base">
+              <strong>Error de conexión:</strong> No se pudo conectar con el servidor. Por favor, verifica tu conexión a internet y refresca la página.
+            </p>
+          </motion.div>
+        )}
+
         {loading && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -601,9 +732,13 @@ const FoodSearch: React.FC = () => {
                         ? "border-gray-600 hover:bg-[#4B5563]" 
                         : "border-gray-300 hover:bg-gray-200"
                   } transition duration-200 flex items-center justify-between cursor-pointer`}
-                  onClick={() => addingMultiple ? toggleFoodSelection(food) : handleFoodClick(food)}
+                  onClick={(e) => {
+                    if(e.currentTarget === e.target || (e.target as HTMLElement).closest('.food-item-content')) {
+                      addingMultiple ? toggleFoodSelection(food) : handleFoodClick(food);
+                    }
+                  }}
                 >
-                  <div className="flex-1">
+                  <div className="flex-1 food-item-content">
                     <p className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                       {food.food_name}
                     </p>
@@ -614,8 +749,11 @@ const FoodSearch: React.FC = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                      addingMultiple ? toggleFoodSelection(food) : handleAddFood(food);
+                      if (addingMultiple) {
+                        toggleFoodSelection(food);
+                      } else {
+                        handleAddFood(food);
+                      }
                     }}
                     className={`${
                       food.selected
@@ -623,9 +761,10 @@ const FoodSearch: React.FC = () => {
                         : isDarkMode
                           ? "text-gray-400 hover:text-[#FF6B35] active:text-[#ff9404]"
                           : "text-gray-600 hover:text-[#FF6B35] active:text-[#ff9404]"
-                    } transition-all duration-200 transform hover:scale-125 active:scale-95 ml-3`}
+                    } transition-all duration-200 transform hover:scale-125 active:scale-95 ml-3 p-2 z-10`}
+                    aria-label={food.selected ? "Quitar selección" : "Agregar alimento"}
                   >
-                    {food.selected ? <FaCheck className="text-sm" /> : <FaPlus className="text-sm" />}
+                    {food.selected ? <FaCheck className="text-lg sm:text-lg" /> : <FaPlus className="text-lg sm:text-lg" />}
                   </button>
                 </div>
               ))}

@@ -86,7 +86,7 @@ const RMProgressPage: React.FC = () => {
           }
         );
 
-        console.log("Datos recibidos del backend:", response.data);
+        //console.log("Datos recibidos del backend:", response.data);
         const rmRecords = response.data.rmRecords || [];
 
         const convertedData = rmRecords.map((record: any) => {
@@ -95,11 +95,11 @@ const RMProgressPage: React.FC = () => {
             record.unidad || "kg",
             unit
           );
-          console.log(
-            `Convirtiendo ${record.rm_maximo} de ${
-              record.unidad || "kg"
-            } a ${unit}: ${convertedWeight}`
-          );
+          //console.log(
+          //  `Convirtiendo ${record.rm_maximo} de ${
+          //    record.unidad || "kg"
+          //  } a ${unit}: ${convertedWeight}`
+          //);
           return {
             ...record,
             rm_maximo: convertedWeight,
@@ -108,7 +108,7 @@ const RMProgressPage: React.FC = () => {
 
         const labels = convertedData.map((record: any) => record.fecha);
         const data = convertedData.map((record: any) => record.rm_maximo);
-        console.log("Datos para la gráfica:", { labels, data });
+        //console.log("Datos para la gráfica:", { labels, data });
 
         setChartData({
           labels,

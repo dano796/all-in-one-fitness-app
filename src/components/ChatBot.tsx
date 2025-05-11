@@ -61,7 +61,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
         setIdusuario(null);
         setHasSubscription(null);
         setIsIdLoading(false);
-        console.log('No user provided, resetting idusuario and hasSubscription');
+        //console.log('No user provided, resetting idusuario and hasSubscription');
         return;
       }
 
@@ -72,10 +72,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
         });
 
         const data = response.data;
-        console.log('User data fetched:', data);
+        //console.log('User data fetched:', data);
         setIdusuario(data.idusuario);
         setHasSubscription(data.Suscripcion);
-        console.log('hasSubscription set to:', data.Suscripcion);
+        //console.log('hasSubscription set to:', data.Suscripcion);
       } catch (error) {
         console.error('Error fetching user data:', error);
         setMessages((prev) => [
@@ -460,7 +460,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
   };
 
   const handleSendMessage = async (messageToSend?: string) => {
-    console.log('handleSendMessage - hasSubscription:', hasSubscription);
+    //console.log('handleSendMessage - hasSubscription:', hasSubscription);
     if (hasSubscription === false) {
       navigate('/subscription-plans');
       return;
