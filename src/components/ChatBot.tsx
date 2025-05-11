@@ -6,6 +6,7 @@ import { useTheme } from '../pages/ThemeContext';
 import { User } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import React from 'react';
 
 interface ChatMessage {
   sender: 'user' | 'bot';
@@ -45,81 +46,378 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
   const [editingConversationId, setEditingConversationId] = useState<number | null>(null);
   const [newTitle, setNewTitle] = useState<string>('');
   const [isFirstUserMessage, setIsFirstUserMessage] = useState<boolean>(true);
+  const [initialMessageSent, setInitialMessageSent] = useState<boolean>(false);
+  const [lastInitialMessage, setLastInitialMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatBotRef = useRef<HTMLDivElement>(null);
-  const [initialMessageSent, setInitialMessageSent] = useState<boolean>(false);
-
-  // Sincronizar isOpen con controlledIsOpen
-  useEffect(() => {
-    setIsOpen(controlledIsOpen);
-  }, [controlledIsOpen]);
 
   // Obtener idusuario y Suscripción desde el backend
   useEffect(() => {
-    const fetchIdUsuarioAndSubscription = async () => {
+    // Referencia para evitar actualizar estado en componentes desmontados
+    let isMounted = true;
+    
+    const fetchUserData = async () => {
       if (!user) {
-        setIdusuario(null);
-        setHasSubscription(null);
-        setIsIdLoading(false);
-        //console.log('No user provided, resetting idusuario and hasSubscription');
+        if (isMounted) {
+          setIdusuario(null);
+          setHasSubscription(null);
+          setIsIdLoading(false);
+        }
         return;
       }
 
       setIsIdLoading(true);
       try {
+        // Obtener datos del usuario y su suscripción
         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/get-user-subscription`, {
           params: { email: user.email },
         });
-
-        const data = response.data;
-        //console.log('User data fetched:', data);
-        setIdusuario(data.idusuario);
-        setHasSubscription(data.Suscripcion);
-        //console.log('hasSubscription set to:', data.Suscripcion);
+        const { idusuario: id, Suscripcion } = response.data;
+        
+        if (!isMounted) return;
+        
+        setIdusuario(id);
+        setHasSubscription(Suscripcion);
+        
+        // Obtener conversaciones si tiene suscripción
+        if (id && Suscripcion) {
+          try {
+            const { data, error } = await supabase
+              .from('Conversaciones')
+              .select('id_conversacion, titulo, fecha_creacion')
+              .eq('idusuario', id)
+              .order('fecha_creacion', { ascending: false });
+            
+            if (!isMounted) return;
+            
+            if (!error) {
+              setConversations(data || []);
+              
+              // Inicializar conversación apropiada
+              if (selectedConversationId) {
+                await loadConversationMessages(selectedConversationId);
+                
+                // Si hay un mensaje inicial, lo enviamos después de cargar la conversación
+                if (initialMessage && !initialMessageSent && isMounted) {
+                  setTimeout(() => {
+                    if (isMounted) handleSendMessage(initialMessage);
+                  }, 500); // Pequeño retraso para asegurar que la UI se actualice correctamente
+                }
+              } else if (data.length > 0) {
+                await loadConversationMessages(data[0].id_conversacion);
+                
+                // Si hay un mensaje inicial, lo enviamos después de cargar la conversación
+                if (initialMessage && !initialMessageSent && isMounted) {
+                  setTimeout(() => {
+                    if (isMounted) handleSendMessage(initialMessage);
+                  }, 500);
+                }
+              } else if (Suscripcion) {
+                const newConversationId = await createNewConversation();
+                
+                // Si hay un mensaje inicial, lo enviamos después de crear la conversación
+                if (initialMessage && !initialMessageSent && newConversationId && isMounted) {
+                  setTimeout(() => {
+                    if (isMounted) handleSendMessage(initialMessage);
+                  }, 500);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error al cargar conversaciones:', error);
+          }
+        }
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        setMessages((prev) => [
-          ...prev,
-          { sender: 'bot', text: 'Error al obtener tu información de usuario. Por favor, intenta de nuevo más tarde.' },
-        ]);
-        setIdusuario(null);
-        setHasSubscription(null);
+        console.error('Error al obtener datos de usuario:', error);
+        if (isMounted) {
+          setMessages(prev => [
+            ...prev,
+            { sender: 'bot', text: 'Error al obtener tu información. Intenta de nuevo más tarde.' },
+          ]);
+          setIdusuario(null);
+          setHasSubscription(null);
+        }
       } finally {
-        setIsIdLoading(false);
+        if (isMounted) setIsIdLoading(false);
       }
     };
 
-    fetchIdUsuarioAndSubscription();
-  }, [user]);
+    fetchUserData();
+    
+    // Limpieza
+    return () => {
+      isMounted = false;
+    };
+  }, [user, selectedConversationId]);
 
-  // Obtener las conversaciones del usuario
-  const fetchConversations = async () => {
-    if (!idusuario) return;
+  // Manejar el estado del chat (apertura/cierre)
+  useEffect(() => {
+    console.log("Estado del chat actualizado - controlledIsOpen:", controlledIsOpen, "isOpen:", isOpen);
+    
+    // Si el chat se está abriendo externamente
+    if (controlledIsOpen !== isOpen) {
+      setIsOpen(controlledIsOpen);
+    }
+  }, [controlledIsOpen]);
 
-    try {
-      const { data, error } = await supabase
-        .from('Conversaciones')
-        .select('id_conversacion, titulo, fecha_creacion')
-        .eq('idusuario', idusuario)
-        .order('fecha_creacion', { ascending: false });
-
-      if (error) throw error;
-      setConversations(data || []);
-
-      // Si no hay conversaciones y no hay una seleccionada, crea una nueva
-      if (data?.length === 0 && !selectedConversationId) {
-        await createNewConversation();
+  // Efecto para manejar cambios en el mensaje inicial
+  useEffect(() => {
+    // Si no hay mensaje inicial o el chat no está abierto, no hacemos nada
+    if (!initialMessage || !isOpen) return;
+    
+    // Si el mensaje inicial ha cambiado, resetear el estado
+    if (initialMessage !== lastInitialMessage) {
+      console.log("Nuevo mensaje inicial detectado:", initialMessage);
+      setInitialMessageSent(false);
+      setLastInitialMessage(initialMessage);
+    }
+    
+    // Si ya se envió este mensaje, no hacemos nada
+    if (initialMessageSent) {
+      console.log("Mensaje inicial ya enviado, no se procesa de nuevo");
+      return;
+    }
+    
+    // Procesar el nuevo mensaje inicial
+    const handleNewInitialMessage = async () => {
+      // Solo proceder si el usuario está autenticado y tiene suscripción
+      if (!user || !idusuario || hasSubscription !== true) return;
+      
+      console.log("Procesando nuevo mensaje inicial:", initialMessage);
+      
+      try {
+        // Limpiar los mensajes actuales
+        setMessages([{ sender: 'bot', text: '¡Hola! Soy FitMate, tu asistente de fitness. ¿En qué puedo ayudarte hoy?' }]);
+        
+        // Crear una nueva conversación
+        const newConversationId = await createNewConversation();
+        
+        // Si se creó correctamente, enviar el mensaje inicial
+        if (newConversationId) {
+          setTimeout(() => {
+            handleSendMessage(initialMessage);
+          }, 500);
+        }
+      } catch (error) {
+        console.error("Error al crear nueva conversación para mensaje inicial:", error);
       }
+    };
+    
+    handleNewInitialMessage();
+  }, [initialMessage, isOpen, lastInitialMessage, initialMessageSent, user, idusuario, hasSubscription]);
+
+  // Control de apertura/cierre del chat con clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen && chatBotRef.current && !chatBotRef.current.contains(event.target as Node)) {
+        console.log("Clic fuera del chat detectado, cerrando");
+        setIsOpen(false);
+        setIsSidebarOpen(false);
+        if (onClose) onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onClose]);
+
+  // Desplazamiento automático a los mensajes nuevos
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Función simplificada de parseado de markdown
+  const parseMarkdownToJSX = (text: string): JSX.Element[] => {
+    try {
+      // Dividir el texto en líneas
+      const lines = text.split('\n');
+      
+      // Mapear cada línea a un elemento JSX
+      return lines.map((line, i) => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return <br key={`br-${i}`} />;
+        
+        // Títulos (encabezados)
+        if (trimmedLine.startsWith('# ')) {
+          return <h1 key={`h1-${i}`} className="text-xl font-bold mt-3 mb-2">{trimmedLine.substring(2)}</h1>;
+        }
+        
+        if (trimmedLine.startsWith('## ')) {
+          return <h2 key={`h2-${i}`} className="text-lg font-bold mt-3 mb-2">{trimmedLine.substring(3)}</h2>;
+        }
+        
+        if (trimmedLine.startsWith('### ')) {
+          return <h3 key={`h3-${i}`} className="text-base font-bold mt-2 mb-1">{trimmedLine.substring(4)}</h3>;
+        }
+        
+        // Listas con viñetas
+        if (trimmedLine.startsWith('-') || trimmedLine.startsWith('*')) {
+          return (
+            <div key={`list-${i}`} className="flex ml-4 mb-1">
+              <span className="mr-2 ml-2">•</span>
+              <span>{formatTextWithAsterisks(trimmedLine.substring(1).trim())}</span>
+            </div>
+          );
+        }
+        
+        // Listas numeradas
+        const numMatch = trimmedLine.match(/^(\d+)\.\s+(.*)$/);
+        if (numMatch) {
+          return (
+            <div key={`numlist-${i}`} className="flex ml-4 mb-1">
+              <span className="mr-2 ml-2">{numMatch[1]}.</span>
+              <span>{formatTextWithAsterisks(numMatch[2])}</span>
+            </div>
+          );
+        }
+        
+        // Texto normal (puede contener negritas)
+        return <p key={`p-${i}`} className="mb-1">{formatTextWithAsterisks(trimmedLine)}</p>;
+      });
     } catch (error) {
-      console.error('Error al obtener conversaciones:', error);
+      console.error('Error al parsear markdown:', error);
+      return [<p key="error">{text}</p>];
+    }
+  };
+  
+  // Función auxiliar para procesar texto con negritas (**texto**)
+  const formatTextWithAsterisks = (text: string): React.ReactNode => {
+    if (!text.includes('**')) return text;
+    
+    const segments = text.split(/(\*\*.*?\*\*)/g);
+    if (segments.length === 1) return segments[0];
+    
+    return (
+      <>
+        {segments.map((segment, i) => {
+          if (segment.startsWith('**') && segment.endsWith('**')) {
+            const content = segment.slice(2, -2);
+            return <strong key={`bold-${i}`}>{content}</strong>;
+          }
+          return <React.Fragment key={`text-${i}`}>{segment}</React.Fragment>;
+        })}
+      </>
+    );
+  };
+  
+  // Funciones básicas simplificadas
+  const saveMessageToDB = async (conversationId: number, sender: 'user' | 'bot', text: string) => {
+    try {
+      await supabase.from('Mensajes').insert([{
+        id_conversacion: conversationId,
+        remitente: sender,
+        texto: text,
+        fecha_creacion: new Date().toISOString(),
+      }]);
+    } catch (error) {
+      console.error('Error al guardar mensaje:', error);
+    }
+  };
+  
+  // Manejo de mensajes simplificado
+  const handleSendMessage = async (messageToSend?: string) => {
+    // Verificaciones básicas
+    if (isLoading || hasSubscription === false || !user || !idusuario) {
+      if (hasSubscription === false) navigate('/subscription-plans');
+      return;
+    }
+    
+    const message = messageToSend || input;
+    if (!message.trim()) return;
+    
+    // Crear conversación si es necesario
+    if (!currentConversationId) {
+      try {
+        await createNewConversation();
+        if (currentConversationId) {
+          handleSendMessage(message);
+        }
+        return;
+      } catch (error) {
+        console.error('Error al crear conversación:', error);
+        return;
+      }
+    }
+    
+    // Verificar si este mensaje ya ha sido procesado (si es un mensaje inicial)
+    const isInitialMsg = messageToSend === initialMessage;
+    if (isInitialMsg && initialMessageSent) {
+      console.log("Mensaje inicial ya procesado, evitando duplicación");
+      return;
+    }
+    
+    // Mostrar mensaje del usuario (solo si es mensaje normal, no inicial)
+    if (!messageToSend) {
+      setMessages(prev => [...prev, { sender: 'user', text: message }]);
+    } else if (isInitialMsg && !initialMessageSent) {
+      // Si es un mensaje inicial que aún no ha sido mostrado
+      setMessages(prev => [...prev, { sender: 'user', text: messageToSend }]);
+      setInitialMessageSent(true);
+      console.log("Marcando mensaje inicial como enviado:", messageToSend);
+    }
+    
+    // Guardar y procesar mensaje
+    try {
+      // Limpiamos input independientemente de si es mensaje inicial o no
+      if (!messageToSend) setInput('');
+      setIsLoading(true);
+      
+      // Guardar mensaje en la base de datos
+      await saveMessageToDB(currentConversationId, 'user', message);
+      
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/chat`, {
+        message,
+        userId: idusuario,
+        conversationId: currentConversationId,
+      });
+      
+      // Procesar respuesta
+      const botResponse = response.data.message;
+      const parsedElements = parseMarkdownToJSX(botResponse);
+      
+      setMessages(prev => [...prev, { 
+        sender: 'bot', 
+        text: botResponse, 
+        elements: parsedElements 
+      }]);
+      
+      await saveMessageToDB(currentConversationId, 'bot', botResponse);
+      if (isFirstUserMessage) setIsFirstUserMessage(false);
+      
+      // Asegurarnos de que se marca como enviado si es un mensaje inicial
+      if (isInitialMsg && !initialMessageSent) {
+        setInitialMessageSent(true);
+      }
+    } catch (error: any) {
+      setMessages(prev => [...prev, { 
+        sender: 'bot', 
+        text: `Lo siento, ocurrió un error: ${error.response?.data?.error || 'Error desconocido'}` 
+      }]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (hasSubscription) {
-      fetchConversations();
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
     }
-  }, [idusuario, hasSubscription]);
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
+  // Renderizado simplificado
+  const renderMessage = (msg: ChatMessage) => (
+    <div className={`max-w-[80%] sm:max-w-[85%] p-3 sm:p-4 rounded-xl text-sm sm:text-base leading-relaxed break-words ${
+      msg.sender === 'user'
+        ? isDarkMode ? 'bg-[#ff9404] text-white' : 'bg-orange-500 text-white'
+        : isDarkMode ? 'bg-[#4B5563] text-white' : 'bg-gray-100 text-gray-900'
+    } shadow-sm`}>
+      {msg.elements && msg.elements.length > 0 ? msg.elements : msg.text}
+    </div>
+  );
 
   const checkIfFirstUserMessage = async (conversationId: number) => {
     try {
@@ -131,14 +429,17 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
 
       if (error) throw error;
       return data.length === 0;
-    } catch (error) {
+    } catch (error: any) {
       console.error('checkIfFirstUserMessage - Error al verificar mensajes:', error.message);
       return false;
     }
   };
 
   const createNewConversation = async () => {
-    if (!idusuario) return;
+    if (!idusuario) {
+      console.error('createNewConversation - No hay idusuario disponible');
+      return null;
+    }
 
     const defaultTitle = '';
     try {
@@ -148,20 +449,35 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error al crear nueva conversación:', error);
+        throw error;
+      }
+
+      if (!data) {
+        console.error('No se recibieron datos al crear la conversación');
+        throw new Error('No se recibieron datos al crear la conversación');
+      }
 
       setConversations((prev) => [data, ...prev]);
       setCurrentConversationId(data.id_conversacion);
-      setMessages([{ sender: 'bot', text: '¡Hola! Soy FitMate, tu asistente de fitness. ¿En qué puedo ayudarte hoy? 🏋️‍♂️' }]);
       setIsSidebarOpen(false);
       setIsFirstUserMessage(true);
       setInitialMessageSent(false);
+      
+      return data.id_conversacion;
     } catch (error) {
       console.error('Error al crear nueva conversación:', error);
+      throw error;
     }
   };
 
   const loadConversationMessages = async (conversationId: number) => {
+    if (!conversationId) {
+      console.error('loadConversationMessages - No se proporcionó un ID de conversación válido');
+      return;
+    }
+    
     try {
       const { data, error } = await supabase
         .from('Mensajes')
@@ -169,7 +485,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
         .eq('id_conversacion', conversationId)
         .order('fecha_creacion', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error al cargar mensajes:', error);
+        throw error;
+      }
 
       const loadedMessages: ChatMessage[] = data.map((msg: any) => ({
         sender: msg.remitente as 'user' | 'bot',
@@ -177,7 +496,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
         elements: msg.remitente === 'bot' ? parseMarkdownToJSX(msg.texto) : undefined,
       }));
 
-      setMessages(loadedMessages.length > 0 ? loadedMessages : [{ sender: 'bot', text: '¡Hola! Soy FitMate, tu asistente de fitness. ¿En qué puedo ayudarte hoy?' }]);
+      // Si no hay mensajes, inicializamos con un mensaje de bienvenida
+      if (loadedMessages.length === 0) {
+        setMessages([{ sender: 'bot', text: '¡Hola! Soy FitMate, tu asistente de fitness. ¿En qué puedo ayudarte hoy?' }]);
+      } else {
+        setMessages(loadedMessages);
+      }
+      
       setCurrentConversationId(conversationId);
       setIsSidebarOpen(false);
 
@@ -186,6 +511,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
       setInitialMessageSent(false);
     } catch (error) {
       console.error('Error al cargar mensajes de la conversación:', error);
+      // Establecer un mensaje de error que el usuario pueda ver
+      setMessages([{ 
+        sender: 'bot', 
+        text: 'Lo siento, hubo un problema al cargar los mensajes de esta conversación. Por favor, intenta nuevamente.' 
+      }]);
     }
   };
 
@@ -238,298 +568,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
     }
   };
 
-  // Manejar la creación de conversación y el envío del mensaje inicial
-  useEffect(() => {
-    const initializeAndSend = async () => {
-      if (idusuario && hasSubscription && isOpen) {
-        // Si hay un selectedConversationId, cargar esa conversación
-        if (selectedConversationId && selectedConversationId !== currentConversationId) {
-          await loadConversationMessages(selectedConversationId);
-        } else if (!currentConversationId && !selectedConversationId) {
-          // Si no hay conversación seleccionada, crear una nueva
-          await createNewConversation();
-        }
-
-        // Enviar el mensaje inicial si no se ha enviado aún
-        if (initialMessage && !initialMessageSent && currentConversationId) {
-          setMessages((prev) => [...prev, { sender: 'user', text: initialMessage }]);
-          await handleSendMessage(initialMessage);
-          setInitialMessageSent(true);
-        }
-      }
-    };
-
-    initializeAndSend();
-  }, [isOpen, initialMessage, selectedConversationId, currentConversationId, idusuario, hasSubscription]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isOpen && chatBotRef.current && !chatBotRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setIsSidebarOpen(false);
-        if (onClose) onClose();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, onClose]);
-
-  const parseMarkdownToJSX = (text: string): JSX.Element[] => {
-    const elements: JSX.Element[] = [];
-    const lines = text.split('\n');
-    let currentList: JSX.Element[] | null = null;
-    let listType: 'ul' | 'ol' | null = null;
-
-    lines.forEach((line, index) => {
-      const trimmedLine = line.trim();
-      if (!trimmedLine) {
-        if (currentList) {
-          elements.push(
-            listType === 'ul' ? (
-              <ul key={`ul-${index}`} className="ml-4 list-disc">
-                {currentList}
-              </ul>
-            ) : (
-              <ol key={`ol-${index}`} className="ml-4 list-decimal">
-                {currentList}
-              </ol>
-            )
-          );
-          currentList = null;
-          listType = null;
-        }
-        return;
-      }
-
-      const titleMatch = trimmedLine.match(/^(#+)\s+(.*)$/);
-      if (titleMatch) {
-        if (currentList) {
-          elements.push(
-            listType === 'ul' ? (
-              <ul key={`ul-${index}`} className="ml-4 list-disc">
-                {currentList}
-              </ul>
-            ) : (
-              <ol key={`ol-${index}`} className="ml-4 list-decimal">
-                {currentList}
-              </ol>
-            )
-          );
-          currentList = null;
-          listType = null;
-        }
-
-        const level = titleMatch[1].length;
-        const titleText = titleMatch[2];
-        const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
-        elements.push(
-          <HeadingTag key={`heading-${index}`} className="font-bold text-lg mt-2 mb-1">
-            {titleText}
-          </HeadingTag>
-        );
-        return;
-      }
-
-      const numberedListMatch = trimmedLine.match(/^(\d+)\.\s+(.*)$/);
-      if (numberedListMatch) {
-        const itemText = numberedListMatch[2];
-        if (currentList && listType !== 'ol') {
-          elements.push(
-            listType === 'ul' ? (
-              <ul key={`ul-${index}`} className="ml-4 list-disc">
-                {currentList}
-              </ul>
-            ) : (
-              <ol key={`ul-${index}`} className="ml-4 list-decimal">
-                {currentList}
-              </ol>
-            )
-          );
-          currentList = null;
-        }
-
-        if (!currentList) {
-          currentList = [];
-          listType = 'ol';
-        }
-
-        currentList.push(<li key={`ol-item-${index}`}>{itemText}</li>);
-        return;
-      }
-
-      const bulletListMatch = trimmedLine.match(/^-+\s+(.*)$/);
-      if (bulletListMatch) {
-        const itemText = bulletListMatch[1];
-        if (currentList && listType !== 'ul') {
-          elements.push(
-            listType === 'ul' ? (
-              <ul key={`ul-${index}`} className="ml-4 list-disc">
-                {currentList}
-              </ul>
-            ) : (
-              <ol key={`ol-${index}`} className="ml-4 list-decimal">
-                {currentList}
-              </ol>
-            )
-          );
-          currentList = null;
-        }
-
-        if (!currentList) {
-          currentList = [];
-          listType = 'ul';
-        }
-
-        currentList.push(<li key={`ul-item-${index}`}>{itemText}</li>);
-        return;
-      }
-
-      if (currentList) {
-        elements.push(
-          listType === 'ul' ? (
-            <ul key={`ul-${index}`} className="ml-4 list-disc">
-              {currentList}
-            </ul>
-          ) : (
-            <ol key={`ol-${index}`} className="ml-4 list-decimal">
-              {currentList}
-            </ol>
-          )
-        );
-        currentList = null;
-        listType = null;
-      }
-
-      let formattedLine: string | JSX.Element = trimmedLine;
-      if (formattedLine.includes('**')) {
-        const parts = formattedLine.split(/\*\*(.*?)\*\*/g);
-        formattedLine = parts.map((part, i) =>
-          i % 2 === 1 ? <strong key={`strong-${index}-${i}`}>{part}</strong> : part
-        );
-      }
-
-      if (typeof formattedLine === 'string' && formattedLine.includes('*')) {
-        const parts = formattedLine.split(/\*(.*?)\*/g);
-        formattedLine = parts.map((part, i) =>
-          i % 2 === 1 ? <em key={`em-${index}-${i}`}>{part}</em> : part
-        );
-      }
-
-      elements.push(<p key={`p-${index}`}>{formattedLine}</p>);
-    });
-
-    if (currentList) {
-      elements.push(
-        listType === 'ul' ? (
-          <ul key={`ul-final`} className="ml-4 list-disc">
-            {currentList}
-          </ul>
-        ) : (
-          <ol key={`ol-final`} className="ml-4 list-decimal">
-            {currentList}
-          </ol>
-        )
-      );
-    }
-
-    return elements;
-  };
-
-  const saveMessageToDB = async (conversationId: number, sender: 'user' | 'bot', text: string) => {
-    try {
-      const { error } = await supabase.from('Mensajes').insert([
-        {
-          id_conversacion: conversationId,
-          remitente: sender,
-          texto: text,
-          fecha_creacion: new Date().toISOString(),
-        },
-      ]);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error al guardar mensaje:', error);
-    }
-  };
-
-  const handleSendMessage = async (messageToSend?: string) => {
-    //console.log('handleSendMessage - hasSubscription:', hasSubscription);
-    if (hasSubscription === false) {
-      navigate('/subscription-plans');
-      return;
-    }
-
-    const message = messageToSend || input;
-    if (!message.trim()) return;
-
-    if (!user || !idusuario) {
-      setMessages((prev) => [
-        ...prev,
-        { sender: 'bot', text: 'Por favor, inicia sesión para usar el chat.' },
-      ]);
-      return;
-    }
-
-    if (isIdLoading) {
-      setMessages((prev) => [
-        ...prev,
-        { sender: 'bot', text: 'Aún estoy cargando tu información de usuario. Por favor, espera un momento.' },
-      ]);
-      return;
-    }
-
-    if (!currentConversationId) {
-      await createNewConversation();
-      return;
-    }
-
-    setMessages((prev) => [...prev, { sender: 'user', text: message }]);
-    await saveMessageToDB(currentConversationId!, 'user', message);
-    setInput('');
-    setIsLoading(true);
-
-    try {
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/chat`, {
-        message,
-        userId: idusuario,
-        conversationId: currentConversationId,
-      });
-      const botResponse = response.data.message;
-
-      const parsedElements = parseMarkdownToJSX(botResponse);
-      setMessages((prev) => [...prev, { sender: 'bot', text: botResponse, elements: parsedElements }]);
-      await saveMessageToDB(currentConversationId!, 'bot', botResponse);
-
-      if (isFirstUserMessage) {
-        setIsFirstUserMessage(false);
-      }
-    } catch (error: any) {
-      setMessages((prev) => [
-        ...prev,
-        { sender: 'bot', text: `Lo siento, ocurrió un error al enviar el mensaje: ${error.response?.data?.error || 'Error desconocido'}. Intenta de nuevo.` },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
-  };
-
   return (
     <div ref={chatBotRef} className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
       {!isOpen && (
@@ -537,20 +575,20 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => {
+            console.log("Botón del chat clickeado, abriendo chat");
             setIsOpen(true);
-            if (onClose) onClose();
           }}
-          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
-            isDarkMode
-              ? 'border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)]'
-              : 'border-gray-300 hover:bg-gray-50'
-          } ${isOpen ? 'hidden' : ''}`}
+          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:shadow-xl"
+          style={{
+            background: isDarkMode ? '#2D3748' : 'white',
+            boxShadow: isDarkMode ? '0 0 10px rgba(255,148,4,0.3)' : '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}
         >
-          <div className="w-full h-full bg-[#ff9404] rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#ff9404] rounded-full flex items-center justify-center">
             <img
               src="https://png.pngtree.com/png-clipart/20230621/original/pngtree-illustration-of-a-standing-cat-png-image_9194368.png"
               alt="FitMate"
-              className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+              className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
             />
           </div>
         </motion.button>
@@ -742,19 +780,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
                               />
                             </div>
                           )}
-                          <div
-                            className={`max-w-[80%] sm:max-w-[85%] p-3 sm:p-4 rounded-xl text-sm sm:text-base leading-relaxed break-words ${
-                              msg.sender === 'user'
-                                ? isDarkMode
-                                  ? 'bg-[#ff9404] text-white'
-                                  : 'bg-orange-500 text-white'
-                                : isDarkMode
-                                ? 'bg-[#4B5563] text-white'
-                                : 'bg-gray-100 text-gray-900'
-                            } shadow-sm`}
-                          >
-                            {msg.elements ? msg.elements : msg.text}
-                          </div>
+                          {renderMessage(msg)}
                         </motion.div>
                       ))}
                       {isLoading && (
@@ -808,7 +834,19 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
                         <Send size={20} />
                       </button>
                       <button
-                        onClick={() => createNewConversation()}
+                        onClick={async () => {
+                          try {
+                            const newId = await createNewConversation();
+                            if (newId) {
+                              // Configurar el chat nuevo
+                              setMessages([{ sender: 'bot', text: '¡Hola! Soy FitMate, tu asistente de fitness. ¿En qué puedo ayudarte hoy?' }]);
+                              setIsOpen(true);
+                              setIsSidebarOpen(false);
+                            }
+                          } catch (error) {
+                            console.error('Error al crear nuevo chat:', error);
+                          }
+                        }}
                         className={`p-2 text-[#ff9404] hover:text-[#e08503] transition-colors duration-300`}
                       >
                         <Edit size={20} />
@@ -819,32 +857,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ user, initialMessage, isOpen: control
               </div>
             </div>
           </motion.div>
-
-          {/* Overlay de suscripción bloqueada */}
-          {hasSubscription === false && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-30"
-            >
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`flex flex-col items-center p-6 rounded-xl ${
-                  isDarkMode ? 'bg-[#3B4252] text-white' : 'bg-white text-gray-900'
-                } shadow-lg`}
-              >
-                <Lock size={40} className="text-[#ff9404] mb-4" />
-                <p className="text-center mb-4">Necesitas una suscripción Premium para usar el chatbot.</p>
-                <button
-                  onClick={() => navigate('/subscription-plans')}
-                  className="bg-[#ff9404] text-white px-4 py-2 rounded-lg hover:bg-[#e08503] transition-colors duration-300"
-                >
-                  Ver planes
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
         </>
       )}
     </div>

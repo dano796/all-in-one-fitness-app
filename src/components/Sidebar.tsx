@@ -184,14 +184,19 @@ const Sidebar: React.FC = () => {
                 onClick={handleNavItemClick}
                 isActive={location.pathname === "/water"}
               />
-              <DashboardNavItem
-                to="/activity"
-                label="Actividad"
-                showLabel={isExpanded || isMobileOpen}
-                icon={<IoFootstepsSharp className="h-5 w-5 sm:h-6 sm:w-6" />}
-                onClick={handleNavItemClick}
-                isActive={location.pathname === "/activity"}
-              />
+              
+              {/* Elemento no navegable para Actividad */}
+              <div 
+                className={`flex items-center w-full cursor-not-allowed opacity-50 ${
+                  isExpanded || isMobileOpen ? "justify-start pl-6" : "justify-center"
+                } ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} 
+                title="Funcionalidad próximamente"
+              >
+                <IoFootstepsSharp className="h-5 w-5 sm:h-6 sm:w-6" />
+                {(isExpanded || isMobileOpen) && (
+                  <span className="ml-3">Actividad (Próximamente)</span>
+                )}
+              </div>
             </div>
 
             {/* Sección media */}
