@@ -41,6 +41,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const FoodSearchIAPage = lazy(() => import("./pages/FoodSearchIAPage"));
 const SearchRecipes = lazy(() => import("./components/SearchRecipes"));
 const SubscriptionPlans = lazy(() => import("./components/SubscriptionPlans"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -335,6 +336,9 @@ function App() {
           </FoodSearchLayout>
         }
       />
+
+      {/* 404 Route - Siempre debe ser la última ruta */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 
