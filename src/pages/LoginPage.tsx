@@ -62,16 +62,14 @@ const LoginPage = () => {
           title: "¡Error!",
           text: result.error,
           icon: "error",
-          iconColor: "#ff9400",
           confirmButtonText: "Aceptar",
           confirmButtonColor: "#ff9400",
+          background: isDarkMode ? "#282c3c" : "#ffffff",
           customClass: {
             popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
             icon: "custom-swal-icon",
-            title: isDarkMode ? "custom-swal-title" : "custom-swal-title-light",
-            htmlContainer: isDarkMode
-              ? "custom-swal-text"
-              : "custom-swal-text-light",
+            title: isDarkMode ? "text-white" : "text-gray-900",
+            htmlContainer: isDarkMode ? "text-gray-400" : "text-gray-600",
           },
         });
       } else if (result.success) {
@@ -177,7 +175,7 @@ const LoginPage = () => {
           }
           transition={{ duration: 0.6, delay: 0.2 }}
           className={`rounded-xl p-8 shadow-sm ${
-            isDarkMode ? "bg-[#3B4252]" : "bg-[#E9ECEF]"
+            isDarkMode ? "bg-[#3B4252]" : "bg-white"
           }`}
         >
           <form className="space-y-5" onSubmit={handleLogin}>

@@ -282,7 +282,7 @@ const RegisterPage = () => {
           }
           transition={{ duration: 0.6, delay: 0.2 }}
           className={`rounded-xl p-8 shadow-sm ${
-            isDarkMode ? "bg-[#3B4252]" : "bg-[#E9ECEF]"
+            isDarkMode ? "bg-[#3B4252]" : "bg-white"
           }`}
         >
           <form className="space-y-5" onSubmit={handleRegister}>

@@ -6,8 +6,6 @@ const word = "ALL    IN    ONE".split("");
 
 import { Variants } from "framer-motion";
 
-const repeatType = "loop" as const; // Explicitly type as a valid literal
-
 const letterVariants: Variants = {
   hidden: { opacity: 0, x: -20 },
   visible: (i: number) => ({
@@ -17,7 +15,7 @@ const letterVariants: Variants = {
       delay: i * 0.1,
       duration: 0.5,
       repeat: Infinity,
-      repeatType: "loop" as RepeatType, // Explicitly type as a valid literal
+      repeatType: "loop" as RepeatType,
       repeatDelay: 1,
     },
   }),
@@ -49,7 +47,7 @@ const Loader: React.FC = () => {
   return (
     <motion.div
       className={`fixed inset-0 flex items-center justify-center z-50 ${
-        isDarkMode ? "bg-black/60" : "bg-gray-100/60"
+        isDarkMode ? "bg-black/60" : "bg-white/80"
       }`}
       initial="hidden"
       animate="visible"

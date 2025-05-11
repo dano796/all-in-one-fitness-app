@@ -1056,14 +1056,13 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                                 </button>
                               )}
                             </div>
-                            {serie.sets.length > 0 && (
-                              <div className={`flex justify-between py-2 border-b mb-2 ${isDarkMode ? "border-gray-600" : "border-gray-300"}`}>
-                                <span className={`text-sm font-semibold flex-1 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>SET</span>
-                                <span className={`text-sm font-semibold flex-1 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>PREVIO</span>
-                                <span className={`text-sm font-semibold flex-1 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>KG</span>
-                                <span className={`text-sm font-semibold flex-1 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>REPS</span>
-                                <span className={`text-sm font-semibold flex-1 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}></span>
-                                {isToday && <span className={`text-sm font-semibold flex-1 text-center ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}></span>}
+                            {serie.sets.length > 0 && (                              <div className={`flex items-center justify-between gap-2 py-2 border-b mb-2 ${isDarkMode ? "border-gray-600" : "border-gray-300"}`}>
+                                <span className={`w-8 text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>SET</span>
+                                <span className={`w-16 text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>PREVIO</span>
+                                <span className={`w-16 text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>KG</span>
+                                <span className={`w-16 text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>REPS</span>
+                                <span className={`text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}></span>
+                                {isToday && <span className={`text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}></span>}
                               </div>
                             )}
                             {serie.sets.map((set, setIndex) => (

@@ -295,7 +295,7 @@ const RegisteredFoods: React.FC = () => {
   return (
     <div
       className={`min-h-screen p-6 flex flex-col items-center justify-start [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-colors duration-300 ${
-        isDarkMode ? "bg-[#282c3c]" : "bg-gray-100"
+        isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
       }`}
     >
       <div className="mb-6 w-full max-w-2xl">

@@ -245,7 +245,7 @@ const Settings: React.FC = () => {
                   </button>
                 </div>
               </div>
-
+              {/*
               <hr
                 className={`my-6 ${
                   isDarkMode ? "border-gray-600" : "border-gray-200"
@@ -304,7 +304,7 @@ const Settings: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>*/}
 
               <hr
                 className={`my-6 ${
