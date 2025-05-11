@@ -793,31 +793,32 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
 
   const timerProgress = initialTimer > 0 ? ((initialTimer - timer) / initialTimer) * 100 : 0;
 
-  const dateButtonStyle = `px-6 py-3 font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 ${
+  // Estilos de botones manteniendo colores y efectos hover originales
+  const dateButtonStyle = `px-3 py-1.5 text-sm font-semibold rounded-md border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 ${
     isDarkMode
       ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
       : "bg-gray-200 text-gray-900 hover:bg-gray-300"
   }`;
 
-  const addExerciseButtonStyle = `px-4 py-2 font-semibold text-sm rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-102 active:scale-95 transition-all duration-300 ${
+  const addExerciseButtonStyle = `px-3 py-1.5 text-sm font-semibold rounded-md border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-102 active:scale-95 transition-all duration-300 ${
     isDarkMode
       ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
       : "bg-gray-200 text-gray-900 hover:bg-gray-300"
   }`;
 
-  const addSetSerieButtonStyle = `px-4 py-2 font-semibold text-sm rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-102 active:scale-95 transition-all duration-300 ${
+  const addSetSerieButtonStyle = `px-3 py-1.5 text-sm font-semibold rounded-md border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-102 active:scale-95 transition-all duration-300 ${
     isDarkMode
       ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
       : "bg-gray-200 text-gray-900 hover:bg-gray-300"
   }`;
 
-  const cameraButtonStyle = `px-4 py-2 font-semibold text-sm rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-102 active:scale-95 transition-all duration-300 ${
+  const cameraButtonStyle = `px-3 py-1.5 text-sm font-semibold rounded-md border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-102 active:scale-95 transition-all duration-300 ${
     isDarkMode
       ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
       : "bg-gray-200 text-gray-900 hover:bg-gray-300"
   }`;
 
-  const modalButtonStyle = `px-6 py-3 font-semibold rounded-lg border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 ${
+  const modalButtonStyle = `px-3 py-1.5 text-sm font-semibold rounded-md border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 ${
     isDarkMode
       ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
       : "bg-gray-200 text-gray-900 hover:bg-gray-300"
@@ -863,7 +864,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
       <div className="absolute inset-0 z-0">
         <GalaxyBackground />
       </div>
-      <div className="relative z-10">
+      <div className="relative z-10 max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
@@ -871,9 +872,9 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
           className="flex items-center justify-between p-4 sticky top-0 bg-transparent z-20"
         >
           <button onClick={handleBackClick} className={`p-2 hover:text-[#ff9404] transition-colors ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
-          <div className="flex-1 text-center">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleDatePicker}
               className={dateButtonStyle}
@@ -888,15 +889,15 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
               max={new Date().toLocaleDateString("en-CA")}
               className="absolute opacity-0 w-0 h-0 pointer-events-none"
             />
+            {isToday && (
+              <button
+                onClick={handleFinish}
+                className={dateButtonStyle}
+              >
+                Finalizar
+              </button>
+            )}
           </div>
-          {isToday && (
-            <button
-              onClick={handleFinish}
-              className={dateButtonStyle}
-            >
-              Finalizar
-            </button>
-          )}
         </motion.div>
 
         <motion.div
@@ -915,19 +916,19 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.8, ease: [0.68, -0.55, 0.265, 1.55] }}
-          className="flex justify-between my-4 md:flex-row flex-col gap-2"
+          className="my-4 grid grid-cols-2 sm:grid-cols-4 gap-4"
         >
           <div className="text-center">
-            <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Duración</p>
-            <p className="text-base font-semibold">0s</p>
+            <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Duración</p>
+            <p className="text-sm font-semibold">0s</p>
           </div>
           <div className="text-center">
-            <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Volumen</p>
-            <p className="text-base font-semibold">0 kg</p>
+            <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Volumen</p>
+            <p className="text-sm font-semibold">0 kg</p>
           </div>
           <div className="text-center">
-            <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Series</p>
-            <p className="text-base font-semibold">
+            <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Series</p>
+            <p className="text-sm font-semibold">
               {editedExercises.reduce(
                 (total, exercise) => total + exercise.series.length,
                 0
@@ -935,8 +936,8 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
             </p>
           </div>
           <div className="text-center">
-            <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Sets</p>
-            <p className="text-base font-semibold">
+            <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>Sets</p>
+            <p className="text-sm font-semibold">
               {editedExercises.reduce(
                 (total, exercise) =>
                   total + exercise.series.reduce((serieTotal, serie) => serieTotal + serie.sets.length, 0),
@@ -962,20 +963,20 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                 className={`rounded-xl p-4 mb-4 shadow-xl hover:-translate-y-1 transition-transform border border-[#ff9404]/50 ${isDarkMode ? "bg-[#3B4252]" : "bg-white"}`}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
                     <div>
-                      <h3 className="text-lg font-semibold uppercase">{exercise.name}</h3>
-                      <p className={`text-sm uppercase ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{exercise.equipment}</p>
+                      <h3 className="text-base font-semibold uppercase">{exercise.name}</h3>
+                      <p className={`text-xs uppercase ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>{exercise.equipment}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => handleToggleExercise(exercise.id)}
-                    className="bg-transparent border-none cursor-pointer p-1 transition-transform duration-200 hover:scale-125 active:scale-90"
+                    className="bg-transparent border-none cursor-pointer p-1 transition-transform duration-200 hover:scale-110"
                   >
                     {expandedExercises[exercise.id] ? (
-                      <ChevronUp className={`w-5 h-5 text-[#ff9404] hover:text-[#e08503] transition-colors duration-300`} />
+                      <ChevronUp className={`w-4 h-4 text-[#ff9404]`} />
                     ) : (
-                      <ChevronDown className={`w-5 h-5 text-[#ff9404] hover:text-[#e08503] transition-colors duration-300`} />
+                      <ChevronDown className={`w-4 h-4 text-[#ff9404]`} />
                     )}
                   </button>
                 </div>
@@ -997,20 +998,20 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                             value={exercise.note || ""}
                             onChange={(e) => handleNoteChange(exerciseIndex, e.target.value)}
                             onBlur={() => handleNoteBlur(exerciseIndex)}
-                            className={`w-full rounded-lg p-2 text-base focus:border-[#ff9404] outline-none transition-colors ${isDarkMode ? "bg-[#4B5563] text-white border border-gray-600" : "bg-white text-gray-900 border border-gray-300"}`}
+                            className={`w-full rounded-lg p-2 text-sm focus:border-[#ff9404] outline-none transition-colors ${isDarkMode ? "bg-[#4B5563] text-white border border-gray-600" : "bg-white text-gray-900 border border-gray-300"}`}
                           />
                         </div>
 
                         <div className="flex flex-col gap-2 mb-4">
-                          <div className="flex items-center gap-4">
-                            <label className={`text-base font-medium ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-                              Temporizador de descanso:
+                          <div className="flex items-center gap-3">
+                            <label className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                              Descanso:
                             </label>
                             <div className="flex items-center gap-2">
                               <select
                                 value={exercise.restTimer || "Apagado"}
                                 onChange={(e) => handleRestTimerChange(exerciseIndex, e.target.value)}
-                                className={`w-full max-w-[200px] p-3 rounded-lg border text-base transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:scale-102 ${isDarkMode ? "bg-[#4B5563] text-white border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
+                                className={`w-32 p-2 rounded-lg border text-sm transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:scale-102 ${isDarkMode ? "bg-[#4B5563] text-white border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
                               >
                                 <option value="Apagado">Apagado</option>
                                 <option value="30">30 segundos</option>
@@ -1023,7 +1024,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                                   onClick={() => startRestTimer(exercise.restTimer!)}
                                   className="text-[#ff9404] hover:text-[#e08503] transition-colors"
                                 >
-                                  <Clock className="w-6 h-6" />
+                                  <Clock className="w-5 h-5" />
                                 </button>
                               )}
                             </div>
@@ -1034,7 +1035,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                               placeholder="Segundos"
                               value={customTimer}
                               onChange={(e) => setCustomTimer(e.target.value)}
-                              className={`mt-2 w-full max-w-[200px] p-3 rounded-lg border text-base transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:scale-102 ${isDarkMode ? "bg-[#4B5563] text-white border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
+                              className={`mt-2 w-32 p-2 rounded-lg border text-sm transition-all duration-300 placeholder-gray-400 focus:outline-none focus:border-[#ff9404] focus:shadow-[0_0_8px_rgba(255,148,4,0.2)] focus:scale-102 ${isDarkMode ? "bg-[#4B5563] text-white border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
                             />
                           )}
                         </div>
@@ -1046,29 +1047,30 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                         {exercise.series.map((serie, serieIndex) => (
                           <div key={serieIndex} className="mb-4">
                             <div className="flex justify-between items-center mb-2">
-                              <h4 className={`text-base font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>Serie {serieIndex + 1}</h4>
+                              <h4 className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>Serie {serieIndex + 1}</h4>
                               {isToday && exercise.series.length > 1 && (
                                 <button
                                   onClick={() => handleRemoveSerie(exerciseIndex, serieIndex)}
                                   className="text-red-500 hover:text-red-600 transition-colors"
                                 >
-                                  <Trash2 className="w-5 h-5" />
+                                  <Trash2 className="w-4 h-4" />
                                 </button>
                               )}
                             </div>
-                            {serie.sets.length > 0 && (                              <div className={`flex items-center justify-between gap-2 py-2 border-b mb-2 ${isDarkMode ? "border-gray-600" : "border-gray-300"}`}>
-                                <span className={`w-8 text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>SET</span>
-                                <span className={`w-16 text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>PREVIO</span>
-                                <span className={`w-16 text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>KG</span>
-                                <span className={`w-16 text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>REPS</span>
-                                <span className={`text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}></span>
-                                {isToday && <span className={`text-center text-sm font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}></span>}
+                            {serie.sets.length > 0 && (
+                              <div className={`flex items-center justify-between gap-2 py-2 border-b mb-2 ${isDarkMode ? "border-gray-600" : "border-gray-300"}`}>
+                                <span className={`w-8 text-center text-xs font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>SET</span>
+                                <span className={`w-16 text-center text-xs font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>PREVIO</span>
+                                <span className={`w-14 text-center text-xs font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>KG</span>
+                                <span className={`w-14 text-center text-xs font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>REPS</span>
+                                <span className={`w-8 text-center text-xs font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}></span>
+                                {isToday && <span className={`w-8 text-center text-xs font-semibold ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}></span>}
                               </div>
                             )}
                             {serie.sets.map((set, setIndex) => (
                               <div key={setIndex} className="flex items-center justify-between gap-2 mb-2">
-                                <span className="w-8 text-center text-base">{setIndex + 1}</span>
-                                <span className="w-16 text-center text-base">
+                                <span className="w-8 text-center text-sm">{setIndex + 1}</span>
+                                <span className="w-16 text-center text-sm">
                                   {set.kg && set.reps ? `${set.kg} kg x ${set.reps}` : "-"}
                                 </span>
                                 <input
@@ -1079,7 +1081,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                                     handleSetChange(exerciseIndex, serieIndex, setIndex, "kg", e.target.value)
                                   }
                                   onBlur={() => handleSetBlur(exerciseIndex, serieIndex, setIndex)}
-                                  className={`rounded-lg p-2 w-16 text-center focus:border-[#ff9404] outline-none transition-colors ${isDarkMode ? "bg-[#4B5563] text-white border border-gray-600" : "bg-white text-gray-900 border border-gray-300"}`}
+                                  className={`rounded-lg p-1.5 w-14 text-center text-sm focus:border-[#ff9404] outline-none transition-colors ${isDarkMode ? "bg-[#4B5563] text-white border border-gray-600" : "bg-white text-gray-900 border border-gray-300"}`}
                                   disabled={!isToday}
                                 />
                                 <input
@@ -1090,7 +1092,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                                     handleSetChange(exerciseIndex, serieIndex, setIndex, "reps", e.target.value)
                                   }
                                   onBlur={() => handleSetBlur(exerciseIndex, serieIndex, setIndex)}
-                                  className={`rounded-lg p-2 w-16 text-center focus:border-[#ff9404] outline-none transition-colors ${isDarkMode ? "bg-[#4B5563] text-white border border-gray-600" : "bg-white text-gray-900 border border-gray-300"}`}
+                                  className={`rounded-lg p-1.5 w-14 text-center text-sm focus:border-[#ff9404] outline-none transition-colors ${isDarkMode ? "bg-[#4B5563] text-white border border-gray-600" : "bg-white text-gray-900 border border-gray-300"}`}
                                   disabled={!isToday}
                                 />
                                 <button
@@ -1099,9 +1101,9 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                                   disabled={!isToday}
                                 >
                                   {set.completed ? (
-                                    <CheckCircle className="w-5 h-5 text-[#ff9404]" />
+                                    <CheckCircle className="w-4 h-4 text-[#ff9404]" />
                                   ) : (
-                                    <CheckCircle className={`w-5 h-5 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`} />
+                                    <CheckCircle className={`w-4 h-4 ${isDarkMode ? "text-gray-500" : "text-gray-400"}`} />
                                   )}
                                 </button>
                                 {isToday && (
@@ -1109,7 +1111,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                                     onClick={() => handleRemoveSet(exerciseIndex, serieIndex, setIndex)}
                                     className="text-red-500 hover:text-red-600 transition-colors"
                                   >
-                                    <Trash2 className="w-5 h-5" />
+                                    <Trash2 className="w-4 h-4" />
                                   </button>
                                 )}
                               </div>
@@ -1153,7 +1155,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                           width={videoRef.current?.videoWidth || 640}
                           height={videoRef.current?.videoHeight || 480}
                         />
-                        <p className={`mt-2 text-lg font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{feedback}</p>
+                        <p className={`mt-2 text-sm font-medium ${isDarkMode ? "text-white" : "text-gray-900"}`}>{feedback}</p>
                         <button
                           onClick={() => {
                             setActiveAnalysisExerciseId(null);
@@ -1170,12 +1172,12 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
               </motion.div>
             ))
           ) : (
-            <p className={`text-center text-base mt-8 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+            <p className={`text-center text-sm mt-8 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
               No hay ejercicios en esta rutina.
             </p>
           )}
           {editedExercises.length > 0 && !hasSetsForDate() && (
-            <p className={`text-center text-base mt-4 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+            <p className={`text-center text-sm mt-4 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
               No hay sets registrados para esta fecha.
             </p>
           )}
@@ -1185,7 +1187,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.0, ease: [0.68, -0.55, 0.265, 1.55], delay: 1.2 }}
-          className="mt-8 flex flex-col gap-6"
+          className="mt-8 flex justify-center"
         >
           {isToday && (
             <button
@@ -1211,20 +1213,20 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`rounded-2xl p-6 w-11/12 max-w-md relative shadow-2xl border ${isDarkMode ? "bg-gradient-to-br from-gray-700 to-gray-800 border-white/10" : "bg-white border-gray-300"}`}
+                className={`rounded-2xl p-6 w-11/12 max-w-sm relative shadow-2xl border ${isDarkMode ? "bg-gradient-to-br from-gray-700 to-gray-800 border-white/10" : "bg-white border-gray-300"}`}
               >
                 <button
                   onClick={closeTimerModal}
-                  className={`absolute top-4 right-4 transition-colors ${isDarkMode ? "text-white hover:text-red-500" : "text-gray-900 hover:text-red-600"}`}
+                  className={`absolute top-3 right-3 transition-colors ${isDarkMode ? "text-white hover:text-red-500" : "text-gray-900 hover:text-red-600"}`}
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5" />
                 </button>
-                <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>Tiempo de Descanso</h2>
-                <div className="relative w-48 h-48 mx-auto mb-6">
+                <h2 className={`text-lg font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>Tiempo de Descanso</h2>
+                <div className="relative w-40 h-40 mx-auto mb-4">
                   <svg className="w-full h-full -rotate-90" viewBox="0 0 200 200">
-                    <circle className={`fill-none stroke-[10] ${isDarkMode ? "stroke-gray-600" : "stroke-gray-300"}`} cx="100" cy="100" r="90" />
+                    <circle className={`fill-none stroke-[8] ${isDarkMode ? "stroke-gray-600" : "stroke-gray-300"}`} cx="100" cy="100" r="90" />
                     <circle
-                      className="fill-none stroke-[#ff9404] stroke-[10] stroke-linecap-round transition-[stroke-dashoffset] duration-1000"
+                      className="fill-none stroke-[#ff9404] stroke-[8] stroke-linecap-round transition-[stroke-dashoffset] duration-1000"
                       cx="100"
                       cy="100"
                       r="90"
@@ -1232,20 +1234,20 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                       strokeDashoffset={565.48 * (1 - timerProgress / 100)}
                     />
                   </svg>
-                  <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                  <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                     {timer}s
                   </div>
                 </div>
-                <div className="flex gap-4 justify-center">
+                <div className="flex gap-3 justify-center">
                   <button
                     onClick={toggleTimer}
-                    className={dateButtonStyle}
+                    className={modalButtonStyle}
                   >
                     {isTimerRunning ? "Pausar" : "Reanudar"}
                   </button>
                   <button
                     onClick={() => startRestTimer(editedExercises[currentExerciseIndex]?.restTimer || "0")}
-                    className={dateButtonStyle}
+                    className={modalButtonStyle}
                   >
                     Reiniciar
                   </button>
@@ -1269,16 +1271,16 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`rounded-2xl p-6 w-11/12 max-w-md relative shadow-2xl border ${isDarkMode ? "bg-gradient-to-br from-gray-700 to-gray-800 border-white/10" : "bg-white border-gray-300"}`}
+                className={`rounded-2xl p-6 w-11/12 max-w-sm relative shadow-2xl border ${isDarkMode ? "bg-gradient-to-br from-gray-700 to-gray-800 border-white/10" : "bg-white border-gray-300"}`}
               >
                 <button
                   onClick={() => setIsSubscriptionModalOpen(false)}
-                  className={`absolute top-4 right-4 transition-colors ${isDarkMode ? "text-white hover:text-red-500" : "text-gray-900 hover:text-red-600"}`}
+                  className={`absolute top-3 right-3 transition-colors ${isDarkMode ? "text-white hover:text-red-500" : "text-gray-900 hover:text-red-600"}`}
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5" />
                 </button>
-                <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>Función Premium</h2>
-                <p className={`mb-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                <h2 className={`text-lg font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>Función Premium</h2>
+                <p className={`mb-4 text-sm ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
                   El análisis de ejercicios con cámara es una función exclusiva para usuarios Premium. ¡Obtén una suscripción para desbloquear esta y otras funciones avanzadas!
                 </p>
                 <button

@@ -1,4 +1,3 @@
-// src/pages/CalorieCalculator.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
@@ -8,6 +7,7 @@ import { toast, Toaster } from "react-hot-toast";
 import GalaxyBackground from "./GalaxyBackground";
 import ButtonToolTip from "./ButtonToolTip";
 import { useTheme } from "../pages/ThemeContext";
+import { User, TrendingUp, Scale, Ruler, Activity } from "lucide-react";
 
 const activityMultipliers = {
   basal: 1.2,
@@ -216,6 +216,12 @@ const CalorieCalculator: React.FC = () => {
       "Calcula tus necesidades calóricas diarias basadas en tu edad, género, altura, peso y nivel de actividad. Selecciona un objetivo para establecer tu meta diaria de calorías.",
   };
 
+  const formProgress = () => {
+    const fields = [age, height, weight, gender, activityLevel];
+    const filledFields = fields.filter((field) => field !== undefined && field !== "").length;
+    return (filledFields / fields.length) * 100;
+  };
+
   return (
     <div
       className={`min-h-screen flex items-center justify-center p-6 relative w-full transition-colors duration-300 ${
@@ -243,6 +249,42 @@ const CalorieCalculator: React.FC = () => {
           <ButtonToolTip content={infoText.calorieCalculatorInfo} />
         </div>
 
+        <motion.div
+          className="mb-6"
+          initial={{ width: 0 }}
+          animate={{ width: "100%" }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="flex justify-between mb-2">
+            <span
+              className={`text-sm font-medium ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
+              Progreso del formulario
+            </span>
+            <span
+              className={`text-sm font-semibold ${
+                isDarkMode ? "text-[#ff9404]" : "text-[#ff9404]"
+              }`}
+            >
+              {Math.round(formProgress())}%
+            </span>
+          </div>
+          <div
+            className={`h-2 rounded-full ${
+              isDarkMode ? "bg-gray-600" : "bg-gray-300"
+            }`}
+          >
+            <motion.div
+              className="h-full bg-[#ff9404] rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${formProgress()}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
+        </motion.div>
+
         {error && (
           <motion.p
             initial={{ opacity: 0 }}
@@ -264,10 +306,11 @@ const CalorieCalculator: React.FC = () => {
         >
           <div>
             <label
-              className={`block text-sm font-medium ${
+              className={`flex items-center gap-2 text-sm font-medium ${
                 isDarkMode ? "text-gray-400" : "text-gray-600"
               } mb-1`}
             >
+              <User className="w-4 h-4 text-[#ff9404]" />
               Edad (15-80)
             </label>
             <input
@@ -286,10 +329,11 @@ const CalorieCalculator: React.FC = () => {
 
           <div>
             <label
-              className={`block text-sm font-medium ${
+              className={`flex items-center gap-2 text-sm font-medium ${
                 isDarkMode ? "text-gray-400" : "text-gray-600"
               } mb-1`}
             >
+              <TrendingUp className="w-4 h-4 text-[#ff9404]" />
               Género
             </label>
             <div className="flex space-x-6">
@@ -330,10 +374,11 @@ const CalorieCalculator: React.FC = () => {
 
           <div>
             <label
-              className={`block text-sm font-medium ${
+              className={`flex items-center gap-2 text-sm font-medium ${
                 isDarkMode ? "text-gray-400" : "text-gray-600"
               } mb-1`}
             >
+              <Ruler className="w-4 h-4 text-[#ff9404]" />
               Altura (cm)
             </label>
             <input
@@ -352,10 +397,11 @@ const CalorieCalculator: React.FC = () => {
 
           <div>
             <label
-              className={`block text-sm font-medium ${
+              className={`flex items-center gap-2 text-sm font-medium ${
                 isDarkMode ? "text-gray-400" : "text-gray-600"
               } mb-1`}
             >
+              <Scale className="w-4 h-4 text-[#ff9404]" />
               Peso (kg)
             </label>
             <input
@@ -374,10 +420,11 @@ const CalorieCalculator: React.FC = () => {
 
           <div>
             <label
-              className={`block text-sm font-medium ${
+              className={`flex items-center gap-2 text-sm font-medium ${
                 isDarkMode ? "text-gray-400" : "text-gray-600"
               } mb-1`}
             >
+              <Activity className="w-4 h-4 text-[#ff9404]" />
               Nivel de Actividad
             </label>
             <select
@@ -410,10 +457,10 @@ const CalorieCalculator: React.FC = () => {
 
           <button
             type="submit"
-            className={`w-full py-3 px-4 font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-2 disabled:bg-gray-500 disabled:cursor-not-allowed ${
+            className={`w-full py-3 px-4 text-sm font-semibold rounded-md border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 ${
               isDarkMode
-                ? "bg-gradient-to-r from-[#ff9404] to-[#FF6B35] text-white hover:from-[#FF6B35] hover:to-[#ff9404]"
-                : "bg-orange-500 text-white hover:bg-orange-600"
+                ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
+                : "bg-gray-200 text-gray-900 hover:bg-gray-300"
             }`}
             disabled={isButtonDisabled || isLoading}
           >

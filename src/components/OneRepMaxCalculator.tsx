@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import ButtonToolTip from "./ButtonToolTip";
 import Swal from "sweetalert2";
 import { useTheme } from "../pages/ThemeContext";
+import { Scale, Repeat, Gauge, Dumbbell } from "lucide-react";
 
 const exercises = [
   "Peso Muerto",
@@ -200,14 +201,16 @@ const OneRepMaxCalculator: React.FC = () => {
               </h2>
               <ButtonToolTip content={infoText.oneRmCalculatorInfo} />
             </div>
+
             <form onSubmit={calculateOneRepMax} className="space-y-6">
               <div>
                 <label
                   htmlFor="weight"
-                  className={`block text-sm font-medium ${
-                    isDarkMode ? "text-white" : "text-gray-700"
+                  className={`flex items-center gap-2 text-sm font-medium ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
                   } mb-1`}
                 >
+                  <Scale className="w-4 h-4 text-[#ff9404]" />
                   Peso
                 </label>
                 <div className="relative">
@@ -236,10 +239,11 @@ const OneRepMaxCalculator: React.FC = () => {
               <div>
                 <label
                   htmlFor="reps"
-                  className={`block text-sm font-medium ${
-                    isDarkMode ? "text-white" : "text-gray-700"
+                  className={`flex items-center gap-2 text-sm font-medium ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
                   } mb-1`}
                 >
+                  <Repeat className="w-4 h-4 text-[#ff9404]" />
                   Repeticiones (1-30)
                 </label>
                 <input
@@ -259,10 +263,11 @@ const OneRepMaxCalculator: React.FC = () => {
               <div>
                 <label
                   htmlFor="rpe"
-                  className={`block text-sm font-medium ${
-                    isDarkMode ? "text-white" : "text-gray-700"
+                  className={`flex items-center gap-2 text-sm font-medium ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
                   } mb-1`}
                 >
+                  <Gauge className="w-4 h-4 text-[#ff9404]" />
                   RPE (1-10)
                 </label>
                 <select
@@ -304,10 +309,11 @@ const OneRepMaxCalculator: React.FC = () => {
               <div>
                 <label
                   htmlFor="exercise"
-                  className={`block text-sm font-medium ${
-                    isDarkMode ? "text-white" : "text-gray-700"
+                  className={`flex items-center gap-2 text-sm font-medium ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
                   } mb-1`}
                 >
+                  <Dumbbell className="w-4 h-4 text-[#ff9404]" />
                   Ejercicio
                 </label>
                 <select
@@ -339,7 +345,11 @@ const OneRepMaxCalculator: React.FC = () => {
               <div className="flex space-x-4">
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 text-sm font-semibold bg-gradient-to-br from-[#ff9404] to-[#FF6B35] text-white border-none rounded-md hover:bg-gradient-to-br hover:from-[#e08503] hover:to-[#ff9404] hover:shadow-[0_0_10px_rgba(255,148,4,0.5)] hover:scale-102 transition-all duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed sm:text-sm sm:px-4 sm:py-2"
+                  className={`w-full px-3 py-1.5 text-sm font-semibold rounded-md border border-[#ff9404] shadow-[0_0_10px_rgba(255,148,4,0.3)] hover:shadow-[0_0_15px_rgba(255,148,4,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 ${
+                    isDarkMode
+                      ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
+                      : "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                  } disabled:bg-gray-500 disabled:cursor-not-allowed`}
                   disabled={isButtonDisabled}
                 >
                   Calcular 1RM
@@ -347,7 +357,11 @@ const OneRepMaxCalculator: React.FC = () => {
                 <button
                   type="button"
                   onClick={saveOneRepMax}
-                  className="w-full px-4 py-2 text-sm font-semibold bg-gradient-to-br from-[#4CAF50] to-[#2d8f32] text-white border-none rounded-md hover:bg-gradient-to-br hover:from-[#388E3C] hover:to-[#4CAF50] hover:shadow-[0_0_10px_rgba(76,175,80,0.5)] hover:scale-102 transition-all duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed sm:text-sm sm:px-4 sm:py-2"
+                  className={`w-full px-3 py-1.5 text-sm font-semibold rounded-md border border-[#4CAF50] shadow-[0_0_10px_rgba(76,175,80,0.3)] hover:shadow-[0_0_15px_rgba(76,175,80,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 ${
+                    isDarkMode
+                      ? "bg-gradient-to-br from-[#2D3242] to-[#3B4252] text-gray-200 hover:from-[#3B4252] hover:to-[#4B5563]"
+                      : "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                  } disabled:bg-gray-500 disabled:cursor-not-allowed`}
                   disabled={isButtonDisabled || oneRepMax === null}
                 >
                   Guardar 1RM
