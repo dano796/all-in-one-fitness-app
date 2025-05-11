@@ -33,7 +33,7 @@ const NotFoundPage: FC = () => {
 
   return (
     <div className={`min-h-screen flex flex-col items-center justify-center ${
-      isDarkMode ? 'bg-[#282c3c]' : 'bg-gradient-to-b from-blue-50 to-blue-100'
+      isDarkMode ? 'bg-[#282c3c]' : 'bg-[#F8F9FA]'
     } p-6 relative overflow-hidden`}>
       <GalaxyBackground />
       
