@@ -8,11 +8,14 @@ import {
   Camera,
 } from "lucide-react";
 import ModuleCard from "../components/ModuleCard";
+import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
+import { useUserProfile } from "../hooks/useUserProfile";
 import { useTheme } from "../pages/ThemeContext";
 import { motion } from "framer-motion";
 
 const ModulesPage: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { profile: userProfile } = useUserProfile();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -133,6 +136,19 @@ const ModulesPage: React.FC = () => {
           />
         </motion.div>
       </div>
+
+      {/* Sugerencias Personalizadas */}
+      <motion.div
+        variants={cardVariants}
+        className="max-w-4xl mx-auto mt-12"
+      >
+        <PersonalizedSuggestions 
+          userProfile={userProfile}
+          context="general"
+          maxSuggestions={4}
+          showCategories={true}
+        />
+      </motion.div>
     </motion.div>
   );
 };

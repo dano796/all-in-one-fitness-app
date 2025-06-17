@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import FoodSearchIA from "../components/FoodSearchIA";
 import GalaxyBackground from "../components/GalaxyBackground";
+import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
+import { useUserData } from "../hooks/useUserData";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -23,6 +25,9 @@ const FoodSearchIAPage: React.FC<FoodSearchIAPageProps> = ({ user }) => {
     new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
   const [hasSubscription, setHasSubscription] = useState<boolean | null>(null);
   const [isIdLoading, setIsIdLoading] = useState<boolean>(false);
+
+  // Get user data for personalized suggestions
+  const { userData, loading: userDataLoading } = useUserData();
 
   // Fetch user subscription status
   useEffect(() => {
@@ -113,6 +118,25 @@ const FoodSearchIAPage: React.FC<FoodSearchIAPageProps> = ({ user }) => {
               <FoodSearchIA initialType={foodType} date={date} />
             </div>
           </div>
+
+          {/* Personalized Suggestions */}
+          {!userDataLoading && userData && (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.0, duration: 0.6 }}
+              className="w-full px-4 mt-6"
+            >
+              <div className="max-w-4xl mx-auto">
+                <PersonalizedSuggestions
+                  userProfile={userData.profile}
+                  context="ai_food"
+                  maxSuggestions={3}
+                  userData={userData}
+                />
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 

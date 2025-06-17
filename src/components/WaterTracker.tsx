@@ -571,9 +571,7 @@ const WaterTracker: React.FC = () => {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: "easeOut" }}
-      className={`relative p-4 space-y-6 min-h-screen overflow-auto -mt-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
-        isDarkMode ? "bg-[#282c3c]" : "bg-[#F8F9FA]"
-      }`}
+      className="relative p-4 space-y-6 overflow-auto -mt-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
       <GalaxyBackground />
 

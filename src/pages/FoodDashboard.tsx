@@ -22,6 +22,9 @@ import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 import GalaxyBackground from "../components/GalaxyBackground";
 import ButtonToolTip from "../components/ButtonToolTip";
+import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
+import { useUserProfile } from "../hooks/useUserProfile";
+import { useUserData } from "../hooks/useUserData";
 import { useTheme } from "../pages/ThemeContext";
 import { useNotificationStore } from '../store/notificationStore';
 import { useFoodTracker } from '../hooks/useFoodTracker';
@@ -77,6 +80,8 @@ interface FoodsResponse {
 const FoodDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
+  const { profile: userProfile } = useUserProfile();
+  const { userData } = useUserData();
   const TIMEZONE = "America/Bogota";
   const todayStr = new Date().toLocaleDateString("en-CA", {
     timeZone: TIMEZONE,
@@ -968,6 +973,22 @@ const FoodDashboard: React.FC = () => {
             );
           })}
         </div>
+      </motion.div>
+
+      {/* Sugerencias Personalizadas */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 2.0 }}
+        className="max-w-[700px] mx-auto mt-6 relative z-10"
+      >
+        <PersonalizedSuggestions 
+          userProfile={userProfile}
+          context="nutrition"
+          maxSuggestions={3}
+          showCategories={true}
+          userData={userData}
+        />
       </motion.div>
     </div>
   );

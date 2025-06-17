@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios, { AxiosError } from "axios";
 import { supabase } from "../lib/supabaseClient";
 import GalaxyBackground from "./GalaxyBackground";
+import PersonalizedSuggestions from "./PersonalizedSuggestions";
+import { useUserData } from "../hooks/useUserData";
 import { useNavigate } from "react-router-dom";
 import {
   FaArrowLeft,
@@ -32,6 +34,9 @@ const SearchRecipes: React.FC = () => {
 
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+  // Get user data for personalized suggestions
+  const { userData, loading: userDataLoading } = useUserData();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -142,7 +147,6 @@ const SearchRecipes: React.FC = () => {
     const message = `¿Cómo puedo preparar una receta de "${recipe.recipe_name}" con los siguientes ingredientes: ${ingredients}? Por favor, dame instrucciones detalladas paso a paso.`;
     setInitialChatMessage(message);
     setIsChatBotOpen(true);
-    setCurrentConversationId(null); // Forzar la creación de una nueva conversación
   };
 
   const infoText = {
@@ -580,6 +584,23 @@ const SearchRecipes: React.FC = () => {
           isOpen={isChatBotOpen}
           onClose={() => setIsChatBotOpen(false)}
         />
+
+        {/* Personalized Suggestions */}
+        {!userDataLoading && userData && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 0.6 }}
+            className="max-w-5xl mx-auto px-2 sm:px-4 mt-6"
+          >
+            <PersonalizedSuggestions
+              userProfile={userData.profile}
+              context="recipes"
+              maxSuggestions={3}
+              userData={userData}
+            />
+          </motion.div>
+        )}
       </div>
     </div>
   );

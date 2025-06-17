@@ -19,6 +19,9 @@ import GalaxyBackground from "../components/GalaxyBackground";
 import ReactApexChart from "react-apexcharts";
 import ButtonToolTip from "../components/ButtonToolTip";
 import DashboardSkeleton from "@/components/DashboardSkeleton";
+import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
+import { useUserProfile } from "../hooks/useUserProfile";
+import { useUserData } from "../hooks/useUserData";
 import { useTheme } from "../pages/ThemeContext";
 
 interface DailyBreakdown {
@@ -59,6 +62,8 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
+  const { profile: userProfile } = useUserProfile();
+  const { userData } = useUserData();
   const TIMEZONE = "America/Bogota";
   const today = new Date();
   const todayStr = today.toLocaleDateString("en-CA", { timeZone: TIMEZONE });
@@ -513,7 +518,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                         background: isDarkMode ? "#3B4252" : "#ffffff",
                         fontFamily: "Inter, sans-serif",
                       },
-                      colors: ["#FF0000", "#8884d8", "#1E90FF", "#ff9404"],
+                      colors: ["#49b93c", "#8884d8", "#1E90FF", "#ff9404"],
                       labels: [
                         "Calorías",
                         "Carbohidratos",
@@ -615,7 +620,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                   >
                     Calorías
                   </p>
-                  <p className="text-sm text-[#FF0000] font-semibold">
+                  <p className="text-sm text-[#49b93c] font-semibold">
                     {formatValue(dashboardData.calorieIntake.totalCalories)}/
                     {dashboardData.calorieGoal} kcal
                   </p>
@@ -738,6 +743,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 {getWaterMessage()}
               </p>
             </motion.div>
+
+            {/* Sugerencias Personalizadas */}
+            <PersonalizedSuggestions 
+              userProfile={userProfile}
+              context="dashboard"
+              maxSuggestions={2}
+              showCategories={false}
+              userData={userData}
+            />
           </div>
 
           <div className="space-y-6">
