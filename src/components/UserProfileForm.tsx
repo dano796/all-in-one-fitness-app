@@ -131,9 +131,20 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({
     }
   };
 
+  // Utilidad para limpiar los datos antes de enviar al backend
+  function cleanProfileData(data: UserProfileFormData): UserProfileFormData {
+    const cleaned: any = { ...data };
+    Object.keys(cleaned).forEach(key => {
+      if (cleaned[key] === '' || (Array.isArray(cleaned[key]) && cleaned[key].length === 0)) {
+        cleaned[key] = null;
+      }
+    });
+    return cleaned;
+  }
+
   const handleSubmit = async () => {
     if (isStepValid(currentStep)) {
-      await onSubmit(formData);
+      await onSubmit(cleanProfileData(formData));
     }
   };
 
@@ -597,4 +608,4 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({
   );
 };
 
-export default UserProfileForm; 
+export default UserProfileForm;
