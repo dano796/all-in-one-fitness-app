@@ -248,6 +248,45 @@ function App() {
             );
           }, 3000);
         } else if (event === "SIGNED_OUT") {
+          // Asegurarse de que la sesión se limpie completamente
+          localStorage.removeItem("supabase.auth.token");
+          localStorage.removeItem("sb-access-token");
+          localStorage.removeItem("sb-refresh-token");
+          localStorage.removeItem("sb:token");
+          localStorage.removeItem("sb:session");
+          
+          // Limpiar cualquier otro dato de Supabase en localStorage
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith("supabase") || key.startsWith("sb:") || key.startsWith("sb-")) {
+              localStorage.removeItem(key);
+            }
+          });
+          
+          // Limpiar datos de autenticación en la caché offline
+          await offlineSyncManager.clearAuthData();
+          
+          // Eliminar todas las cookies relacionadas con la autenticación
+          document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+          });
+          
+          // Notificar al backend para limpiar la sesión también
+          try {
+            await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/signout`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              cache: "no-store" // Evitar que el navegador use caché para esta solicitud
+            });
+          } catch (error) {
+            console.error("Error al notificar cierre de sesión al backend:", error);
+          }
+          
+          // Forzar recarga de la página para limpiar cualquier estado en memoria
+          if (window.location.pathname !== "/login" && window.location.pathname !== "/") {
+            window.location.href = "/login";
+            return;
+          }
+          
           addNotification(
             "👋 Sesión cerrada",
             "🔒 Has cerrado sesión correctamente.",

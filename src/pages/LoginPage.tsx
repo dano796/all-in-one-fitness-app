@@ -6,6 +6,7 @@ import { motion, useInView } from "framer-motion";
 import PasswordRecovery from "../components/PasswordRecovery";
 import { supabase } from "../lib/supabaseClient";
 import { useTheme } from "../pages/ThemeContext";
+import { offlineSyncManager } from "../utils/offlineSync";
 
 const LoginPage = () => {
   const { isDarkMode } = useTheme();
@@ -47,12 +48,35 @@ const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Primero, asegúrate de cerrar cualquier sesión existente
+      await supabase.auth.signOut();
+      
+      // Limpiar datos de autenticación en caché
+      await offlineSyncManager.clearAuthData();
+      
+      // Limpiar localStorage de tokens y sesiones
+      localStorage.removeItem("supabase.auth.token");
+      localStorage.removeItem("sb-access-token");
+      localStorage.removeItem("sb-refresh-token");
+      localStorage.removeItem("sb:token");
+      localStorage.removeItem("sb:session");
+      
+      // Limpiar cookies relacionadas con autenticación
+      document.cookie.split(";").forEach(function(c) {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      
+      // Pequeña pausa para asegurar que todo se haya limpiado
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const response = await fetch(
         import.meta.env.VITE_BACKEND_URL + "/api/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ input, password }),
+          // Evitar que el navegador use caché para esta solicitud
+          cache: "no-store"
         }
       );
       const result = await response.json();
