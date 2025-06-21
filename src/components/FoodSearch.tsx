@@ -8,13 +8,92 @@ import { motion } from "framer-motion";
 import { ClipLoader } from "react-spinners";
 import { useTheme } from "../pages/ThemeContext";
 import { useNotificationStore } from "../store/notificationStore";
+import NutrientChart from "./NutrientChart";
+import MacroLegend from "./MacroLegend";
 
 interface Food {
   food_id: string;
   food_name: string;
   food_description: string;
   selected?: boolean;
+  fat_g?: number;
+  carbs_g?: number;
+  protein_g?: number;
+  calories?: number;
 }
+
+// Funciones para extraer información nutricional de la descripción
+const extractCalories = (description: string): number => {
+  // Intentamos diferentes patrones comunes en la descripción
+  const patterns = [
+    /Calorías:\s*(\d+(?:\.\d+)?)\s*(?:kcal|calories|cal)/i,
+    /Calories:\s*(\d+(?:\.\d+)?)/i,
+    /(\d+(?:\.\d+)?)\s*(?:kcal|calories|cal)/i,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = description.match(pattern);
+    if (match && match[1]) {
+      return parseFloat(match[1]);
+    }
+  }
+  
+  return 100; // Valor por defecto si no se encuentra
+};
+
+const extractFat = (description: string): number => {
+  const patterns = [
+    /Fat:\s*(\d+(?:\.\d+)?)\s*g/i,
+    /Grasas?:\s*(\d+(?:\.\d+)?)\s*g/i,
+    /Fat:\s*(\d+(?:\.\d+)?)/i,
+    /(?:^|\|)\s*Fat:?\s*(\d+(?:\.\d+)?)/i,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = description.match(pattern);
+    if (match && match[1]) {
+      return parseFloat(match[1]);
+    }
+  }
+  
+  return 3; // Valor por defecto si no se encuentra
+};
+
+const extractCarbs = (description: string): number => {
+  const patterns = [
+    /Carbs?:\s*(\d+(?:\.\d+)?)\s*g/i,
+    /Carbohidratos?:\s*(\d+(?:\.\d+)?)\s*g/i,
+    /Carbs?:\s*(\d+(?:\.\d+)?)/i,
+    /(?:^|\|)\s*Carbs?:?\s*(\d+(?:\.\d+)?)/i,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = description.match(pattern);
+    if (match && match[1]) {
+      return parseFloat(match[1]);
+    }
+  }
+  
+  return 10; // Valor por defecto si no se encuentra
+};
+
+const extractProtein = (description: string): number => {
+  const patterns = [
+    /Protein:\s*(\d+(?:\.\d+)?)\s*g/i,
+    /Proteínas?:\s*(\d+(?:\.\d+)?)\s*g/i,
+    /Protein:\s*(\d+(?:\.\d+)?)/i,
+    /(?:^|\|)\s*Protein:?\s*(\d+(?:\.\d+)?)/i,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = description.match(pattern);
+    if (match && match[1]) {
+      return parseFloat(match[1]);
+    }
+  }
+  
+  return 5; // Valor por defecto si no se encuentra
+};
 
 const FoodSearch: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -140,10 +219,22 @@ const FoodSearch: React.FC = () => {
         
         const formattedFoods = foodResults.filter((food: Food) => food !== null && food !== undefined);
         
-        const updatedFoods = formattedFoods.map(food => ({
-          ...food,
-          selected: selectedFoods.some(selected => selected.food_id === food.food_id)
-        }));
+        const updatedFoods = formattedFoods.map(food => {
+          // Extraer macronutrientes de la descripción
+          const calories = extractCalories(food.food_description);
+          const fat = extractFat(food.food_description);
+          const carbs = extractCarbs(food.food_description);
+          const protein = extractProtein(food.food_description);
+          
+          return {
+            ...food,
+            calories: calories,
+            fat_g: fat,
+            carbs_g: carbs,
+            protein_g: protein,
+            selected: selectedFoods.some(selected => selected.food_id === food.food_id)
+          };
+        });
         
         setFoods(updatedFoods);
         
@@ -206,7 +297,7 @@ const FoodSearch: React.FC = () => {
           icon: "error",
           iconColor: "#ff9400",
           confirmButtonText: "Aceptar",
-          confirmButtonColor: "#ff9400",
+          confirmButtonColor: "#ff9404",
           customClass: {
             popup: "custom-swal-background",
             icon: "custom-swal-icon",
@@ -312,7 +403,7 @@ const FoodSearch: React.FC = () => {
           text: `${selectedFoods.length} alimento(s) agregado(s) correctamente.`,
           icon: "success",
           confirmButtonText: "Aceptar",
-          confirmButtonColor: "#ff9400",
+          confirmButtonColor: "#ff9404",
           background: isDarkMode ? "#282c3c" : "#ffffff",
           customClass: {
             popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
@@ -346,7 +437,7 @@ const FoodSearch: React.FC = () => {
           icon: "error",
           iconColor: "#ff9400",
           confirmButtonText: "Aceptar",
-          confirmButtonColor: "#ff9400",
+          confirmButtonColor: "#ff9404",
           customClass: {
             popup: "custom-swal-background",
             icon: "custom-swal-icon",
@@ -425,7 +516,7 @@ const FoodSearch: React.FC = () => {
           text: "El alimento ha sido registrado correctamente.",
           icon: "success",
           confirmButtonText: "Aceptar",
-          confirmButtonColor: "#ff9400",
+          confirmButtonColor: "#ff9404",
           background: isDarkMode ? "#282c3c" : "#ffffff",
           customClass: {
             popup: isDarkMode ? "custom-dark-swal" : "custom-light-swal",
@@ -461,7 +552,7 @@ const FoodSearch: React.FC = () => {
           icon: "error",
           iconColor: "#ff9400",
           confirmButtonText: "Aceptar",
-          confirmButtonColor: "#ff9400",
+          confirmButtonColor: "#ff9404",
           customClass: {
             popup: "custom-swal-background",
             icon: "custom-swal-icon",
@@ -707,12 +798,25 @@ const FoodSearch: React.FC = () => {
               >
                 Resultados
               </h3>
-              {selectedFoods.length > 0 && addingMultiple && (
-                <span className={`text-sm ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                  {selectedFoods.length} seleccionado(s)
-                </span>
-              )}
+
+              {/* Botón de selección múltiple */}
+              <button
+                onClick={() => setAddingMultiple(!addingMultiple)}
+                className={`${
+                  isDarkMode
+                    ? "bg-[#4B586E] text-white hover:bg-[#5A6A82]"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                } transition px-3 py-1.5 rounded-md text-sm font-medium`}
+              >
+                {addingMultiple ? "Modo normal" : "Selección múltiple"}
+              </button>
             </div>
+            
+            {/* Leyenda de macronutrientes */}
+            <div className="mb-4">
+              <MacroLegend size="medium" />
+            </div>
+            
             <div
               className={`space-y-3 max-h-[50vh] overflow-y-auto ml-2 pr-2 [scrollbar-width:thin] scrollbar-thin ${
                 isDarkMode
@@ -734,6 +838,7 @@ const FoodSearch: React.FC = () => {
                   } transition duration-200 flex items-center justify-between cursor-pointer`}
                   onClick={(e) => {
                     if(e.currentTarget === e.target || (e.target as HTMLElement).closest('.food-item-content')) {
+                      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                       addingMultiple ? toggleFoodSelection(food) : handleFoodClick(food);
                     }
                   }}
@@ -745,7 +850,18 @@ const FoodSearch: React.FC = () => {
                     <p className={`text-xs ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
                       {food.food_description}
                     </p>
+                  </div>                  {/* Mostrar siempre la gráfica de nutrientes */}
+                  <div className="flex-shrink-0 mr-3">
+                    <NutrientChart 
+                      calories={food.calories || 0}
+                      fat={food.fat_g || 0}
+                      carbs={food.carbs_g || 0}
+                      protein={food.protein_g || 0}
+                      size="small"
+                      showCaloriesOutside={true}
+                    />
                   </div>
+                  
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
