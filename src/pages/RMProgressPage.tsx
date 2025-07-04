@@ -17,6 +17,9 @@ import { exercises } from "../components/OneRepMaxCalculator";
 import { motion } from "framer-motion";
 import GalaxyBackground from "../components/GalaxyBackground";
 import ButtonToolTip from "../components/ButtonToolTip";
+import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
+import { useUserProfile } from "../hooks/useUserProfile";
+import { useUserData } from "../hooks/useUserData";
 import { useTheme } from "./ThemeContext";
 
 ChartJS.register(
@@ -31,6 +34,8 @@ ChartJS.register(
 
 const RMProgressPage: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { profile: userProfile } = useUserProfile();
+  const { userData } = useUserData();
   const [selectedExercise, setSelectedExercise] = useState<string>(
     exercises[0]
   );
@@ -368,6 +373,22 @@ const RMProgressPage: React.FC = () => {
               entrenamientos.
             </p>
           </div>
+        </motion.div>
+
+        {/* Sugerencias Personalizadas para Progreso */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="max-w-4xl mx-auto px-4 mt-6 relative z-10"
+        >
+          <PersonalizedSuggestions 
+            userProfile={userProfile}
+            context="rm_progress"
+            maxSuggestions={3}
+            showCategories={true}
+            userData={userData}
+          />
         </motion.div>
       </div>
     </div>
