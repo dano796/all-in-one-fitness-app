@@ -1,35 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { supabase } from '../lib/supabaseClient';
-
-interface UserProfile {
-  id_profile: number;
-  idusuario: number;
-  edad: number;
-  genero: string;
-  altura_cm: number;
-  peso_actual_kg: number;
-  peso_objetivo_kg: number;
-  nivel_actividad: string;
-  experiencia_ejercicio: string;
-  dias_ejercicio_semana: number;
-  tipos_ejercicio_preferidos: string[];
-  objetivo_nutricional: string;
-  restricciones_alimentarias: string[];
-  alergias_alimentarias: string[];
-  comidas_por_dia: number;
-  condiciones_medicas: string[];
-  medicamentos: string[];
-  lesiones_previas: string[];
-  horas_sueno_promedio: number;
-  nivel_estres: string;
-  trabajo_tipo: string;
-  nivel_fitness: 'principiante' | 'intermedio' | 'avanzado';
-  puntuacion_fitness: number;
-  created_at: string;
-  updated_at: string;
-  profile_completed: boolean;
-}
+import { UserProfile } from '../types/userProfile';
 
 interface UseUserProfileReturn {
   profile: UserProfile | null;
@@ -124,7 +96,7 @@ export const useUserProfile = (): UseUserProfileReturn => {
     loading,
     error,
     refetchProfile,
-    hasProfile: profile !== null && profile.profile_completed
+    hasProfile: profile !== null && Boolean(profile.profile_completed)
   };
 };
 

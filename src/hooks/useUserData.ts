@@ -129,11 +129,10 @@ export const useUserData = () => {
       }
     };
 
-    // Only fetch if we have a profile or if it's the first load
-    if (profile !== undefined) {
+    if (profileId || profile !== null) {
       fetchUserData();
     }
-  }, [profileId]); // Only depend on profile ID, not the entire profile object
+  }, [profileId]);
 
   return { userData, loading, error };
 }; 
