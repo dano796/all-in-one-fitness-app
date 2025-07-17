@@ -21,7 +21,10 @@ import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 import GalaxyBackground from "../components/GalaxyBackground";
-import ButtonToolTip from "../components/ButtonToolTip";;
+import ButtonToolTip from "../components/ButtonToolTip";
+import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
+import { useUserProfile } from "../hooks/useUserProfile";
+import { useUserData } from "../hooks/useUserData";
 import { useTheme } from "../pages/ThemeContext";
 import { useNotificationStore } from '../store/notificationStore';
 import { useFoodTracker } from '../hooks/useFoodTracker';
@@ -77,6 +80,8 @@ interface FoodsResponse {
 const FoodDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
+  const { profile: userProfile } = useUserProfile();
+  const { userData } = useUserData();
   const TIMEZONE = "America/Bogota";
   const todayStr = new Date().toLocaleDateString("en-CA", {
     timeZone: TIMEZONE,
@@ -817,7 +822,7 @@ const FoodDashboard: React.FC = () => {
                   }}
                 >                  <Progress
                     value={progressValue}
-                    className={`w-full h-2 rounded-full [&>div]:rounded-full [&>div]:transition-all [&>div]:duration-[1500ms] [&>div]:ease-out data-[value='0']:[&>div]:w-0 data-[value='0']:[&>div]:hidden ${
+                    className={`w-full h-2 rounded-full [&>div]:rounded-full [&>div]:transition-all [&>div]:duration-1000 [&>div]:ease-out data-[value='0']:[&>div]:w-0 data-[value='0']:[&>div]:hidden ${
                       isDarkMode ? "bg-gray-600" : "bg-gray-200"
                     }`}
                     style={{
@@ -994,6 +999,13 @@ const FoodDashboard: React.FC = () => {
         transition={{ duration: 0.6, ease: "easeOut", delay: 2.0 }}
         className="max-w-[700px] mx-auto mt-6 relative z-10"
       >
+        <PersonalizedSuggestions 
+          userProfile={userProfile}
+          context="nutrition"
+          maxSuggestions={3}
+          showCategories={true}
+          userData={userData}
+        />
       </motion.div>
     </div>
   );
