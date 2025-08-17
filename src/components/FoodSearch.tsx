@@ -420,8 +420,10 @@ const FoodSearch: React.FC = () => {
         setHasSearched(false);
         
         // Obtener la fecha actual o usar la fecha de la URL
-        const searchParams = new URLSearchParams(location.search); 
-        const currentDate = searchParams.get("date") || new Date().toLocaleString("en-CA", {timeZone: "America/Bogota"}).split(",")[0];
+        const searchParams = new URLSearchParams(location.search);
+        const currentDate =
+          searchParams.get("date") ||
+          new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
         
         navigate(`/comidas?type=${normalizedType.toLowerCase()}&date=${currentDate}`, {
           state: { fromAddButton: true },
@@ -533,7 +535,9 @@ const FoodSearch: React.FC = () => {
         setHasSearched(false);
         
         const searchParams = new URLSearchParams(location.search);
-        const currentDate = searchParams.get("date") || new Date().toISOString().split('T')[0];
+        const currentDate =
+          searchParams.get("date") ||
+          new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
         
         navigate(`/comidas?type=${normalizedType.toLowerCase()}&date=${currentDate}`, {
           state: { fromAddButton: true },
@@ -593,7 +597,9 @@ const FoodSearch: React.FC = () => {
         
         // Obtener fecha actual o de la URL
         const searchParams = new URLSearchParams(location.search);
-        const currentDate = searchParams.get("date") || new Date().toISOString().split('T')[0];
+        const currentDate =
+          searchParams.get("date") ||
+          new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
 
         // Usar navigate con objeto history completo para evitar la pérdida de estado
         navigate("/food-quantity-adjust", { 

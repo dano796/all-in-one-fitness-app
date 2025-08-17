@@ -482,7 +482,10 @@ const FoodQuantityAdjust: React.FC = () => {
       });
 
       const searchParams = new URLSearchParams(location.search);
-      const currentDate = date || searchParams.get("date") || new Date().toLocaleString("en-CA", {timeZone: "America/Bogota"}).split(",")[0];
+      const currentDate =
+        date ||
+        searchParams.get("date") ||
+        new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
 
       navigate(`/comidas?type=${normalizedType.toLowerCase()}&date=${currentDate}`, {
         state: { fromAddButton: true },
