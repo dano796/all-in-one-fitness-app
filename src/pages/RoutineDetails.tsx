@@ -86,7 +86,6 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
         setIdusuario(null);
         setIsSubscribed(null);
         setIsIdLoading(false);
-        console.log('No user provided, resetting idusuario and isSubscribed');
         setFeedback('Por favor, inicia sesión para usar el análisis de ejercicios.');
         return;
       }
@@ -99,10 +98,8 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
         });
 
         const data = response.data;
-        console.log('User data fetched:', data);
         setIdusuario(data.idusuario);
         setIsSubscribed(data.Suscripcion);
-        console.log('isSubscribed set to:', data.Suscripcion);
       } catch (error) {
         console.error('Error fetching user data:', error);
         setFeedback('Error al obtener tu información de usuario. Por favor, intenta de nuevo más tarde.');
@@ -129,7 +126,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
       
       if (leftKnee && leftHip && leftAnkle && rightKnee && rightHip && rightAnkle &&
           leftKnee.score && leftHip.score && leftAnkle.score &&
-          rightKnee.score && rightHip.score && rightAnkle.score > 0.5) {
+          rightKnee.score && rightHip.score && rightAnkle.score && rightAnkle.score > 0.5) {
         const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
         const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
         const avgAngle = (leftAngle + rightAngle) / 2;
@@ -154,7 +151,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
       
       if (leftElbow && leftShoulder && leftWrist && rightElbow && rightShoulder && rightWrist &&
           leftElbow.score && leftShoulder.score && leftWrist.score &&
-          rightElbow.score && rightShoulder.score && rightWrist.score > 0.5) {
+          rightElbow.score && rightShoulder.score && rightWrist.score && rightWrist.score > 0.5) {
         const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
         const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
         const avgAngle = (leftAngle + rightAngle) / 2;
@@ -177,7 +174,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
       const rightShoulder = keypoints.find((kp) => kp.name === 'right_shoulder');
       const rightWrist = keypoints.find((kp) => kp.name === 'right_wrist');
       
-      if (leftElbow && leftShoulder && leftWrist && leftElbow.score && leftShoulder.score && leftWrist.score > 0.5) {
+      if (leftElbow && leftShoulder && leftWrist && leftElbow.score && leftShoulder.score && leftWrist.score && leftWrist.score > 0.5) {
         const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
         if (leftAngle >= 30 && leftAngle <= 60) {
           return '¡Buen curl de bíceps! Mantén el codo cerca del cuerpo, sube la barra lentamente y baja con control.';
@@ -186,7 +183,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
         } else {
           return 'Ajusta tu postura: no extiendas tanto el brazo, baja la barra hasta casi estirar el codo.';
         }
-      } else if (rightElbow && rightShoulder && rightWrist && rightElbow.score && rightShoulder.score && rightWrist.score > 0.5) {
+      } else if (rightElbow && rightShoulder && rightWrist && rightElbow.score && rightShoulder.score && rightWrist.score && rightWrist.score > 0.5) {
         const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
         if (rightAngle >= 30 && rightAngle <= 60) {
           return '¡Buen curl de bíceps! Mantén el codo cerca del cuerpo, sube la barra lentamente y baja con control.';
@@ -208,7 +205,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
       
       if (leftHip && leftKnee && leftAnkle && rightHip && rightKnee && rightAnkle &&
           leftHip.score && leftKnee.score && leftAnkle.score &&
-          rightHip.score && rightKnee.score && rightAnkle.score > 0.5) {
+          rightHip.score && rightKnee.score && rightAnkle.score && rightAnkle.score > 0.5) {
         const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
         const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
         const avgAngle = (leftAngle + rightAngle) / 2;
@@ -233,7 +230,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
       
       if (leftElbow && leftShoulder && leftWrist && rightElbow && rightShoulder && rightWrist &&
           leftElbow.score && leftShoulder.score && leftWrist.score &&
-          rightElbow.score && rightShoulder.score && rightWrist.score > 0.5) {
+          rightElbow.score && rightShoulder.score && rightWrist.score && rightWrist.score > 0.5) {
         const leftAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
         const rightAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
         const avgAngle = (leftAngle + rightAngle) / 2;
@@ -403,7 +400,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
       async function setupCamera() {
         try {
           console.log('Setting up camera...');
-          if (videoRef.current.srcObject) {
+          if (videoRef.current && videoRef.current.srcObject) {
             const oldStream = videoRef.current.srcObject as MediaStream;
             oldStream.getTracks().forEach(track => track.stop());
           }
@@ -908,7 +905,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
         >
           <Progress
             value={calculateProgress()}
-            className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-600" : "bg-gray-300"} [&>div]:bg-[#ff9404] [&>div]:rounded-full [&>div]:transition-all [&>div]:duration-[1500ms] [&>div]:ease-out`}
+            className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-600" : "bg-gray-300"} [&>div]:bg-[#ff9404] [&>div]:rounded-full [&>div]:transition-all [&>div]:duration-1000 [&>div]:ease-out`}
           />
         </motion.div>
 

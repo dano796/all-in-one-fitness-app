@@ -10,6 +10,9 @@ import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import ButtonToolTip from "../components/ButtonToolTip";
+import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
+import { useUserProfile } from "../hooks/useUserProfile";
+import { useUserData } from "../hooks/useUserData";
 import { useTheme } from "../pages/ThemeContext";
 import { useNotificationStore } from "../store/notificationStore";
 import { useWaterTracker } from '../hooks/useWaterTracker';
@@ -96,6 +99,8 @@ interface WaterGoal {
 
 const WaterTracker: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { profile: userProfile } = useUserProfile();
+  const { userData } = useUserData();
   const navigate = useNavigate();
   const todayStr = new Date().toLocaleDateString("en-CA", {
     timeZone: TIMEZONE,
@@ -973,6 +978,22 @@ const WaterTracker: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Sugerencias Personalizadas */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 1.5 }}
+        className="max-w-4xl mx-auto mt-8 px-4 relative z-10"
+      >
+        <PersonalizedSuggestions 
+          userProfile={userProfile}
+          context="water"
+          maxSuggestions={3}
+          showCategories={true}
+          userData={userData}
+        />
+      </motion.div>
     </motion.div>
   );
 };

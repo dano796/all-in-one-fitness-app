@@ -5,18 +5,23 @@ import { MoreHorizontal, Plus, Trash2, Clock, Dumbbell } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import axios from "axios";
 import GalaxyBackground from "../components/GalaxyBackground";
+import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
+import { useUserProfile } from "../hooks/useUserProfile";
+import { useUserData } from "../hooks/useUserData";
 import { useTheme } from "./ThemeContext";
 
 interface Routine {
   id: string;
   day: string;
   name: string;
-  exercises: any[] | string | null; // Ajustamos el tipo para manejar casos inválidos
-  exerciseCount?: number; // Nuevo campo que vendrá del backend
+  exercises: any[] | string | null; 
+  exerciseCount?: number;
 }
 
 const Routines: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { profile: userProfile } = useUserProfile();
+  const { userData } = useUserData();
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState<string>("");
   const [routines, setRoutines] = useState<Routine[]>([]);
@@ -388,6 +393,22 @@ const Routines: React.FC = () => {
               </button>
             </motion.div>
           )}
+        </motion.div>
+
+        {/* Sugerencias Personalizadas */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.68, -0.55, 0.265, 1.55], delay: 0.8 }}
+          className="max-w-[1000px] mx-auto"
+        >
+          <PersonalizedSuggestions 
+            userProfile={userProfile}
+            context="routines"
+            maxSuggestions={3}
+            showCategories={true}
+            userData={userData}
+          />
         </motion.div>
       </div>
     </div>
