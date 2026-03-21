@@ -23,7 +23,7 @@ import { supabase } from "../lib/supabaseClient";
 import GalaxyBackground from "../components/GalaxyBackground";
 import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTheme } from "../pages/ThemeContext";
+import { useTheme } from "./ThemeContext";
 import { UserProfile, UserProfileFormData } from "../types/userProfile";
 import UserProfileForm from "../components/UserProfileForm";
 import { useUserData } from "../hooks/useUserData";

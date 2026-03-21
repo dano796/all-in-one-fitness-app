@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Mail, Phone, MapPin } from "lucide-react";
-import { useTheme } from "../pages/ThemeContext";
+import { useTheme } from "./ThemeContext";
 
 interface ContactCardProps {
   Icon: React.ComponentType<{ className?: string }>;

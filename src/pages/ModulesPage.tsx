@@ -10,7 +10,7 @@ import {
 import ModuleCard from "../components/ModuleCard";
 import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
 import { useUserProfile } from "../hooks/useUserProfile";
-import { useTheme } from "../pages/ThemeContext";
+import { useTheme } from "./ThemeContext";
 import { motion } from "framer-motion";
 
 const ModulesPage: React.FC = () => {

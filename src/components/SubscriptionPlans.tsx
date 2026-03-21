@@ -6,7 +6,7 @@ import { User } from '@supabase/supabase-js';
 import { CheckCircle, XCircle, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import { useNotificationStore } from '../store/notificationStore';
-import GalaxyBackground from '../components/GalaxyBackground';
+import GalaxyBackground from './GalaxyBackground';
 
 interface SubscriptionPlansProps {
   user: User | null;

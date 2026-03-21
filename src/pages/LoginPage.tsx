@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import PasswordRecovery from "../components/PasswordRecovery";
 import { supabase } from "../lib/supabaseClient";
-import { useTheme } from "../pages/ThemeContext";
+import { useTheme } from "./ThemeContext";
 
 const LoginPage = () => {
   const { isDarkMode } = useTheme();

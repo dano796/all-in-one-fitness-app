@@ -2,7 +2,7 @@ import { FC, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import notFoundImage from '../assets/All-In-One-Fitness-App-Not-Found.jpg';
-import { useTheme } from '../pages/ThemeContext';
+import { useTheme } from './ThemeContext';
 import GalaxyBackground from '../components/GalaxyBackground';
 
 const NotFoundPage: FC = () => {

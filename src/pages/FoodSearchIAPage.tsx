@@ -6,7 +6,7 @@ import { useUserData } from "../hooks/useUserData";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useTheme } from "../pages/ThemeContext";
+import { useTheme } from "./ThemeContext";
 import axios from "axios";
 import { Lock } from "lucide-react";
 import { User } from '@supabase/supabase-js';

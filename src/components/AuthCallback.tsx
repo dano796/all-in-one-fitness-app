@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
 import { useNotificationStore } from "../store/notificationStore";
-import Loader from "../components/Loader";
+import Loader from "./Loader";
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();

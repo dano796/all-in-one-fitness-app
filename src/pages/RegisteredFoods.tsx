@@ -5,7 +5,7 @@ import { supabase } from "../lib/supabaseClient";
 import Swal from "sweetalert2";
 import { FaArrowLeft, FaTrash, FaEdit } from "react-icons/fa";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { useTheme } from "../pages/ThemeContext";
+import { useTheme } from "./ThemeContext";
 import { useNotificationStore } from "../store/notificationStore";
 
 interface RegisteredFood {

@@ -25,7 +25,7 @@ import ButtonToolTip from "../components/ButtonToolTip";
 import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useUserData } from "../hooks/useUserData";
-import { useTheme } from "../pages/ThemeContext";
+import { useTheme } from "./ThemeContext";
 import { useNotificationStore } from '../store/notificationStore';
 import { useFoodTracker } from '../hooks/useFoodTracker';
 

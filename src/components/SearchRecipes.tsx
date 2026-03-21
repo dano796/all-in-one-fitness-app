@@ -16,7 +16,7 @@ import ButtonToolTip from "./ButtonToolTip";
 import { ClipLoader } from "react-spinners";
 import { Recipe } from "../types";
 import { useTheme } from "../pages/ThemeContext";
-import ChatBot from "../components/ChatBot";
+import ChatBot from "./ChatBot";
 import { User } from "@supabase/supabase-js";
 
 const SearchRecipes: React.FC = () => {

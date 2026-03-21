@@ -184,12 +184,14 @@ const Sidebar: React.FC = () => {
                 onClick={handleNavItemClick}
                 isActive={location.pathname === "/water"}
               />
-              
+
               {/* Elemento no navegable para Actividad */}
-              <div 
+              <div
                 className={`flex items-center w-full cursor-not-allowed opacity-50 ${
-                  isExpanded || isMobileOpen ? "justify-start pl-6" : "justify-center"
-                } ${isDarkMode ? "text-gray-400" : "text-gray-500"}`} 
+                  isExpanded || isMobileOpen
+                    ? "justify-start pl-6"
+                    : "justify-center"
+                } ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}
                 title="Funcionalidad próximamente"
               >
                 <IoFootstepsSharp className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -232,7 +234,7 @@ const Sidebar: React.FC = () => {
                 icon={<Camera className="h-5 w-5 sm:h-6 sm:w-6" />}
                 onClick={handleNavItemClick}
                 isActive={location.pathname === "/foodsearchia"}
-              />
+              />{" "}
               <DashboardNavItem
                 to="/search-recipes"
                 label="Buscar Recetas"
@@ -240,6 +242,14 @@ const Sidebar: React.FC = () => {
                 icon={<BiSolidFoodMenu className="h-5 w-5 sm:h-6 sm:w-6" />}
                 onClick={handleNavItemClick}
                 isActive={location.pathname === "/search-recipes"}
+              />
+              <DashboardNavItem
+                to="/anatomy-viewer"
+                label="Anatomía Muscular 3D"
+                showLabel={isExpanded || isMobileOpen}
+                icon={<Dumbbell className="h-5 w-5 sm:h-6 sm:w-6" />}
+                onClick={handleNavItemClick}
+                isActive={location.pathname === "/anatomy-viewer"}
               />
             </div>
 

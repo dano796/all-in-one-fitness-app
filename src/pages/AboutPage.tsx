@@ -1,6 +1,6 @@
 import React from "react";
 import { Users, Target, Award, LucideIcon } from "lucide-react";
-import { useTheme } from "../pages/ThemeContext";
+import { useTheme } from "./ThemeContext";
 import { motion } from "framer-motion";
 
 interface InfoCardProps {

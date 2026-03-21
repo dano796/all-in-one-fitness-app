@@ -31,7 +31,9 @@ const FoodSearch = lazy(() => import("./components/FoodSearch"));
 const WaterTracker = lazy(() => import("./components/WaterTracker"));
 const ComidasRegistro = lazy(() => import("./pages/RegisteredFoods"));
 const CalorieCalculator = lazy(() => import("./components/CalorieCalculator"));
-const FoodQuantityAdjust = lazy(() => import("./components/FoodQuantityAdjust"));
+const FoodQuantityAdjust = lazy(
+  () => import("./components/FoodQuantityAdjust")
+);
 const OneRMCalculator = lazy(() => import("./components/OneRepMaxCalculator"));
 const Routines = lazy(() => import("./pages/Routines"));
 const RoutineDetails = lazy(() => import("./pages/RoutineDetails"));
@@ -42,6 +44,7 @@ const SearchRecipes = lazy(() => import("./components/SearchRecipes"));
 const SubscriptionPlans = lazy(() => import("./components/SubscriptionPlans"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const Terms = lazy(() => import("./components/Terms")); // Nueva ruta para Terms
+const AnatomyViewerPage = lazy(() => import("./pages/AnatomyViewerPage"));
 
 // Layouts
 import AuthLayout from "./layouts/AuthLayout";
@@ -50,6 +53,7 @@ import FoodSearchLayout from "./layouts/FoodSearchLayout";
 import WaterLayout from "./layouts/WaterLayout";
 import CalorieCalculatorLayout from "./layouts/CalorieCalculatorLayout";
 import OneRMCalculatorLayout from "./layouts/OneRMCalculatorLayout";
+import AnatomyViewerLayout from "./layouts/AnatomyViewerLayout";
 import ExerciseList from "./components/ExerciseList";
 import FoodDashboard from "./pages/FoodDashboard";
 import RecipeSearchLayout from "./layouts/RecipeLayout";
@@ -150,6 +154,11 @@ const protectedRoutes = [
     path: "/subscription-plans",
     layout: DashboardLayout,
     component: SubscriptionPlans,
+  },
+  {
+    path: "/anatomy-viewer",
+    layout: AnatomyViewerLayout,
+    component: AnatomyViewerPage,
   },
 ];
 
@@ -300,7 +309,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/terms" element={<Terms />} /> {/* Nueva ruta para Terms */}
+        <Route path="/terms" element={<Terms />} />{" "}
+        {/* Nueva ruta para Terms */}
       </Route>
 
       {/* Protected Routes */}

@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaArrowLeft, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { supabase } from "../lib/supabaseClient";
 import { motion } from "framer-motion";
-import GalaxyBackground from "../components/GalaxyBackground";
+import GalaxyBackground from "./GalaxyBackground";
 import { useTheme } from "../pages/ThemeContext";
 import { useNotificationStore } from "../store/notificationStore";
 import { useExercises } from "../hooks/useExercises";
