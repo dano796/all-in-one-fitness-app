@@ -22,6 +22,9 @@ import DashboardSkeleton from "@/components/DashboardSkeleton";
 import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { useUserData } from "../hooks/useUserData";
+import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
+import { useUserProfile } from "../hooks/useUserProfile";
+import { useUserData } from "../hooks/useUserData";
 import { useTheme } from "./ThemeContext";
 
 interface DailyBreakdown {

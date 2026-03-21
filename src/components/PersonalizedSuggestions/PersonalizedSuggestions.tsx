@@ -9,6 +9,8 @@ import { useTheme } from '../../pages/ThemeContext';
 import { PersonalizedSuggestionsProps, Suggestion, SuggestionContext } from './types';
 import { getTypeColor, getTypeBg, contextCategoryMap, sortSuggestionsByPriority, getCategoryDisplayName } from './utils';
 import { generateDashboardSuggestions, generateWaterSuggestions, generateBasicSuggestions, generateRecipesSuggestions, generateAiFoodSuggestions, generateNutritionSuggestions } from './generators';
+import { generateRoutinesSuggestions } from './generators/routinesSuggestions';
+import { generateSettingsSuggestions } from './generators/settingsSuggestions';
 
 const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
   userProfile,
@@ -22,71 +24,185 @@ const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
   const [dismissedSuggestions, setDismissedSuggestions] = useState<string[]>([]);
   const [expandedSuggestion, setExpandedSuggestion] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Generate context-specific suggestions (memoized)
   const generateContextSpecificSuggestions = useCallback((userData: any, context: SuggestionContext): Suggestion[] => {
+    // Si no hay userData o profile, devolver array vacío - las sugerencias básicas se manejan en otro lugar
     if (!userData || !userData.profile) return [];
 
-    switch (context) {
-      case 'dashboard':
-        return generateDashboardSuggestions(userData);
-      case 'water':
-        return generateWaterSuggestions(userData);
-      case 'recipes':
-        return generateRecipesSuggestions(userData);
-      case 'ai_food':
-        return generateAiFoodSuggestions(userData);
-      case 'nutrition':
-        return generateNutritionSuggestions(userData);
-      case 'rm_progress':
-        return generateDashboardSuggestions(userData); // Use dashboard suggestions for RM progress
-      case 'routines':
-        return generateDashboardSuggestions(userData); // Use dashboard suggestions for routines
-      default:
-        return [];
+    try {
+      switch (context) {
+        case 'dashboard':
+          return generateDashboardSuggestions(userData);
+        case 'water':
+          return generateWaterSuggestions(userData);
+        case 'recipes':
+          return generateRecipesSuggestions(userData);
+        case 'ai_food':
+          return generateAiFoodSuggestions(userData);
+        case 'nutrition':
+          return generateNutritionSuggestions(userData);
+        case 'rm_progress':
+          return generateDashboardSuggestions(userData); // Use dashboard suggestions for RM progress
+        case 'routines':
+          return generateRoutinesSuggestions(userData); // Use dedicated routines suggestions
+        case 'settings':
+          return generateSettingsSuggestions(userData); // Use dedicated settings suggestions
+        default:
+          return [];
+      }
+    } catch (error) {
+      console.error('Error generating context-specific suggestions:', error);
+      return [];
     }
   }, []);
 
   // Generate general suggestions based on user profile (memoized)
   const generateGeneralSuggestions = useCallback((profile: any): Suggestion[] => {
-    const allSuggestions: Suggestion[] = [];
-    
-    // Add general suggestions logic here (simplified version)
-    if (profile?.nivel_fitness === 'principiante') {
-      allSuggestions.push({
-        id: 'beginner-start-slow',
-        type: 'prevention',
-        title: 'Comienza gradualmente',
-        description: 'Como principiante, es importante empezar con ejercicios básicos y aumentar la intensidad progresivamente.',
-        icon: React.createElement(Lightbulb, { className: "w-5 h-5" }),
-        priority: 'high',
-        category: 'exercise',
-        context: 'general'
-      });
-    }
+    try {
+      const allSuggestions: Suggestion[] = [];
+      const fitnessLevel = profile?.nivel_fitness || 'principiante';
+      const age = profile?.edad || 25;
+      const objective = profile?.objetivo_nutricional || '';
+      
+      // Sugerencias basadas en nivel de fitness
+      if (fitnessLevel === 'principiante') {
+        allSuggestions.push({
+          id: 'beginner-start-slow',
+          type: 'support',
+          title: 'Comienza gradualmente tu viaje fitness',
+          description: 'Como principiante, es importante empezar con ejercicios básicos y aumentar la intensidad progresivamente. Enfócate en aprender la técnica correcta antes que en el peso.',
+          icon: React.createElement(Lightbulb, { className: "w-5 h-5" }),
+          priority: 'high',
+          category: 'exercise',
+          context: 'general'
+        });
 
-    // Add more general suggestions based on profile...
-    
-    return allSuggestions;
+        allSuggestions.push({
+          id: 'beginner-habits',
+          type: 'idea',
+          title: 'Construye hábitos saludables',
+          description: 'Empieza con pequeños cambios: beber más agua, caminar 20 minutos al día, y registrar tus comidas. La consistencia es más importante que la intensidad.',
+          icon: React.createElement(Lightbulb, { className: "w-5 h-5" }),
+          priority: 'high',
+          category: 'lifestyle',
+          context: 'general'
+        });
+      }
+
+      if (fitnessLevel === 'intermedio') {
+        allSuggestions.push({
+          id: 'intermediate-progression',
+          type: 'idea',
+          title: 'Optimiza tu progresión',
+          description: 'Con tu nivel intermedio, es momento de implementar periodización en tu entrenamiento y ser más específico con tus objetivos nutricionales.',
+          icon: React.createElement(Lightbulb, { className: "w-5 h-5" }),
+          priority: 'high',
+          category: 'exercise',
+          context: 'general'
+        });
+
+        allSuggestions.push({
+          id: 'intermediate-tracking',
+          type: 'support',
+          title: 'Monitorea tu progreso detalladamente',
+          description: 'Lleva un registro más detallado de tus entrenamientos, medidas corporales y cómo te sientes. Esto te ayudará a ajustar tu plan según sea necesario.',
+          icon: React.createElement(Lightbulb, { className: "w-5 h-5" }),
+          priority: 'medium',
+          category: 'lifestyle',
+          context: 'general'
+        });
+      }
+
+      if (fitnessLevel === 'avanzado') {
+        allSuggestions.push({
+          id: 'advanced-periodization',
+          type: 'idea',
+          title: 'Refina tu periodización',
+          description: 'Como atleta avanzado, considera ciclos de entrenamiento más complejos y asegúrate de incluir fases de descarga para evitar el sobreentrenamiento.',
+          icon: React.createElement(Lightbulb, { className: "w-5 h-5" }),
+          priority: 'medium',
+          category: 'exercise',
+          context: 'general'
+        });
+      }
+
+      // Sugerencias basadas en objetivos
+      if (objective.includes('perder')) {
+        allSuggestions.push({
+          id: 'weight-loss-mindset',
+          type: 'support',
+          title: 'Enfoque sostenible para perder peso',
+          description: 'Recuerda que la pérdida de peso saludable es gradual. Crea un déficit calórico moderado y combina cardio con entrenamiento de fuerza.',
+          icon: React.createElement(Lightbulb, { className: "w-5 h-5" }),
+          priority: 'high',
+          category: 'nutrition',
+          context: 'general'
+        });
+      }
+
+      if (objective.includes('ganar') || objective.includes('músculo')) {
+        allSuggestions.push({
+          id: 'muscle-gain-focus',
+          type: 'idea',
+          title: 'Optimiza tu ganancia muscular',
+          description: 'Para ganar músculo, asegúrate de comer suficiente proteína (1.6-2.2g por kg), tener un ligero superávit calórico y priorizar el entrenamiento de fuerza.',
+          icon: React.createElement(Lightbulb, { className: "w-5 h-5" }),
+          priority: 'high',
+          category: 'nutrition',
+          context: 'general'
+        });
+      }
+
+      // Sugerencias basadas en edad
+      if (age >= 40) {
+        allSuggestions.push({
+          id: 'mature-athlete-recovery',
+          type: 'prevention',
+          title: 'Prioriza la recuperación',
+          description: 'A partir de los 40, la recuperación se vuelve crucial. Asegúrate de dormir 7-8 horas, incluir movilidad en tu rutina y no subestimes los días de descanso.',
+          icon: React.createElement(Lightbulb, { className: "w-5 h-5" }),
+          priority: 'high',
+          category: 'recovery',
+          context: 'general'
+        });
+      }
+      
+      return allSuggestions;
+    } catch (error) {
+      console.error('Error generating general suggestions:', error);
+      return [];
+    }
   }, []);
 
   // Memoize suggestions generation
   const generatedSuggestions = useMemo(() => {
-    if (userProfile && userData) {
-      // Generate context-specific suggestions
-      const contextSuggestions = generateContextSpecificSuggestions(userData, context as SuggestionContext);
+    try {
+      setError(null);
       
-      // Generate general suggestions
-      const generalSuggestions = generateGeneralSuggestions(userProfile);
-      
-      // Combine all suggestions
-      let allSuggestions = [...contextSuggestions, ...generalSuggestions];
-      
-      // Filter by context if needed
-      if (context !== 'general') {
-        allSuggestions = allSuggestions.filter(s => 
-          contextCategoryMap[context]?.includes(s.category) || s.context === context
+      let allSuggestions: Suggestion[] = [];
+
+      // 1. PRIORIDAD ALTA: Generar sugerencias contextuales específicas si tenemos userData con profile
+      if (userData && userData.profile) {
+        const contextSuggestions = generateContextSpecificSuggestions(userData, context as SuggestionContext);
+        allSuggestions = [...contextSuggestions];
+      }
+
+      // 2. PRIORIDAD MEDIA: Agregar sugerencias generales si tenemos userProfile (sin reemplazar las contextuales)
+      if (userProfile && allSuggestions.length < maxSuggestions) {
+        const generalSuggestions = generateGeneralSuggestions(userProfile);
+        allSuggestions = [...allSuggestions, ...generalSuggestions];
+      }
+
+      // 3. PRIORIDAD BAJA: Solo usar sugerencias básicas si no hay suficientes específicas
+      if (allSuggestions.length < maxSuggestions) {
+        const basicSuggestions = generateBasicSuggestions(
+          context as SuggestionContext, 
+          maxSuggestions - allSuggestions.length, // Solo las que faltan
+          dismissedSuggestions
         );
+        allSuggestions = [...allSuggestions, ...basicSuggestions];
       }
 
       // Filter dismissed suggestions
@@ -94,25 +210,43 @@ const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
         !dismissedSuggestions.includes(s.id)
       );
 
-      // Sort by priority and limit
-      const sortedSuggestions = sortSuggestionsByPriority(allSuggestions);
-      return sortedSuggestions.slice(0, maxSuggestions);
-    } else {
-      // Generate basic suggestions when no profile
-      return generateBasicSuggestions(
-        context as SuggestionContext, 
-        maxSuggestions, 
-        dismissedSuggestions
+      // Remove duplicates by id
+      const uniqueSuggestions = allSuggestions.filter((suggestion, index, self) => 
+        index === self.findIndex((s) => s.id === suggestion.id)
       );
+
+      // Filter by context DESPUÉS de generar, pero más permisivo
+      let filteredSuggestions = uniqueSuggestions;
+      if (context !== 'general') {
+        filteredSuggestions = uniqueSuggestions.filter(s => 
+          s.context === context || 
+          contextCategoryMap[context]?.includes(s.category) ||
+          s.context === 'general' // Permitir sugerencias generales en cualquier contexto
+        );
+      }
+
+      const sortedSuggestions = sortSuggestionsByPriority(filteredSuggestions);
+      const finalSuggestions = sortedSuggestions.slice(0, maxSuggestions);
+      
+      return finalSuggestions;
+    } catch (err) {
+      console.error('Error in suggestions generation:', err);
+      setError('Error al generar sugerencias');
+      return [];
     }
   }, [userProfile, userData, context, maxSuggestions, dismissedSuggestions, generateContextSpecificSuggestions, generateGeneralSuggestions]);
 
   // Update suggestions when generated suggestions change
   useEffect(() => {
     setIsLoading(true);
-    // Set suggestions immediately to avoid animation conflicts
-    setSuggestions(generatedSuggestions);
-    setIsLoading(false);
+    
+    // Use a small timeout to batch updates and avoid race conditions
+    const timeoutId = setTimeout(() => {
+      setSuggestions(generatedSuggestions);
+      setIsLoading(false);
+    }, 50);
+
+    return () => clearTimeout(timeoutId);
   }, [generatedSuggestions]);
 
   const dismissSuggestion = useCallback((suggestionId: string) => {
@@ -120,7 +254,7 @@ const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
   }, []);
 
   // Show loading state or empty state
-  if (isLoading || suggestions.length === 0) {
+  if (isLoading) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -148,17 +282,73 @@ const PersonalizedSuggestions: React.FC<PersonalizedSuggestionsProps> = ({
         <div className={`text-center py-4 ${
           isDarkMode ? 'text-gray-400' : 'text-gray-500'
         }`}>
-          {isLoading ? (
-            <>
-              <div className="animate-spin w-8 h-8 mx-auto mb-2 border-2 border-[#ff9404] border-t-transparent rounded-full"></div>
-              <p className="text-sm">Cargando sugerencias...</p>
-            </>
-          ) : (
-            <>
-              <Lightbulb className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No hay sugerencias disponibles en este momento</p>
-            </>
+          <div className="animate-spin w-8 h-8 mx-auto mb-2 border-2 border-[#ff9404] border-t-transparent rounded-full"></div>
+          <p className="text-sm">Cargando sugerencias...</p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (suggestions.length === 0 && !error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className={`rounded-lg p-5 ${
+          isDarkMode ? 'bg-[#3B4252]' : 'bg-white'
+        } shadow-md`}
+      >
+        <div className="flex items-center space-x-2 mb-4">
+          <Lightbulb className={`w-5 h-5 ${isDarkMode ? 'text-[#ff9404]' : 'text-[#ff9404]'}`} />
+          <h3 className={`text-lg font-semibold ${
+            isDarkMode ? 'text-white' : 'text-gray-900'
+          }`}>
+            Sugerencias Personalizadas
+          </h3>
+          {userProfile && userProfile.nivel_fitness && (
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              isDarkMode ? 'bg-[#ff9404]/20 text-[#ff9404]' : 'bg-[#ff9404]/10 text-[#ff9404]'
+            }`}>
+              {userProfile.nivel_fitness.charAt(0).toUpperCase() + userProfile.nivel_fitness.slice(1)}
+            </span>
           )}
+        </div>
+        <div className={`text-center py-4 ${
+          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+        }`}>
+          <Lightbulb className="w-8 h-8 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No hay sugerencias disponibles en este momento</p>
+          <p className="text-xs mt-2">Completa tu perfil para obtener sugerencias personalizadas</p>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className={`rounded-lg p-5 ${
+          isDarkMode ? 'bg-[#3B4252]' : 'bg-white'
+        } shadow-md`}
+      >
+        <div className="flex items-center space-x-2 mb-4">
+          <Lightbulb className={`w-5 h-5 ${isDarkMode ? 'text-[#ff9404]' : 'text-[#ff9404]'}`} />
+          <h3 className={`text-lg font-semibold ${
+            isDarkMode ? 'text-white' : 'text-gray-900'
+          }`}>
+            Sugerencias Personalizadas
+          </h3>
+        </div>
+        <div className={`text-center py-4 ${
+          isDarkMode ? 'text-red-400' : 'text-red-500'
+        }`}>
+          <X className="w-8 h-8 mx-auto mb-2" />
+          <p className="text-sm">{error}</p>
+          <p className="text-xs mt-2">Intenta recargar la página</p>
         </div>
       </motion.div>
     );

@@ -905,7 +905,7 @@ const RoutineDetails: React.FC<RoutineDetailsProps> = ({ user }) => {
         >
           <Progress
             value={calculateProgress()}
-            className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-600" : "bg-gray-300"} [&>div]:bg-[#ff9404] [&>div]:rounded-full [&>div]:transition-all [&>div]:duration-[1500ms] [&>div]:ease-out`}
+            className={`w-full h-2 rounded-full ${isDarkMode ? "bg-gray-600" : "bg-gray-300"} [&>div]:bg-[#ff9404] [&>div]:rounded-full [&>div]:transition-all [&>div]:duration-1000 [&>div]:ease-out`}
           />
         </motion.div>
 

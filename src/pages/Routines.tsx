@@ -7,6 +7,7 @@ import axios from "axios";
 import GalaxyBackground from "../components/GalaxyBackground";
 import PersonalizedSuggestions from "../components/PersonalizedSuggestions";
 import { useUserProfile } from "../hooks/useUserProfile";
+import { useUserData } from "../hooks/useUserData";
 import { useTheme } from "./ThemeContext";
 
 interface Routine {
@@ -20,6 +21,7 @@ interface Routine {
 const Routines: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { profile: userProfile } = useUserProfile();
+  const { userData } = useUserData();
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState<string>("");
   const [routines, setRoutines] = useState<Routine[]>([]);
@@ -402,9 +404,10 @@ const Routines: React.FC = () => {
         >
           <PersonalizedSuggestions 
             userProfile={userProfile}
-            context="exercise"
+            context="routines"
             maxSuggestions={3}
             showCategories={true}
+            userData={userData}
           />
         </motion.div>
       </div>

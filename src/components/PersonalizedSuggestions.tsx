@@ -1,8 +1,8 @@
 // Re-export the modular PersonalizedSuggestions component
-export { default } from './PersonalizedSuggestions/index';
-export type { 
-  PersonalizedSuggestionsProps, 
-  UserProfile, 
-  UserData, 
-  Suggestion 
-} from './PersonalizedSuggestions/index';
+export { default } from "./PersonalizedSuggestions/index";
+export type {
+  PersonalizedSuggestionsProps,
+  UserProfile,
+  UserData,
+  Suggestion,
+} from "./PersonalizedSuggestions/index";

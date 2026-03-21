@@ -261,6 +261,7 @@ class OfflineSyncManager {
       let timeoutId: number | undefined;
       
       // Establecer un timeout por si el service worker no responde
+      // eslint-disable-next-line prefer-const
       timeoutId = window.setTimeout(() => {
         messageChannel.port1.close();
         reject(new Error('Timeout al esperar respuesta del Service Worker'));
@@ -490,6 +491,48 @@ class OfflineSyncManager {
       if (value.expiresAt < now) {
         this.routeDataCache.delete(key);
       }
+    }
+  }
+  
+  public async clearAuthData(): Promise<void> {
+    try {
+      // Eliminar datos de autenticación del almacenamiento local
+      const keysToRemove: string[] = [];
+      
+      for (const [key, _] of this.offlineData) {
+        if (
+          key.includes('user') || 
+          key.includes('session') || 
+          key.includes('auth') || 
+          key.includes('login')
+        ) {
+          keysToRemove.push(key);
+        }
+      }
+      
+      keysToRemove.forEach(key => this.offlineData.delete(key));
+      await this.saveOfflineData();
+      
+      // Limpiar caché relacionada con autenticación
+      const authCacheKeys = Array.from(this.routeDataCache.keys()).filter(key => 
+        key.includes('user') || 
+        key.includes('session') || 
+        key.includes('auth') || 
+        key.includes('login')
+      );
+      
+      authCacheKeys.forEach(key => this.routeDataCache.delete(key));
+      
+      // Notificar al service worker para que limpie su caché de autenticación
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'CLEAR_AUTH_CACHE'
+        });
+      }
+      
+      console.log('[OfflineSync] Datos de autenticación eliminados');
+    } catch (error) {
+      console.error('[OfflineSync] Error al limpiar datos de autenticación:', error);
     }
   }
   

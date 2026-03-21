@@ -149,6 +149,46 @@ self.addEventListener('message', (event) => {
     );
   }
   
+  // Limpiar caché de autenticación durante logout
+  if (event.data && event.data.type === 'CLEAR_AUTH_CACHE') {
+    event.waitUntil(
+      Promise.all([
+        // Limpiar caché de datos de autenticación
+        caches.open(DATA_CACHE_NAME).then(async (cache) => {
+          const keys = await cache.keys();
+          const authKeys = keys.filter(key => 
+            key.url.includes('/api/login') || 
+            key.url.includes('/api/auth') ||
+            key.url.includes('/user') ||
+            key.url.includes('/session')
+          );
+          
+          return Promise.all(authKeys.map(key => cache.delete(key)));
+        }),
+        // Limpiar solicitudes pendientes relacionadas con autenticación
+        caches.open(PENDING_REQUESTS_STORE).then(async (cache) => {
+          const keys = await cache.keys();
+          const authKeys = keys.filter(key => 
+            key.url.includes('/api/login') || 
+            key.url.includes('/api/auth') ||
+            key.url.includes('/user') ||
+            key.url.includes('/session')
+          );
+          
+          return Promise.all(authKeys.map(key => cache.delete(key)));
+        })
+      ]).then(() => {
+        // Notificar a los clientes que la caché de autenticación ha sido limpiada
+        if (event.source) {
+          event.source.postMessage({
+            type: 'AUTH_CACHE_CLEARED',
+            timestamp: Date.now()
+          });
+        }
+      })
+    );
+  }
+  
   // Registrar solicitud pendiente
   if (event.data && event.data.type === 'STORE_PENDING_REQUEST') {
     event.waitUntil(

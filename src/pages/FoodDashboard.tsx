@@ -359,7 +359,7 @@ const FoodDashboard: React.FC = () => {
           Math.min(consumedCalories, totalCaloriesGoal || consumedCalories),
           remainingCalories > 0 ? remainingCalories : 0,
         ],
-        backgroundColor: ["#ff9404", isDarkMode ? "#4B5563" : "#e5e7eb"],
+        backgroundColor: ["#49b93c", isDarkMode ? "#4B5563" : "#e5e7eb"],
         borderWidth: 5,
         borderColor: isDarkMode ? "#3B4252" : "#ffffff",
         circumference: 240,
@@ -703,7 +703,7 @@ const FoodDashboard: React.FC = () => {
                       isDarkMode ? "text-gray-500" : "text-gray-500"
                     }`}
                   >
-                    Restante
+                    Calorías restantes
                   </div>
                 </motion.div>
                 {!isSmallScreen && (
@@ -774,14 +774,29 @@ const FoodDashboard: React.FC = () => {
               </div>
             </div>
           </motion.div>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        )}        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {progressData.map((item, index) => {
             const progressValue =
               item.value > 0 && item.max > 0
                 ? Math.min((item.value / item.max) * 100, 100)
                 : 0;
+                
+            // Determinar el color según el tipo de macronutriente
+            const getProgressColor = () => {
+              switch (item.name) {
+                case "Proteínas":
+                  return "#1E90FF"; 
+                case "Carbohidratos":
+                  return "#8884d8";
+                case "Grasas":
+                  return "#FF9404";
+                default:
+                  return "#ff9404";
+              }
+            };
+            
+            const progressColor = getProgressColor();
+            
             return (
               <motion.div
                 key={item.name}
@@ -805,12 +820,14 @@ const FoodDashboard: React.FC = () => {
                     duration: 0.4,
                     ease: "easeOut",
                   }}
-                >
-                  <Progress
+                >                  <Progress
                     value={progressValue}
-                    className={`w-full h-2 rounded-full [&>div]:bg-[#ff9404] [&>div]:rounded-full [&>div]:transition-all [&>div]:duration-[1500ms] [&>div]:ease-out data-[value='0']:[&>div]:w-0 data-[value='0']:[&>div]:hidden ${
+                    className={`w-full h-2 rounded-full [&>div]:rounded-full [&>div]:transition-all [&>div]:duration-1000 [&>div]:ease-out data-[value='0']:[&>div]:w-0 data-[value='0']:[&>div]:hidden ${
                       isDarkMode ? "bg-gray-600" : "bg-gray-200"
                     }`}
+                    style={{
+                      "--progress-fill-color": progressColor
+                    } as React.CSSProperties}
                     data-value={progressValue === 0 ? "0" : "non-zero"}
                   />
                 </motion.div>
